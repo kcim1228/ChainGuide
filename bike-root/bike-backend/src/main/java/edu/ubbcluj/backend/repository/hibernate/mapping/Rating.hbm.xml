@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 4, 2015 1:47:59 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="edu.ubbcluj.backend.model.Rating" table="rating" catalog="bike" optimistic-lock="version">
+        <id name="id" type="int">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" fetch="select">
+            <column name="serviceId" />
+        </many-to-one>
+        <many-to-one name="users" class="edu.ubbcluj.backend.model.Users" fetch="select">
+            <column name="userId" />
+        </many-to-one>
+        <property name="rate" type="java.lang.Integer">
+            <column name="rate" />
+        </property>
+    </class>
+</hibernate-mapping>

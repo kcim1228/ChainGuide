@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+    	<!-- <property name="hibernate.hbm2ddl.auto">create</property>-->
+		<property name="hibernate.bytecode.use_reflection_optimizer">false</property>    
+    
+        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.connection.password">katay</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/bike</property>
+        <property name="hibernate.connection.username">katay</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        
+		<property name="hibernate.search.autoregister_listeners">false</property>
+		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.current_session_context_class">thread</property>
+
+		
+        <mapping class="edu.ubbcluj.backend.model.Messages" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Messages.hbm.xml"/>
+        <mapping class="edu.ubbcluj.backend.model.Openhours" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Openhours.hbm.xml"/>
+         
+        <mapping class="edu.ubbcluj.backend.model.Places" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Places.hbm.xml"/>
+        
+        <mapping class="edu.ubbcluj.backend.model.Rating" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Rating.hbm.xml"/>
+        <mapping class="edu.ubbcluj.backend.model.Services" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Services.hbm.xml"/>
+        <mapping class="edu.ubbcluj.backend.model.Servicetype" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Servicetype.hbm.xml"/>
+    
+        <mapping class="edu.ubbcluj.backend.model.Type" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Type.hbm.xml"/>
+        <mapping class="edu.ubbcluj.backend.model.Users" resource="edu/ubbcluj/backend/repository/hibernate/mapping/Users.hbm.xml"/>
+         
+    </session-factory>
+</hibernate-configuration>

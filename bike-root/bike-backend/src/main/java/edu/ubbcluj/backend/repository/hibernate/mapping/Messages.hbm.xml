@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 4, 2015 1:47:59 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="edu.ubbcluj.backend.model.Messages" table="messages" catalog="bike" optimistic-lock="version">
+        <id name="id" type="int">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="usersByReceiverId" class="edu.ubbcluj.backend.model.Users" fetch="select">
+            <column name="receiverId" />
+        </many-to-one>
+        <many-to-one name="usersBySenderId" class="edu.ubbcluj.backend.model.Users" fetch="select">
+            <column name="senderId" />
+        </many-to-one>
+        <property name="body" type="string">
+            <column name="body" length="65535" />
+        </property>
+        <property name="date" type="date">
+            <column name="date" length="10" />
+        </property>
+    </class>
+</hibernate-mapping>

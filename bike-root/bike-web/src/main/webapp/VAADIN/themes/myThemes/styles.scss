@@ -1,0 +1,19 @@
+@import "../reindeer/reindeer.scss";
+
+.myThemes{
+	@include reindeer;
+
+	.mapPanel{
+		width: 100%;
+		height: 500px;
+	}
+	
+	.alma{
+		background-color:red;
+		width: 25px;
+	}
+	
+	.notVisible{
+		display:none;
+	}
+}
