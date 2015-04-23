@@ -67,7 +67,10 @@ window.edu_ubbcluj_web_MapLoader = function() {
         
         
         document.getElementById('topsearchButton').onclick=function(){
+        	alert("katt");
         	var text = document.getElementById('searchTextField').value;
+        	var cb = document.getElementById('searchTypeCheck').value;
+        	alert(cb);
         	MQA.withModule('geocoder', function() {
         		//felulirom az alapertelmezett pontot
         		 MQA.Geocoder.constructPOI = function(location) {
