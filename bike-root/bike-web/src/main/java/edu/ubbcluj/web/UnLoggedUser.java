@@ -46,10 +46,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	 UI myUIClass;
 	 
 	// public static final String NAME = "unloggedUser";
-	private GridLayout topgrid = new GridLayout(3, 1);
+	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
-	private GridLayout actiongrid = new GridLayout(1,13);
+	private GridLayout actiongrid = new GridLayout(1,14);
 	private TextArea search = new TextArea("Search: ");
 	private TextArea aPoint = new TextArea("A:");
 	private TextArea bPoint = new TextArea("B:");
@@ -67,8 +67,15 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private Button topsearchButton = new Button("GO");
 	private Panel mapPanel = new Panel();
 	private Panel narrative = new Panel();
-	private Label rtype = new Label("bicycle");
 	private VerticalLayout mapLayout = new VerticalLayout();
+	private ComboBox searchType = new ComboBox("serch for");
+	private UserMessageState mState = new UserMessageState();
+	Panel jsPanel = new Panel();
+	private Services actualSelectedService;
+	private String actualServiceName;
+	private Float actualLat;
+	private Float actualLng;
+	
 	
 	public UnLoggedUser(UI UIClass){
 		myUIClass = UIClass;
@@ -88,26 +95,61 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			getUI().getNavigator().navigateTo("admin");
 		}
 		
-	
-		search.setValue("strada horea, cluj napoca");
-		//search.setInputPrompt("blabla");	
-		rtype.setStyleName("notVisible");
+		//a javascipt vegrehajtasahoz szukseges panel
+		
+		jsPanel.setStyleName("notVisible");
+		final DAOFactory daoFactory = DAOFactory.getInstance();
+		search.setValue("strada horea, cluj napoca");	
 		routeType.addItem("bicycle");
 		routeType.addItem("fastest");
 		routeType.setValue("bicycle");
+		searchType.addItem("adress");
+		searchType.addItem("service");
+		searchType.setValue("adress");
 		routeType.addListener( new Property.ValueChangeListener() {
 		    public void valueChange(ValueChangeEvent event) {
-		    		rtype.setValue((String) routeType.getValue());
+		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+		    		jsPanel.setContent(js);
 		    	}
 		    }
 		       );
 		
-		routeType.setRequired(true);
-		rtype.setId("rtype");
+		topsearchButton.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+				System.out.println("kattintottunk");
+				if(searchType.getValue().equals("service")){
+					ServicesDAO sdao = daoFactory.getServicesDAO();
+		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
+		    		if(sv.size()>0){
+		    			actualSelectedService = sv.get(0);
+			    		actualServiceName = actualSelectedService.getName();
+			    		actualLat = actualSelectedService.getCoordX();
+			    		actualLng = actualSelectedService.getCoordY();
+			    		
+						System.out.println(actualSelectedService.toString());
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+			    		jsPanel.setContent(js);
+		    		}else{
+    					Notification.show("No such service found!",
+  			                  "",
+  			                  Notification.Type.WARNING_MESSAGE);
+		    		}
+		    		
+	    		}
+				else{
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+		    		jsPanel.setContent(js);
+				}
+		    }
+		});
 		
+		routeType.setRequired(true);
 		routeType.setDescription("Choose a travel-mode");		
 		nearestSelect.setDescription("What are you looking for?");
 		topsearchButton.setId("topsearchButton");
+		searchType.setId("searchTypeCheck");
+		searchType.setStyleName("check");
 		getDirection.setId("getDirection");
 		getNearest.setId("getNearest");		
 		topgrid.setMargin(true);
@@ -124,19 +166,23 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		logingrid.addComponent(login,0,0);
 		logingrid.addComponent(register,1,0);
 		topgrid.addComponent(search,0,0);
-		topgrid.addComponent(topsearchButton,1,0);
-		topgrid.addComponent(logingrid, 2,0);
+		topgrid.addComponent(topsearchButton,2,0);
+		topgrid.addComponent(searchType,1,0);
+		topgrid.addComponent(logingrid, 3,0);
 		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
 		topgrid.setComponentAlignment(topsearchButton,  Alignment.TOP_LEFT);
+		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
 		
 		logingrid.setComponentAlignment(login, Alignment.TOP_RIGHT);
 		logingrid.setComponentAlignment(register, Alignment.TOP_RIGHT);
 		logingrid.setWidth("100%");
 		logingrid.setColumnExpandRatio(0, 5);
 		logingrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(0, 5);
+		topgrid.setColumnExpandRatio(0, 6);
 		topgrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(2, 3);
+		topgrid.setColumnExpandRatio(2, 1);
+		topgrid.setColumnExpandRatio(3, 5);
+		
 		actiongrid.addComponent(direction,0,0);
 		actiongrid.setWidth("100%");
 		actiongrid.setHeight("100%");
@@ -162,7 +208,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		actiongrid.addComponent(getNearest,0,8);
 		actiongrid.addComponent(showAll,0,9);
 		actiongrid.addComponent(showAllCb,0,10);
-		actiongrid.addComponent(rtype,0,11);
+		actiongrid.addComponent(jsPanel,0,11);
 		start.setId("nearestStart");
 		
 		
@@ -176,6 +222,19 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		actiongrid.setMargin(true);
 		
 		//Label map = new Label("a map itt lesz");
+		
+		/*getDirection.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+		    	if(stype.equals("service")){
+		    		
+		    		ServicesDAO sdao = daoFactory.getServicesDAO();
+		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
+		    		String caption = sv.get(0).getName();
+		    		stype.setCaption(caption);
+		    	}
+		    }
+		});*/
 
 		
 		mapLayout.setSizeFull();

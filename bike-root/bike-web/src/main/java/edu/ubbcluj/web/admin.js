@@ -1,4 +1,7 @@
-
+var mainSerachType = "adress";
+var serviceName = "none";
+var serviceLat;
+var serviceLng;
 window.edu_ubbcluj_web_AdminMapLoader = function() {
 
 	
@@ -54,88 +57,126 @@ window.edu_ubbcluj_web_AdminMapLoader = function() {
               new MQA.MapCornerPlacement(MQA.MapCorner.BOTTOM_RIGHT)
             );
 
-            map.enableMouseWheelZoom();
+            map.enableMouseWheelZoom();                     
           });
-     
-       
-        /*document.getElementById('getDirection').onclick=function(){
-        	
-        	alert("alma");
-        };*/
-        
-        //document.getElementById('update').onclick= Admin.kiir() ;
-        
-        document.getElementById('topsearchButton').onclick=function(){
-        	var text = document.getElementById('searchTextField').value;
-        	MQA.withModule('geocoder', function() {
-        		//felulirom az alapertelmezett pontot
-        		 MQA.Geocoder.constructPOI = function(location) {
-        			 	 lat = location.latLng.lat,
-                         lng = location.latLng.lng,
-                         city = location.adminArea5,
-                         state = location.adminArea3,
-                         p = new MQA.Poi({ lat: lat, lng: lng });
-        			 	 p.draggable = true;
-        			 	 p.key="kezdeti";
-        			 	 //alert(document.getElementById('lat').value)
-        			 	 
-        			 	var evt = document.createEvent('HTMLEvents');
-        			    evt.initEvent('change', true, false);
-        			 	var x = document.getElementById('lat');
-        			 	x.value = lat;
-        			 	var y = document.getElementById('lng');
-        			 	y.value = lng;
-        			 	x.dispatchEvent(evt);
-        			 	y.dispatchEvent(evt);
-        			 	 
-                    // p.setRolloverContent('lat: '+p.latLng.lat+' lng: '+p.latLng.lng);
-                    // p.setInfoTitleHTML(p.getRolloverContent());
-                     p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>');
 
-                    // map.addShape(p);
-                    MQA.EventManager.addListener(p, 'mouseout', function(evt){
-                    	var evt = document.createEvent('HTMLEvents');
-        			    evt.initEvent('change', true, false);
-        			 	var x = document.getElementById('lat');
-        			 	x.value = p.latLng.lat;
-        			 	var y = document.getElementById('lng');
-        			 	y.value = p.latLng.lng;
-        			 	x.dispatchEvent(evt);
-        			 	y.dispatchEvent(evt);
-        			 	
-                    });                   
-                     return p;
-                 };
-                
-                map.geocodeAndAddLocations(text, processRawData);              
-                function processRawData(response) {
-                    if (response.results.length > 0 && response.results[0].locations.length > 0) { 
-                    	var location = response.results[0].locations[0];     		
-                    	}else
-                    		{
-                    			alert(response.results.length);
-                    		}
-                    }
-                   
-                //felulirjuk, hogy csak a legelso talalatot mutassa
-                MQA.Geocoder.processResults = function(response, map) { 
-                    if(response && response.info && response.info.statuscode == 0 && response.results) {
-                        var locations = response.results[0].locations;
-                            var location = locations[0];
-                            if (location) {
-                        
-                            	map.removeShape(map.getByKey("kezdeti"));
-                            	map.addShape(this.constructPOI(location));
-                            }                         
-                      }
-                      map.bestFit();
-                  };
-              });
-        };	
         
         
 }
 
+function createService(X,Y,name){
+	
+	MQA.withModule('geocoder', function() {
+		 MQA.Geocoder.constructPOI = function(location) {
+		 	 lat = location.latLng.lat,
+           lng = location.latLng.lng,
+           p = new MQA.Poi({ lat: lat, lng: lng });
+		 	 p.draggable = false;
+		 	// p.key = caption2;
+	       p.setRolloverContent(name);
+	       p.setInfoTitleHTML(p.getRolloverContent());
+	       p.setIcon(new MQA.Icon('http://zizaza.com/cache/icon_256/iconset/581024/581034/PNG/512/map_marker/home_home_icon_map_marker_flat_icon_home_png_map_marker_icon_png.png', 30, 30));
+	       map.addShape(p);	       
+	       return p;
+		 };
+		 
+	    // executes a geocode with an object containing lat/lng properties,
+	    // adds result to the map, and calls showAddress once geocoding is complete
+	    map.reverseGeocodeAndAddLocation(
+	      { lat: X, lng: Y }, showAddress
+	    );
+	 
+	    // show the address of the geocoded location
+	    function showAddress(data) {
+	    }
+	  });
+	
+	map.bestFit();
+}
+	
+
+window.edu_ubbcluj_web_AdminJsConnecter = function() {
+	mainSerachType=this.getState().searchType;
+	//this.getState().actualLat = "alma";
+	//this.getState().actualLng = "korte";
+	
+	//alert("a service: "+this.getState().serviceName);
+	serviceName = this.getState().serviceName;
+	serviceLat = this.getState().serviceLat;
+	serviceLng = this.getState().serviceLng;
+	
+	var evt = document.createEvent('HTMLEvents');
+    evt.initEvent('change', true, false);
+	
+	if (mainSerachType=="adress"){
+		//ha cimre kerestun k ra
+		var text = document.getElementById('searchTextField').value;
+    	MQA.withModule('geocoder', function() {
+    		//felulirom az alapertelmezett pontot
+    		 MQA.Geocoder.constructPOI = function(location) {
+    			 	 lat = location.latLng.lat,
+                     lng = location.latLng.lng,
+                     city = location.adminArea5,
+                     state = location.adminArea3,
+                     p = new MQA.Poi({ lat: lat, lng: lng });
+    			 	 p.draggable = true;
+    			 	 p.key="kezdeti";
+    			 	 //alert(document.getElementById('lat').value)
+    			 	 
+    			 	
+    			 	var x = document.getElementById('lat');
+    			 	x.value = lat;
+    			 	var y = document.getElementById('lng');
+    			 	y.value = lng;
+    			 	x.dispatchEvent(evt);
+    			 	y.dispatchEvent(evt);
+    			 	 
+                // p.setRolloverContent('lat: '+p.latLng.lat+' lng: '+p.latLng.lng);
+                // p.setInfoTitleHTML(p.getRolloverContent());
+                 p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>');
+
+                // map.addShape(p);
+                MQA.EventManager.addListener(p, 'mouseout', function(evt){
+                	
+    			 	var x = document.getElementById('lat');
+    			 	x.value = p.latLng.lat;
+    			 	var y = document.getElementById('lng');
+    			 	y.value = p.latLng.lng;
+    			 	x.dispatchEvent(evt);
+    			 	y.dispatchEvent(evt);
+    			 	
+                });                   
+                 return p;
+             };
+            
+            map.geocodeAndAddLocations(text, processRawData);              
+            function processRawData(response) {
+                if (response.results.length > 0 && response.results[0].locations.length > 0) { 
+                	var location = response.results[0].locations[0]; 
+                	}else
+                		{
+                			alert(response.results.length);
+                		}
+                }
+               
+            //felulirjuk, hogy csak a legelso talalatot mutassa
+            MQA.Geocoder.processResults = function(response, map) { 
+                if(response && response.info && response.info.statuscode == 0 && response.results) {
+                    var locations = response.results[0].locations;
+                        var location = locations[0];
+                        if (location) {
+                    
+                        	map.removeShape(map.getByKey("kezdeti"));
+                        	map.addShape(this.constructPOI(location));
+                        }                         
+                  }
+                  map.bestFit();
+              };
+          });
+	}else{
+		createService(serviceLat,serviceLng,serviceName);
+	}
+}
 
 
 

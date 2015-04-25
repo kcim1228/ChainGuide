@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -49,11 +53,12 @@ import edu.ubbcluj.backend.repository.UsersDAO;
 public class Admin extends VerticalLayout implements View{
 	
 	boolean saveAdded;
+	boolean updateAdded;
 	 boolean registerAdded;
 	 UI myUIClass;
 	 
 	// public static final String NAME = "unloggedUser";
-	private GridLayout topgrid = new GridLayout(3, 1);
+	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
 	private GridLayout actiongrid = new GridLayout(1,11);
@@ -65,14 +70,18 @@ public class Admin extends VerticalLayout implements View{
 	private Button update = new Button("UPDATE");
 	private TextField lat = new TextField("lat");
 	private TextField lng = new TextField("lng");
-	private TextField adress = new TextField("adress:");
+	private TextField typeForSearch = new TextField();
+	private Float actualLat;
+	private Float actualLng;
+	
 	 private int rowIndex ;
 	 private List<Integer> days ;
 	 private List<String> closeHours;
 	 private List<String> openHours;
-	
-	
-
+	 private ComboBox searchType  = new ComboBox();
+	 private Services actualSelectedService;
+	 private String actualServiceName="none";
+	 Panel jsPanel = new Panel();
 	private Button topsearchButton = new Button("GO");
 	private Panel mapPanel = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
@@ -94,11 +103,44 @@ public class Admin extends VerticalLayout implements View{
 		
 		lat.setId("lat");
 		lng.setId("lng");
-		adress.setId("adress");
+	
+		final DAOFactory daoFactory = DAOFactory.getInstance();
+		jsPanel.setStyleName("notVisible");
 		
-		System.out.println(lat.getCaption());
+		topsearchButton.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+				System.out.println("kattintottunk");
+				if(searchType.getValue().equals("service")){
+					ServicesDAO sdao = daoFactory.getServicesDAO();
+		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
+		    		if(sv.size()>0){
+		    			actualSelectedService = sv.get(0);
+			    		actualServiceName = actualSelectedService.getName();
+			    		actualLat = actualSelectedService.getCoordX();
+			    		actualLng = actualSelectedService.getCoordY();
+			    		
+						System.out.println(actualSelectedService.toString());
+						AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+			    		jsPanel.setContent(js);
+		    		}else{
+    					Notification.show("No such service found!",
+  			                  "",
+  			                  Notification.Type.WARNING_MESSAGE);
+		    		}
+		    		
+	    		}
+				else{
+					AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+		    		jsPanel.setContent(js);
+				}
+		    }
+		});
 		
-		topsearchButton.setId("topsearchButton");	
+		topsearchButton.setId("topsearchButton");
+		searchType.addItem("adress");
+		searchType.addItem("service");
+		searchType.setValue("adress");
 		topgrid.setMargin(true);
 		search.setWidth("70%");
 		search.setHeight("1.7em");
@@ -114,25 +156,31 @@ public class Admin extends VerticalLayout implements View{
 		logingrid.addComponent(logout,1,0);
 
 		topgrid.addComponent(search,0,0);
-		topgrid.addComponent(topsearchButton,1,0);
-		topgrid.addComponent(logingrid, 2,0);
+		topgrid.addComponent(searchType,1,0);
+		topgrid.addComponent(topsearchButton,2,0);
+		topgrid.addComponent(logingrid, 3,0);
 		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
 		topgrid.setComponentAlignment(topsearchButton,  Alignment.TOP_LEFT);		
 		logingrid.setComponentAlignment(logout, Alignment.TOP_RIGHT);
 		logingrid.setWidth("100%");
 		logingrid.setColumnExpandRatio(0, 5);
 		logingrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(0, 5);
+		topgrid.setColumnExpandRatio(0, 6);
 		topgrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(2, 3);
+		topgrid.setColumnExpandRatio(2, 1);
+		topgrid.setColumnExpandRatio(3, 5);
 		actiongrid.setWidth("100%");
 		actiongrid.setHeight("100%");
 		actiongrid.addComponent(save,0,1);
-		actiongrid.addComponent(delete,0,3);
-		actiongrid.addComponent(update,0,5);
-		actiongrid.addComponent(lat,0,6);
-		actiongrid.addComponent(lng,0,7);
-		actiongrid.addComponent(adress,0,8);
+		actiongrid.addComponent(delete,0,2);
+		actiongrid.addComponent(update,0,3);
+		actiongrid.addComponent(lat,0,4);
+		actiongrid.addComponent(lng,0,5);
+		actiongrid.addComponent(typeForSearch,0,7);
+		actiongrid.addComponent(jsPanel,0,6);
+		typeForSearch.setValue("adress");
+		typeForSearch.setId("typeForSearch");
+	
 		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(update, Alignment.MIDDLE_CENTER);		
@@ -160,6 +208,7 @@ public class Admin extends VerticalLayout implements View{
 		
 		createLogout(logout);	
 		createSave(save);
+		createUpdate(update);
 		
 		
 		AdminMapLoader mp = new AdminMapLoader();
@@ -238,7 +287,8 @@ public class Admin extends VerticalLayout implements View{
 		            final TextField coordX = new TextField("Lat coordinate: ");
 		            servicelayout.addComponent(coordX);
 		            
-		            coordX.setValue(lat.getValue());
+
+		    		coordX.setValue(lat.getValue());
 		            
 		            coordX.setValue(coordX.getValue());
 		            final TextField coordY = new TextField("Lng coordinate: ");
@@ -262,7 +312,7 @@ public class Admin extends VerticalLayout implements View{
 		            final TextField name = new TextField("Institusion name: ");
 		            servicelayout.addComponent(name);
 		            final TextField adressField = new TextField("Adress: ");
-		            adressField.setValue(adress.getValue());
+		      
 		            servicelayout.addComponent(adressField);
 		            
 		            final TextField tel = new TextField("Telephone: ");
@@ -407,7 +457,7 @@ public class Admin extends VerticalLayout implements View{
 		    				else{
 		    					ServicesDAO servDao = daoFactory.getServicesDAO();
 		    					ServicetypeDAO servtypeDao = daoFactory.getServicetypeDAO();
-			    				Services serv = new Services(name.getValue(), tel.getValue(), adress.getValue(), Float.parseFloat(coordX.getValue()), Float.parseFloat(coordY.getValue()));
+			    				Services serv = new Services(name.getValue(), tel.getValue(), adressField.getValue(), Float.parseFloat(coordX.getValue()), Float.parseFloat(coordY.getValue()));
 			    				servDao.insertService(serv);
 			    				
 			    				String typeString=serviceTypes.getValue().toString();
@@ -425,12 +475,16 @@ public class Admin extends VerticalLayout implements View{
 			    					servtypeDao.insertServicetype(st);			    								    					
 			    				}
 			    				
-			    				int len = days.size();
-			    				OpenhoursDAO  ohdao= daoFactory.getOpenhoursDAO();
-			    				for(int i=0;i<len;i++){
-			    					Openhours oh = new Openhours(serv, days.get(i), Integer.parseInt(openHours.get(i)), Integer.parseInt(closeHours.get(i)));
-			    					ohdao.insertOpehour(oh);
+			    				
+			    				if(days!=null){
+			    					int len = days.size();
+				    				OpenhoursDAO  ohdao= daoFactory.getOpenhoursDAO();
+				    				for(int i=0;i<len;i++){
+				    					Openhours oh = new Openhours(serv, days.get(i), Integer.parseInt(openHours.get(i)), Integer.parseInt(closeHours.get(i)));
+				    					ohdao.insertOpehour(oh);
+				    				}
 			    				}
+			    				
 			    				
 			    				serviceWindow.close();
 			    				saveAdded=false;
@@ -532,6 +586,238 @@ public class Admin extends VerticalLayout implements View{
 			theday=7;
 		}
 		return theday;
+	}
+	
+	private void createUpdate(Button upd){
+		
+		upd.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+				if(actualSelectedService==null){
+					Notification.show("No service selected!",
+			                  "You should select a service first.",
+			                  Notification.Type.ERROR_MESSAGE);
+					
+				}else{
+					final Window serviceWindow = new Window("Update service as: ");
+			        FormLayout servicelayout = new FormLayout();
+			        serviceWindow.setContent(servicelayout);  
+			        final TextField coordX = new TextField("Lat coordinate: ");
+			        servicelayout.addComponent(coordX);        
+			        coordX.setValue(actualSelectedService.getCoordX().toString());
+
+			        final TextField coordY = new TextField("Lng coordinate: ");
+			        servicelayout.addComponent(coordY);
+			        coordY.setValue(actualSelectedService.getCoordY().toString());
+			        
+			        final OptionGroup serviceTypes = new OptionGroup("Service-types: ");
+			        final DAOFactory daoFactory = DAOFactory.getInstance();
+					final TypeDAO typeDAO = daoFactory.getTypeDAO();
+					List<Type> types = null;
+					try{	
+						types = typeDAO.getAllType();
+					} catch(RuntimeException ex) {
+						System.out.println(ex.getMessage());
+					}
+					for (Type p:types) {
+						serviceTypes.addItem(p.getName());
+					}
+			        serviceTypes.setMultiSelect(true);
+			        servicelayout.addComponent(serviceTypes);
+			        final TextField name = new TextField("Institusion name: ");
+			        name.setValue(actualSelectedService.getName());
+			        servicelayout.addComponent(name);
+			        final TextField adressField = new TextField("Adress: ");
+			        adressField.setValue(actualSelectedService.getAdress());
+			        servicelayout.addComponent(adressField);
+			        
+			        final TextField tel = new TextField("Telephone: ");
+			        tel.setValue(actualSelectedService.getTelephone());
+			        servicelayout.addComponent(tel);
+			        
+			        Button openhour = new Button("Set Time-Table");
+			        servicelayout.addComponent(openhour);
+			        
+			        Button updateservcice = new Button("UPDATE");
+			        updateservcice.setWidth("90%");
+			        servicelayout.addComponent(updateservcice);
+			        servicelayout.setHeight("30em");
+			        servicelayout.setWidth("32em"); 
+			        serviceWindow.center();
+			        serviceWindow.setResizable(false);
+			        
+			        
+			       /* openhour.addClickListener(new Button.ClickListener() {
+						private static final long serialVersionUID = 1L;
+						public void buttonClick(ClickEvent event) {
+							final Window openhourWindow = new Window("Save service-type as: ");
+				            FormLayout openhourlayout = new FormLayout();
+				            //flayout.setMargin(true);
+				            openhourWindow.setContent(openhourlayout);
+				            openhourlayout.setWidth("35em");
+				            //openhourlayout.setHeight("42em");
+				            
+				            days = new ArrayList<Integer>();
+				            closeHours =new ArrayList<String>();
+				            openHours = new ArrayList<String>();
+				            
+				            final ComboBox day = new ComboBox("Day: ");
+				            openhourlayout.addComponent(day);
+				            day.addItem("Monday");
+				            day.addItem("Tuesday");
+				            day.addItem("Wednesday");
+				            day.addItem("Thursday");
+				            day.addItem("Friday");
+				            day.addItem("Saturday");
+				            day.addItem("Sunday");
+				             
+				            
+				            final TextField open  = new TextField("Opens:");
+				            openhourlayout.addComponent(open);
+				            open.setInputPrompt("09");
+				            final TextField close  = new TextField("Closes:");
+				            close.setInputPrompt("12");
+				            openhourlayout.addComponent(close);
+				            Button add = new Button("add");
+				            openhourlayout.addComponent(add);
+				            
+				            final Table table = new Table("Time-Table");
+				            table.setWidth("90%");
+				            table.setPageLength(7);
+				            table.addContainerProperty("Day		", String.class, null);
+				            table.addContainerProperty("Opens",  String.class, null);
+				            table.addContainerProperty("Closes",  String.class, null);
+				            openhourlayout.addComponent(table);
+				            rowIndex = 2;
+				            
+				            add.addClickListener(new Button.ClickListener() {
+				    			private static final long serialVersionUID = 1L;
+				    			public void buttonClick(ClickEvent event) {
+				    				if((day.getValue()==null)||(open.getValue()=="")||(close.getValue()=="")){
+				    					Notification.show("Empty areas in the form!",
+				    			                  "You should fill in all of them.",
+				    			                  Notification.Type.ERROR_MESSAGE);
+				    				}else{
+				    					String o =open.getValue();
+				    					String c = close.getValue();
+				    					
+				    					if((timeFormat(o))&&(timeFormat(c))){
+				    						days.add((Integer)days((String) day.getValue()));
+				    						openHours.add(open.getValue());
+				    						closeHours.add(close.getValue());
+				    						
+				    						table.addItem(new Object[]{day.getValue(),open.getValue(),close.getValue()},rowIndex);
+					    					rowIndex++;
+				    						
+				    					}else{
+				    						Notification.show("Wrong time-format!",
+					    			                  "Use xx format, like 16 or 08 ",
+					    			                  Notification.Type.ERROR_MESSAGE);
+				    					}
+				    									    					
+				    					
+				    				}
+				    				
+				    		    }
+				    		});
+				            
+				            
+				            
+				            Button savetable = new Button("OK");
+				            openhourlayout.addComponent(savetable);
+				            
+				            myUIClass.addWindow(openhourWindow);
+				            openhourWindow.center();
+				            openhourWindow.setResizable(false);
+				            
+				            savetable.addClickListener(new Button.ClickListener() {
+				    			private static final long serialVersionUID = 1L;
+				    			public void buttonClick(ClickEvent event) {
+				    				System.out.println(days.toString());
+				    				System.out.println(closeHours.toString());
+				    				System.out.println(openHours.toString());
+				    		    	openhourWindow.close();
+				    		    	
+				    		    }
+				    		});
+				            
+				            openhourWindow.addCloseListener(new Window.CloseListener() {
+				    			private static final long serialVersionUID = 1L;
+
+				    			public void windowClose(CloseEvent e) {					
+				    				openhourWindow.close();
+				    			}
+				    		});
+					    }
+					});*/
+			        
+			        
+			        serviceWindow.addCloseListener(new Window.CloseListener() {
+						private static final long serialVersionUID = 1L;
+
+						public void windowClose(CloseEvent e) {					
+							serviceWindow.close();
+							updateAdded = false;
+						}
+					});
+					
+			        myUIClass.addWindow(serviceWindow);
+			        updateservcice.addClickListener(new Button.ClickListener() {
+						private static final long serialVersionUID = 1L;
+						public void buttonClick(ClickEvent event) {
+							System.out.println(serviceTypes.getValue().toString());
+							if((coordX.getValue()=="")||(coordY.getValue()=="")||name.getValue()==""||(adressField.getValue()=="")||(tel.getValue()=="")||(serviceTypes.getValue().toString()=="[]")){
+								Notification.show("Empty areas in the form!",
+						                  "You should fill in all of them.",
+						                  Notification.Type.ERROR_MESSAGE);
+							}
+							else{
+								/*ServicesDAO servDao = daoFactory.getServicesDAO();
+								ServicetypeDAO servtypeDao = daoFactory.getServicetypeDAO();
+			    				Services serv = new Services(name.getValue(), tel.getValue(), adressField.getValue(), Float.parseFloat(coordX.getValue()), Float.parseFloat(coordY.getValue()));
+			    				servDao.insertService(serv);
+			    				
+			    				String typeString=serviceTypes.getValue().toString();
+			    				typeString =  typeString.replaceAll (" ", "");
+			    				typeString = typeString.substring(1, typeString.length()-1);
+			    				List<String> typeList = Arrays.asList(typeString.split(","));
+			    				
+			    				for(String t : typeList){
+			    					System.out.println(t);
+			    					Type tp = typeDAO.getTypeByName(t);
+			    					System.out.println(tp.toString());
+			    					System.out.println(serv.toString());
+			    					Servicetype st = new Servicetype(serv, tp);
+			    					System.out.println(st.toString());
+			    					servtypeDao.insertServicetype(st);			    								    					
+			    				}
+			    				
+			    				
+			    				if(days!=null){
+			    					int len = days.size();
+				    				OpenhoursDAO  ohdao= daoFactory.getOpenhoursDAO();
+				    				for(int i=0;i<len;i++){
+				    					Openhours oh = new Openhours(serv, days.get(i), Integer.parseInt(openHours.get(i)), Integer.parseInt(closeHours.get(i)));
+				    					ohdao.insertOpehour(oh);
+				    				}
+			    				}
+			    				
+			    				*/
+			    				serviceWindow.close();
+			    				updateAdded=false;
+							}
+					    	
+					    }
+					});
+				}
+				
+		    }
+		});
+		
+		
+
+
+		
 	}
 
 }
