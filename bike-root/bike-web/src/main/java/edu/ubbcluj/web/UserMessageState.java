@@ -1,5 +1,7 @@
 package edu.ubbcluj.web;
 
+import java.util.List;
+
 import com.vaadin.shared.ui.JavaScriptComponentState;
 
 public class UserMessageState extends JavaScriptComponentState {
@@ -10,6 +12,10 @@ public class UserMessageState extends JavaScriptComponentState {
 	public String serviceName;
 	public Float serviceLat;
 	public Float serviceLng;
+	public List<String> allNames;
+	public List<Float> allLat;
+	public List<Float> allLng;
+	public int allSize;
 	
 
 }

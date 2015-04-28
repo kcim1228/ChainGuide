@@ -2,6 +2,7 @@ package edu.ubbcluj.web;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.data.Property;
@@ -75,6 +76,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private String actualServiceName;
 	private Float actualLat;
 	private Float actualLng;
+	private List<String> allNames =  new ArrayList<String>();
+	private List<Float> allLat = new ArrayList<Float>();
+	private List<Float> allLng = new ArrayList<Float>();
+	private int allSize = -1;
 	
 	
 	public UnLoggedUser(UI UIClass){
@@ -106,10 +111,30 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		searchType.addItem("adress");
 		searchType.addItem("service");
 		searchType.setValue("adress");
-		routeType.addListener( new Property.ValueChangeListener() {
+
+		showAll.addListener( new Property.ValueChangeListener() {
 		    public void valueChange(ValueChangeEvent event) {
-		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+		    	allNames.clear();
+		    	allLat.clear();
+		    	allLng.clear();
+		    	System.out.println(showAll.getValue());
+		    	ServicesDAO sdao = daoFactory.getServicesDAO();
+		    	TypeDAO tdao = daoFactory.getTypeDAO();
+		    	Type tp = tdao.getTypeByName(showAll.getValue().toString());
+		    	List<Services> slist = sdao.getAllServicesByType(tp);
+		    	allSize = slist.size();
+		    	for(int i=0;i<slist.size();i++){
+		    		allNames.add(slist.get(i).getName().toString());
+		    		allLat.add(slist.get(i).getCoordX());
+		    		allLng.add(slist.get(i).getCoordY());
+		    		System.out.println(slist.get(i));
+		    	}
+		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
+		    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+		    			allLat,allLng,allSize);
 		    		jsPanel.setContent(js);
+		    		allSize = -1;
+		    	
 		    	}
 		    }
 		       );
@@ -128,7 +153,9 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    		actualLng = actualSelectedService.getCoordY();
 			    		
 						System.out.println(actualSelectedService.toString());
-						JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),
+								(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
+								allNames,allLat,allLng,allSize);
 			    		jsPanel.setContent(js);
 		    		}else{
     					Notification.show("No such service found!",
@@ -138,7 +165,9 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    		
 	    		}
 				else{
-					JsConnecter js = new JsConnecter((String) routeType.getValue(),(String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),
+							(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
+							allNames,allLat,allLng,allSize);
 		    		jsPanel.setContent(js);
 				}
 		    }

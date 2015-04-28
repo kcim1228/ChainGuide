@@ -72,11 +72,10 @@ function createService(X,Y,name){
            lng = location.latLng.lng,
            p = new MQA.Poi({ lat: lat, lng: lng });
 		 	 p.draggable = false;
-		 	// p.key = caption2;
+		 	p.key = "actualservice";
 	       p.setRolloverContent(name);
 	       p.setInfoTitleHTML(p.getRolloverContent());
-	       p.setIcon(new MQA.Icon('http://zizaza.com/cache/icon_256/iconset/581024/581034/PNG/512/map_marker/home_home_icon_map_marker_flat_icon_home_png_map_marker_icon_png.png', 30, 30));
-	       map.addShape(p);	       
+	       p.setIcon(new MQA.Icon('http://zizaza.com/cache/icon_256/iconset/581024/581034/PNG/512/map_marker/home_home_icon_map_marker_flat_icon_home_png_map_marker_icon_png.png', 30, 30));      
 	       return p;
 		 };
 		 
@@ -90,8 +89,18 @@ function createService(X,Y,name){
 	    function showAddress(data) {
 	    }
 	  });
+	MQA.Geocoder.processResults = function(response, map) { 
+        if(response && response.info && response.info.statuscode == 0 && response.results) {
+            var locations = response.results[0].locations;
+                var location = locations[0];
+                if (location) {
+                	map.removeShape(map.getByKey("actualservice"));
+                	map.addShape(this.constructPOI(location));
+                }                         
+          }
+          map.bestFit();
+      };
 	
-	map.bestFit();
 }
 	
 
