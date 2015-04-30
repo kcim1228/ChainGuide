@@ -16,6 +16,7 @@ public class UserMessageState extends JavaScriptComponentState {
 	public List<Float> allLat;
 	public List<Float> allLng;
 	public int allSize;
+	public String action;
 	
 
 }

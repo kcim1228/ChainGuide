@@ -18,9 +18,9 @@
                 <column name="close" />
             </property>
         
-        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services">
+        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" lazy="false">
             <column name="serviceId" />
-        </many-to-one>
+        </many-to-one >
     
     </class>
 </hibernate-mapping>

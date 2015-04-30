@@ -14,7 +14,8 @@ public class JsConnecter extends AbstractJavaScriptComponent {
 	
 	private static final long serialVersionUID = 1L;
 
-	public JsConnecter(String rtype, String stype,String name,Float lat, Float lng,List<String> sa,List<Float> lats,List<Float> lngs,int size){
+	public JsConnecter(String rtype, String stype,String name,Float lat, Float lng,
+			List<String> sa,List<Float> lats,List<Float> lngs,int size, String act){
 		//System.out.println(szoveg);
 		getState().routeType = rtype;
 		getState().searchType = stype;
@@ -25,6 +26,7 @@ public class JsConnecter extends AbstractJavaScriptComponent {
 		getState().allLat = lats;
 		getState().allLng = lngs;
 		getState().allSize = size;
+		getState().action = act;
 		
 		System.out.println(getState().allNames.toString());
 		

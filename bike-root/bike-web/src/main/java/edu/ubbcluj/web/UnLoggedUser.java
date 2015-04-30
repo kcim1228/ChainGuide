@@ -28,11 +28,13 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 
+import edu.ubbcluj.backend.model.Openhours;
 import edu.ubbcluj.backend.model.Places;
 import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.DAOFactory;
+import edu.ubbcluj.backend.repository.OpenhoursDAO;
 import edu.ubbcluj.backend.repository.PlacesDAO;
 import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
@@ -54,7 +56,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private TextArea search = new TextArea("Search: ");
 	private TextArea aPoint = new TextArea("A:");
 	private TextArea bPoint = new TextArea("B:");
-	private TextArea start = new TextArea("Select a Start point: ");
+	private TextArea startPointForNearest = new TextArea("Select a Start point: ");
 	private Button login = new Button("Login");
 	private Button register = new Button("Register");
 	private Button getDirection = new Button("GO");
@@ -80,6 +82,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private List<Float> allLat = new ArrayList<Float>();
 	private List<Float> allLng = new ArrayList<Float>();
 	private int allSize = -1;
+	private String actionState = "searchAction";
 	
 	
 	public UnLoggedUser(UI UIClass){
@@ -88,6 +91,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		//this.setCaption("alma");
 	}
 
+	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
 		//System.out.println("unluser: "+this.getSession().getAttribute("userType"));
 		
@@ -106,34 +110,111 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		final DAOFactory daoFactory = DAOFactory.getInstance();
 		search.setValue("strada horea, cluj napoca");	
 		routeType.addItem("bicycle");
-		routeType.addItem("fastest");
+		routeType.addItem("shortest");
 		routeType.setValue("bicycle");
 		searchType.addItem("adress");
 		searchType.addItem("service");
 		searchType.setValue("adress");
+		
+		
+		getDirection.addClickListener(new Button.ClickListener() {
+			
+			public void buttonClick(ClickEvent event) {
+				actionState = "routeAction";
+		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
+		    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+		    			allLat,allLng,allSize,actionState);
+		    		jsPanel.setContent(js);
+				
+			}
+		});
+		
+		getNearest.addClickListener(new Button.ClickListener() {
+			
+			public void buttonClick(ClickEvent event) {
+				actionState = "nearestAction";
+				System.out.println("nearestselect value: "+nearestSelect.getValue());
+				System.out.println("text= "+startPointForNearest.getValue());
+				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue().equals(null))){
+					Notification.show("Please select a start point and a service-type!",
+			                  "",
+			                  Notification.Type.WARNING_MESSAGE);
+				}else{
+					allNames.clear();
+			    	allLat.clear();
+			    	allLng.clear();
+			    	System.out.println(nearestSelect.getValue());
+			    	ServicesDAO sdao = daoFactory.getServicesDAO();
+			    	TypeDAO tdao = daoFactory.getTypeDAO();
+			    	Type tp = tdao.getTypeByName(nearestSelect.getValue().toString());
+			    	List<Services> slist = sdao.getAllServicesByType(tp);
+			    	allSize = slist.size();
+			    	for(int i=0;i<slist.size();i++){
+			    		allNames.add(slist.get(i).getName().toString());
+			    		allLat.add(slist.get(i).getCoordX());
+			    		allLng.add(slist.get(i).getCoordY());
+			    		System.out.println(slist.get(i));
+			    	}
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),
+			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			allLat,allLng,allSize,actionState);
+			    		jsPanel.setContent(js);
+			    	allSize = -1;
+				}
+				
+			}
+		});
+		
 
 		showAll.addListener( new Property.ValueChangeListener() {
 		    public void valueChange(ValueChangeEvent event) {
+		    	actionState = "listAction";
 		    	allNames.clear();
 		    	allLat.clear();
 		    	allLng.clear();
-		    	System.out.println(showAll.getValue());
-		    	ServicesDAO sdao = daoFactory.getServicesDAO();
 		    	TypeDAO tdao = daoFactory.getTypeDAO();
 		    	Type tp = tdao.getTypeByName(showAll.getValue().toString());
+		    	ServicesDAO sdao = daoFactory.getServicesDAO();
 		    	List<Services> slist = sdao.getAllServicesByType(tp);
-		    	allSize = slist.size();
-		    	for(int i=0;i<slist.size();i++){
-		    		allNames.add(slist.get(i).getName().toString());
-		    		allLat.add(slist.get(i).getCoordX());
-		    		allLng.add(slist.get(i).getCoordY());
-		    		System.out.println(slist.get(i));
+		    	if(showAllCb.getValue()==false){
+			    	System.out.println(showAll.getValue());
+			    	allSize = slist.size();
+			    	for(int i=0;i<slist.size();i++){
+			    		allNames.add(slist.get(i).getName().toString());
+			    		allLat.add(slist.get(i).getCoordX());
+			    		allLng.add(slist.get(i).getCoordY());
+			    		System.out.println(slist.get(i));
+			    	}
+			    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
+			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			allLat,allLng,allSize,actionState);
+			    		jsPanel.setContent(js);
+			    		allSize = -1;
+		    	}else{
+		    		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+		    		List<Openhours> ohs =  openDao.getAllOpenNow();
+		    		List<Services> openServ = new ArrayList<Services>();
+		    		for(int i=0;i<ohs.size();i++){
+		    			openServ.add(ohs.get(i).getServices());
+		    		}
+		    		slist.retainAll(openServ);//intersection(slist, openServ);
+		    		
+		    		System.out.println("slist: "+slist.toString());
+		    		System.out.println("openserv"+openServ.toString());
+		   
+		    		/*allSize = slist.size();
+		    		for(int i=0;i<allSize;i++){
+			    		allNames.add(intersect.get(i).getName());
+			    		allLat.add(intersect.get(i).getCoordX());
+			    		allLng.add(intersect.get(i).getCoordY());
+			    	}
+		    		JsConnecter js = new JsConnecter((String) routeType.getValue(),
+			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			allLat,allLng,allSize,actionState);
+			    		jsPanel.setContent(js);
+			    		allSize = -1;*/
 		    	}
-		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-		    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
-		    			allLat,allLng,allSize);
-		    		jsPanel.setContent(js);
-		    		allSize = -1;
+
 		    	
 		    	}
 		    }
@@ -142,7 +223,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		topsearchButton.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
-				System.out.println("kattintottunk");
+				actionState = "searchAction";
 				if(searchType.getValue().equals("service")){
 					ServicesDAO sdao = daoFactory.getServicesDAO();
 		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
@@ -155,7 +236,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						System.out.println(actualSelectedService.toString());
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
 								(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
-								allNames,allLat,allLng,allSize);
+								allNames,allLat,allLng,allSize,actionState);
 			    		jsPanel.setContent(js);
 		    		}else{
     					Notification.show("No such service found!",
@@ -167,7 +248,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				else{
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
 							(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
-							allNames,allLat,allLng,allSize);
+							allNames,allLat,allLng,allSize,actionState);
 		    		jsPanel.setContent(js);
 				}
 		    }
@@ -219,11 +300,11 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		aPoint.setId("aPoint");
 		bPoint.setId("bPoint");
 		bPoint.setRows(1);
-		start.setRows(1);
+		startPointForNearest.setRows(1);
 		aPoint.setWidth("90%");
 		aPoint.setRows(2);
 		bPoint.setRows(2);
-		start.setRows(2);
+		startPointForNearest.setRows(2);
 		bPoint.setWidth("90%");
 		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
 		bPoint.setDescription("Type or choose from the map an End point for your trip .");
@@ -233,12 +314,12 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		actiongrid.addComponent(getDirection,0,4);
 		actiongrid.addComponent(nearestSelect,0,5);
 		actiongrid.addComponent(nearestCb,0,6);
-		actiongrid.addComponent(start,0,7);
+		actiongrid.addComponent(startPointForNearest,0,7);
 		actiongrid.addComponent(getNearest,0,8);
 		actiongrid.addComponent(showAll,0,9);
 		actiongrid.addComponent(showAllCb,0,10);
 		actiongrid.addComponent(jsPanel,0,11);
-		start.setId("nearestStart");
+		startPointForNearest.setId("nearestStart");
 		
 		
 		actiongrid.setComponentAlignment(aPoint, Alignment.MIDDLE_LEFT);
@@ -571,6 +652,18 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		return generatedPassword;
 	
 	}
+	
+	public  List<Services> intersection(List<Services> list1, List<Services> list2) {
+        List<Services> list = new ArrayList<Services>();
+
+        for (Services t : list1) {
+            if(list2.contains(t)) {
+                list.add(t);
+            }
+        }
+        System.out.println("lista:"+list);
+        return list;
+    }
 	
 
 }

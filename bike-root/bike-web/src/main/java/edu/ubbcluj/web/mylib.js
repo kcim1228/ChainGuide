@@ -7,6 +7,7 @@ var serviceName;
 var serviceLat;
 var serviceLng;
 var oldSize=0;
+var actionState;
 window.edu_ubbcluj_web_MapLoader = function() {
 
 	
@@ -64,85 +65,8 @@ window.edu_ubbcluj_web_MapLoader = function() {
 
             map.enableMouseWheelZoom();
           });
-     	
-        
-        document.getElementById('getDirection').onclick=function(){
-        	startPoint = map.getByKey("startPoint"+lastStartIndex);
-        	endPoint = map.getByKey("endPoint"+lastEndIndex);
-        	MQA.withModule('new-route', function() {
-        		 var opt = {
-                         request: {
-                        	 locations: [
-                        	            startPoint,endPoint
-                        	           ],
+  
 
-                             options: {
-                                 avoids: [],
-                                 avoidTimedConditions: false,
-                                 doReverseGeocode: true,
-                                 generalize: 0,
-                                 routeType: routeTypeForPath,
-                                 timeType: 1,
-                                 locale: 'en_US',
-                                 unit: 'k',
-                                 enhancedNarrative: false,
-                                 drivingStyle: 2,
-                                 highwayEfficiency: 21.0
-                             }
-                         },
-
-                         display: {
-                             color: '#800000',
-                             borderWidth: 5,
-                             draggable: true,
-                             draggablepoi: true
-                         },
-                         success: function displayNarrative(data) {
-                        	 map.bestFit();
-                        	 if (data.route) {
-                                 var legs = data.route.legs,
-                                     html = '',
-                                     i = 0,
-                                     j = 0,
-                                     trek,
-                                     maneuver;
-
-                                 html += '<table><tbody>';
-
-                                 for (; i<legs.length; i++) {
-                                     for (j=0; j<legs[i].maneuvers.length; j++) {
-                                         maneuver = legs[i].maneuvers[j];
-                                         html += '<tr>';
-                                         html += '<td>';
-
-                                         if (maneuver.iconUrl) {
-                                             html += '<img src="' + maneuver.iconUrl + '" />  ';
-                                         }
-
-                                         for (k=0; k<maneuver.signs.length; k++) {
-                                             var sign = maneuver.signs[k];
-
-                                             if (sign && sign.url) {
-                                                 html += '<img src="' + sign.url + '" />  ';
-                                             }
-                                         }
-
-                                         html += '</td><td>' + maneuver.narrative + '</td>';
-                                         html += '</tr>';
-                                     }
-                                 }
-
-                                 html += '</tbody></table>';
-                                 document.getElementById('route-results').innerHTML = html;
-                             }
-                         }
-        		 }
-        		 map.addRoute(opt);
-        		 map.bestFit();
-        		// alert("ut hozzadava");
-        	  });
-        } ;
-        
        
 }
 
@@ -182,6 +106,11 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
 		      document.getElementById('aPoint').value = adress;
 		      document.getElementById('nearestStart').value = adress;
+		      var evt = document.createEvent('HTMLEvents');
+		      evt.initEvent('change', true, false);
+		      ns = document.getElementById('nearestStart');
+		      ns.dispatchEvent(evt);
+		      
 		    }
 		  });
 		map.removeShape(map.getByKey("kezdeti"));
@@ -307,20 +236,11 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		allLat = this.getState().allLat;
 		allLng = this.getState().allLng;
 		allSize = this.getState().allSize;
+		actionState = this.getState().action;
 		
-		if(allSize>-1){
-
-			if (oldSize>0){
-				map.removeAllShapes();
-			}
-			for(i=0;i<allSize;i++){
-				caption = "allServices";
-				createService2(allLat[i],allLng[i],allNames[i],caption);
-			}
-			map.bestFit();	
-		oldSize = allSize;	
-			
-		}else{
+		alert(actionState);
+		//ha search keres volt
+		if(actionState=="searchAction"){
 			if(mainSerachType=='adress'){
 	    		//ha cimre keresunk ra
 	    		var text = document.getElementById('searchTextField').value;           	
@@ -386,6 +306,110 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	    		
 	    	}
 		}
+		if(actionState=="routeAction"){	           
+	        	startPoint = map.getByKey("startPoint"+lastStartIndex);
+	        	endPoint = map.getByKey("endPoint"+lastEndIndex);
+	        	MQA.withModule('new-route', function() {
+	        		alert(routeTypeForPath);
+	        		 var opt = {
+	                         request: {
+	                        	 locations: [startPoint,endPoint ],
+	                             options: {
+	                                 avoids: [],
+	                                 avoidTimedConditions: false,
+	                                 doReverseGeocode: true,
+	                                 generalize: 0,
+	                                 routeType: routeTypeForPath,
+	                                 timeType: 1,
+	                                 locale: 'en_US',
+	                                 unit: 'k',
+	                                 enhancedNarrative: false,
+	                                 drivingStyle: 2,
+	                                 highwayEfficiency: 21.0
+	                             }
+	                         },
+	                         display: {
+	                             color: '#800000',
+	                             borderWidth: 5,
+	                             draggable: true,
+	                             draggablepoi: true
+	                         },
+	                         success: function displayNarrative(data) {
+	                        	 map.bestFit();
+	                        	 if (data.route) {
+	                        		 alert(data.route.distance);
+	                                 var legs = data.route.legs,
+	                                     html = '',
+	                                     i = 0,
+	                                     j = 0,
+	                                     trek,
+	                                     maneuver;
+
+	                                 html += '<table><tbody>';
+
+	                                 for (; i<legs.length; i++) {
+	                                     for (j=0; j<legs[i].maneuvers.length; j++) {
+	                                         maneuver = legs[i].maneuvers[j];
+	                                         html += '<tr>';
+	                                         html += '<td>';
+
+	                                         if (maneuver.iconUrl) {
+	                                             html += '<img src="' + maneuver.iconUrl + '" />  ';
+	                                         }
+
+	                                         for (k=0; k<maneuver.signs.length; k++) {
+	                                             var sign = maneuver.signs[k];
+
+	                                             if (sign && sign.url) {
+	                                                 html += '<img src="' + sign.url + '" />  ';
+	                                             }
+	                                         }
+
+	                                         html += '</td><td>' + maneuver.narrative + '</td>';
+	                                         html += '</tr>';
+	                                     }
+	                                 }
+
+	                                 html += '</tbody></table>';
+	                                 document.getElementById('route-results').innerHTML = html;
+	                             }
+	                         }
+	        		 }
+	        		 map.addRoute(opt);
+	        		 map.bestFit();
+	        		// alert("ut hozzadava");
+	        	  });
+	        
+	        
+		}
+		if(actionState=="listAction"){
+			if(allSize>-1){
+
+				/*if (oldSize>0){
+					map.removeAllShapes();
+				}*/
+				map.removeAllShapes();
+				for(i=0;i<allSize;i++){
+					caption = "allServices";
+					createService2(allLat[i],allLng[i],allNames[i],caption);
+				}
+				map.bestFit();	
+			oldSize = allSize;	
+				
+			}
+		}
+		if(actionState=="nearestAction"){
+			alert("nearestAction");
+			//route-matrix: h kell hasznalni ????????????????????????????????????????????
+				startPoint = map.getByKey("startPoint"+lastStartIndex);
+				alert(allSize);
+				for(j=0;j<allSize;j++){
+					alert(allNames[j]+"; "+allLat[j]+"; "+allLng[j]);
+					
+				}
+			
+		}
+		
 	
 	}
 
