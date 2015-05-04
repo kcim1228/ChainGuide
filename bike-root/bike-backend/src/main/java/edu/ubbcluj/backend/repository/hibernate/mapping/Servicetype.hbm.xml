@@ -8,10 +8,10 @@
             <column name="id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services">
+        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" lazy="false">
             <column name="serviceID" />
         </many-to-one>
-        <many-to-one name="type" class="edu.ubbcluj.backend.model.Type">
+        <many-to-one name="type" class="edu.ubbcluj.backend.model.Type" lazy="false">
             <column name="typeID" />
         </many-to-one>
     </class>

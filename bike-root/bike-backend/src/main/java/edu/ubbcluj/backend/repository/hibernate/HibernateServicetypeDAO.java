@@ -8,6 +8,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
+import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Servicetype;
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.repository.ServicetypeDAO;
@@ -103,6 +104,33 @@ Session session = null;
 			}
 			
 			throw new RuntimeException("Servicetypes by type selection failed!",ex);			
+		}
+	
+		
+		return serviceList;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Servicetype> getAllServiceTypesByService(Services serv) {
+		List<Servicetype> serviceList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Servicetype.class).add(Restrictions.eq("services",serv));
+			serviceList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Servicetypes by service selection failed!",ex);			
 		}
 	
 		

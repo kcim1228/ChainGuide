@@ -114,9 +114,8 @@ window.edu_ubbcluj_web_AdminJsConnecter = function() {
 	serviceLat = this.getState().serviceLat;
 	serviceLng = this.getState().serviceLng;
 	
-	var evt = document.createEvent('HTMLEvents');
-    evt.initEvent('change', true, false);
-	
+
+    
 	if (mainSerachType=="adress"){
 		//ha cimre kerestun k ra
 		var text = document.getElementById('searchTextField').value;
@@ -131,7 +130,8 @@ window.edu_ubbcluj_web_AdminJsConnecter = function() {
     			 	 p.draggable = true;
     			 	 p.key="kezdeti";
     			 	 //alert(document.getElementById('lat').value)
-    			 	 
+    			 	var evt = document.createEvent('HTMLEvents');
+    			    evt.initEvent('change', true, false);
     			 	
     			 	var x = document.getElementById('lat');
     			 	x.value = lat;
@@ -146,6 +146,8 @@ window.edu_ubbcluj_web_AdminJsConnecter = function() {
 
                 // map.addShape(p);
                 MQA.EventManager.addListener(p, 'mouseout', function(evt){
+                	var evt = document.createEvent('HTMLEvents');
+                    evt.initEvent('change', true, false);
                 	
     			 	var x = document.getElementById('lat');
     			 	x.value = p.latLng.lat;

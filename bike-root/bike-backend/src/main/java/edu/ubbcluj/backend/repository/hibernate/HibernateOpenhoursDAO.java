@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import edu.ubbcluj.backend.model.Openhours;
+import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.repository.OpenhoursDAO;
 
 @SuppressWarnings("rawtypes")
@@ -133,6 +134,31 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 			}
 			
 			throw new RuntimeException("Openhours selection failed!",ex);			
+		}
+	
+		
+		return openhList;
+	}
+	@Override
+	public List<Openhours> getAllOpenhoursByService(Services serv) {	
+		List<Openhours> openhList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Openhours.class).add(Restrictions.eq("services", serv));
+			openhList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Openhours selection by service failed!",ex);			
 		}
 	
 		

@@ -85,6 +85,7 @@ public class Admin extends VerticalLayout implements View{
 	private Button topsearchButton = new Button("GO");
 	private Panel mapPanel = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
+	 final DAOFactory daoFactory = DAOFactory.getInstance();
 	
 	public Admin(UI ui){
 		myUIClass=ui;
@@ -287,7 +288,7 @@ public class Admin extends VerticalLayout implements View{
 		            final TextField coordX = new TextField("Lat coordinate: ");
 		            servicelayout.addComponent(coordX);
 		            
-
+		            
 		    		coordX.setValue(lat.getValue());
 		            
 		            coordX.setValue(coordX.getValue());
@@ -296,7 +297,6 @@ public class Admin extends VerticalLayout implements View{
 		            coordY.setValue(lng.getValue());
 		            
 		            final OptionGroup serviceTypes = new OptionGroup("Service-types: ");
-		            final DAOFactory daoFactory = DAOFactory.getInstance();
 		    		final TypeDAO typeDAO = daoFactory.getTypeDAO();
 		    		List<Type> types = null;
 		    		try{	
@@ -363,15 +363,32 @@ public class Admin extends VerticalLayout implements View{
 				            openhourlayout.addComponent(close);
 				            Button add = new Button("add");
 				            openhourlayout.addComponent(add);
+				            Button remove = new Button("remove");
+				            openhourlayout.addComponent(remove);
 				            
 				            final Table table = new Table("Time-Table");
+				            table.setSelectable(true);
 				            table.setWidth("90%");
 				            table.setPageLength(7);
-				            table.addContainerProperty("Day		", String.class, null);
+				            table.addContainerProperty("Day", String.class, null);
 				            table.addContainerProperty("Opens",  String.class, null);
 				            table.addContainerProperty("Closes",  String.class, null);
 				            openhourlayout.addComponent(table);
 				            rowIndex = 2;
+				            remove.addClickListener(new Button.ClickListener() {								
+								public void buttonClick(ClickEvent event) {
+									
+									String open=  (String) table.getItem(table.getValue()).getItemProperty("Opens").getValue();
+									openHours.remove(open);
+									String close = (String) table.getItem(table.getValue()).getItemProperty("Closes").getValue();
+									closeHours.remove(close);
+									String day = (String) table.getItem(table.getValue()).getItemProperty("Day").getValue();
+									days.remove((Integer)(daysToInt(day)));
+									table.removeItem(table.getValue());
+								
+								}
+							});
+				            
 				            
 				            add.addClickListener(new Button.ClickListener() {
 				    			private static final long serialVersionUID = 1L;
@@ -385,7 +402,7 @@ public class Admin extends VerticalLayout implements View{
 				    					String c = close.getValue();
 				    					
 				    					if((timeFormat(o))&&(timeFormat(c))){
-				    						days.add((Integer)days((String) day.getValue()));
+				    						days.add((Integer)daysToInt((String) day.getValue()));
 				    						openHours.add(open.getValue());
 				    						closeHours.add(close.getValue());
 				    						
@@ -416,9 +433,12 @@ public class Admin extends VerticalLayout implements View{
 				            savetable.addClickListener(new Button.ClickListener() {
 				    			private static final long serialVersionUID = 1L;
 				    			public void buttonClick(ClickEvent event) {
+		
+				    				
 				    				System.out.println(days.toString());
 				    				System.out.println(closeHours.toString());
 				    				System.out.println(openHours.toString());
+				    			
 				    		    	openhourWindow.close();
 				    		    	
 				    		    }
@@ -502,22 +522,27 @@ public class Admin extends VerticalLayout implements View{
 			            placeWindow.setContent(placelayout);  
 			            final TextField coordX = new TextField("Lat coordinate: ");
 			            placelayout.addComponent(coordX);
+			            coordX.setValue(lat.getValue());
 			            final TextField coordY = new TextField("Lng coordinate: ");
 			            placelayout.addComponent(coordY);
 			            final TextField name = new TextField("Place name: ");
+			            coordY.setValue(lng.getValue());
 			            placelayout.addComponent(name);
-			            ComboBox placeType = new ComboBox();
+			            final ComboBox placeType = new ComboBox("Place type: ");
+			            placeType.addItem("dirtpark");
+			            placeType.addItem("skatepark");
+			            placeType.addItem("trail");
+			            placelayout.addComponent(placeType);
 			            
-			            
-			           
-			            
-			            Button saveservcice = new Button("SAVE");
-			            saveservcice.setWidth("90%");
-			            placelayout.addComponent(saveservcice);
+			            			            
+			            Button saveplace = new Button("SAVE");
+			            saveplace.setWidth("90%");
+			            placelayout.addComponent(saveplace);
 			            placelayout.setHeight("25em");
 			            placelayout.setWidth("30em"); 
 			            placeWindow.center();
 			            placeWindow.setResizable(false);
+			            
 			            
 			            placeWindow.addCloseListener(new Window.CloseListener() {
 			    			private static final long serialVersionUID = 1L;
@@ -529,9 +554,12 @@ public class Admin extends VerticalLayout implements View{
 			    		});
 			    		
 			            myUIClass.addWindow(placeWindow);
-			            saveservcice.addClickListener(new Button.ClickListener() {
+			            saveplace.addClickListener(new Button.ClickListener() {
 			    			private static final long serialVersionUID = 1L;
 			    			public void buttonClick(ClickEvent event) {
+			    				PlacesDAO pdao = daoFactory.getPlacesDAO();
+			    				Places place = new Places(name.getValue(),placeType.getValue().toString(),Float.parseFloat(coordX.getValue()),Float.parseFloat(coordY.getValue()));
+			    				pdao.insertPlace(place);
 			    				placeWindow.close();
 			    				saveAdded=false;
 			    		    	
@@ -562,7 +590,7 @@ public class Admin extends VerticalLayout implements View{
 		return ok;
 		}
 		
-	public int days(String day){
+	public int daysToInt(String day){
 		int theday = 0;
 		if(day.equals("Monday")){
 			theday=1;
@@ -587,8 +615,36 @@ public class Admin extends VerticalLayout implements View{
 		}
 		return theday;
 	}
+	private String returnDay(int day){
+		String dayname ="";
+		if(day==1){
+			dayname = "Monday";
+		}
+		if(day==2){
+			dayname = "Tuesday";
+		}
+		if(day==3){
+			dayname ="Wednesday";
+		}
+		if(day==4){
+			dayname = "Thursday";
+		}
+		if(day==5){
+			dayname = "Friday";
+		}
+		if(day==6){
+			dayname = "Saturday";
+		}
+		if(day==7){
+			dayname = "Sunday";
+		}
+		System.out.println("fg: "+dayname);
+		return dayname;
+	}
+	
 	
 	private void createUpdate(Button upd){
+	
 		
 		upd.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -613,7 +669,10 @@ public class Admin extends VerticalLayout implements View{
 			        final OptionGroup serviceTypes = new OptionGroup("Service-types: ");
 			        final DAOFactory daoFactory = DAOFactory.getInstance();
 					final TypeDAO typeDAO = daoFactory.getTypeDAO();
+					final ServicetypeDAO stdao = daoFactory.getServicetypeDAO();
 					List<Type> types = null;
+					List<Servicetype> servTlist = stdao.getAllServiceTypesByService(actualSelectedService);
+					
 					try{	
 						types = typeDAO.getAllType();
 					} catch(RuntimeException ex) {
@@ -622,7 +681,13 @@ public class Admin extends VerticalLayout implements View{
 					for (Type p:types) {
 						serviceTypes.addItem(p.getName());
 					}
-			        serviceTypes.setMultiSelect(true);
+					serviceTypes.setMultiSelect(true);
+					for(Servicetype st:servTlist){
+						System.out.println("type:"+st.getType().getName());
+						serviceTypes.select(st.getType().getName());
+					}
+					
+			        
 			        servicelayout.addComponent(serviceTypes);
 			        final TextField name = new TextField("Institusion name: ");
 			        name.setValue(actualSelectedService.getName());
@@ -647,7 +712,7 @@ public class Admin extends VerticalLayout implements View{
 			        serviceWindow.setResizable(false);
 			        
 			        
-			       /* openhour.addClickListener(new Button.ClickListener() {
+			        openhour.addClickListener(new Button.ClickListener() {
 						private static final long serialVersionUID = 1L;
 						public void buttonClick(ClickEvent event) {
 							final Window openhourWindow = new Window("Save service-type as: ");
@@ -680,16 +745,46 @@ public class Admin extends VerticalLayout implements View{
 				            openhourlayout.addComponent(close);
 				            Button add = new Button("add");
 				            openhourlayout.addComponent(add);
+				            Button remove = new Button("remove");
+				            openhourlayout.addComponent(remove);
+				            
 				            
 				            final Table table = new Table("Time-Table");
+				            table.setSelectable(true);
 				            table.setWidth("90%");
 				            table.setPageLength(7);
-				            table.addContainerProperty("Day		", String.class, null);
+				            table.addContainerProperty("Day", String.class, null);
 				            table.addContainerProperty("Opens",  String.class, null);
 				            table.addContainerProperty("Closes",  String.class, null);
 				            openhourlayout.addComponent(table);
 				            rowIndex = 2;
+				            OpenhoursDAO ohdao = daoFactory.getOpenhoursDAO();
+				            List<Openhours> ohlist = ohdao.getAllOpenhoursByService(actualSelectedService);
+				            for(Openhours o:ohlist){
+				            	days.add(o.getDay());
+	    						openHours.add(o.getOpen().toString());
+	    						closeHours.add(o.getClose().toString());
+				            	table.addItem(new Object[]{returnDay(o.getDay()),o.getOpen().toString(),o.getClose().toString()},rowIndex);
+				            	rowIndex++;
+				            }
 				            
+				            remove.addClickListener(new Button.ClickListener() {								
+								public void buttonClick(ClickEvent event) {
+									
+									String open=  (String) table.getItem(table.getValue()).getItemProperty("Opens").getValue();
+									System.out.println("open: "+open);
+									openHours.remove(open);
+									String close = (String) table.getItem(table.getValue()).getItemProperty("Closes").getValue();
+									System.out.println("close:"+ close);
+									closeHours.remove(close);
+									String day = (String) table.getItem(table.getValue()).getItemProperty("Day").getValue();
+									System.out.println("day: "+day);
+									days.remove((Integer)(daysToInt(day)));
+									table.removeItem(table.getValue()); 
+									
+									
+								}
+							});
 				            add.addClickListener(new Button.ClickListener() {
 				    			private static final long serialVersionUID = 1L;
 				    			public void buttonClick(ClickEvent event) {
@@ -702,7 +797,7 @@ public class Admin extends VerticalLayout implements View{
 				    					String c = close.getValue();
 				    					
 				    					if((timeFormat(o))&&(timeFormat(c))){
-				    						days.add((Integer)days((String) day.getValue()));
+				    						days.add((Integer)daysToInt((String) day.getValue()));
 				    						openHours.add(open.getValue());
 				    						closeHours.add(close.getValue());
 				    						
@@ -733,6 +828,7 @@ public class Admin extends VerticalLayout implements View{
 				            savetable.addClickListener(new Button.ClickListener() {
 				    			private static final long serialVersionUID = 1L;
 				    			public void buttonClick(ClickEvent event) {
+				    				
 				    				System.out.println(days.toString());
 				    				System.out.println(closeHours.toString());
 				    				System.out.println(openHours.toString());
@@ -749,7 +845,7 @@ public class Admin extends VerticalLayout implements View{
 				    			}
 				    		});
 					    }
-					});*/
+					});
 			        
 			        
 			        serviceWindow.addCloseListener(new Window.CloseListener() {
@@ -772,10 +868,20 @@ public class Admin extends VerticalLayout implements View{
 						                  Notification.Type.ERROR_MESSAGE);
 							}
 							else{
-								/*ServicesDAO servDao = daoFactory.getServicesDAO();
+								ServicesDAO servDao = daoFactory.getServicesDAO();
 								ServicetypeDAO servtypeDao = daoFactory.getServicetypeDAO();
-			    				Services serv = new Services(name.getValue(), tel.getValue(), adressField.getValue(), Float.parseFloat(coordX.getValue()), Float.parseFloat(coordY.getValue()));
-			    				servDao.insertService(serv);
+			    				Services serv = servDao.getServiceById(actualSelectedService.getId());
+			    				serv.setName(name.getValue());
+			    				serv.setTelephone(tel.getValue());
+			    				serv.setAdress(adressField.getValue());
+			    				serv.setCoordX(Float.parseFloat(coordX.getValue()));
+			    				serv.setCoordY(Float.parseFloat(coordY.getValue()));
+			    				servDao.updateService(serv);
+			    				
+			    				List<Servicetype> servTlist = stdao.getAllServiceTypesByService(actualSelectedService);
+			    				for(Servicetype st:servTlist){
+			    					stdao.deleteServicetype(st);
+			    				}
 			    				
 			    				String typeString=serviceTypes.getValue().toString();
 			    				typeString =  typeString.replaceAll (" ", "");
@@ -791,18 +897,21 @@ public class Admin extends VerticalLayout implements View{
 			    					System.out.println(st.toString());
 			    					servtypeDao.insertServicetype(st);			    								    					
 			    				}
-			    				
+			    				OpenhoursDAO ohdao = daoFactory.getOpenhoursDAO();
+			    				List<Openhours> ohs = ohdao.getAllOpenhoursByService(actualSelectedService);
+			    				for(Openhours o:ohs){
+			    					ohdao.deleteOpenhour(o);
+			    				}
 			    				
 			    				if(days!=null){
 			    					int len = days.size();
-				    				OpenhoursDAO  ohdao= daoFactory.getOpenhoursDAO();
 				    				for(int i=0;i<len;i++){
 				    					Openhours oh = new Openhours(serv, days.get(i), Integer.parseInt(openHours.get(i)), Integer.parseInt(closeHours.get(i)));
 				    					ohdao.insertOpehour(oh);
 				    				}
 			    				}
 			    				
-			    				*/
+			    				
 			    				serviceWindow.close();
 			    				updateAdded=false;
 							}
@@ -817,6 +926,10 @@ public class Admin extends VerticalLayout implements View{
 		
 
 
+		
+	}
+	
+	public void createDelete(Button del){
 		
 	}
 
