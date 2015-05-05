@@ -13,6 +13,7 @@ public class AdminMessageState extends JavaScriptComponentState {
 	public String serviceName;
 	public Float serviceLat;
 	public Float serviceLng;
+	public String actionType;
 	
 
 }

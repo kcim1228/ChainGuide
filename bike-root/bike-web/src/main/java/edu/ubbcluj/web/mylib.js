@@ -157,6 +157,44 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		map.bestFit();
 	}
 	
+	function createPlace(X,Y,name,id){
+		MQA.withModule('geocoder', function() {
+			 MQA.Geocoder.constructPOI = function(location) {
+			 	 lat = location.latLng.lat,
+	           lng = location.latLng.lng,
+	           p = new MQA.Poi({ lat: lat, lng: lng });
+			 	 p.draggable = false;
+			 	 p.key = id;
+		       p.setRolloverContent(name);
+		       p.setInfoTitleHTML(p.getRolloverContent());
+		       p.setIcon(new MQA.Icon('http://www.wsdot.wa.gov/NR/rdonlyres/91C3220B-A412-4821-9901-B002AD261CF7/28730/i405_TDM_icon_bike8.gif', 30, 30)); 
+		      // map.bestFit();
+		       return p;
+			 };			 
+		    // executes a geocode with an object containing lat/lng properties,
+		    // adds result to the map, and calls showAddress once geocoding is complete
+		    map.reverseGeocodeAndAddLocation(
+		      { lat: X, lng: Y }, showAddress
+		    );		 
+		    // show the address of the geocoded location
+		    function showAddress(data) {		    	
+		    }
+		  });
+		 MQA.Geocoder.processResults = function(response, map) { 
+            if(response && response.info && response.info.statuscode == 0 && response.results) {
+                var locations = response.results[0].locations;
+                    var location = locations[0];
+                    if (location) {
+                   	 
+                    	map.removeShape(map.getByKey(id));
+                    	map.addShape(this.constructPOI(location));
+                    }                         
+              }
+              map.bestFit();
+          };
+		
+	}
+	
 	function createService(X,Y,name,id){
 		MQA.withModule('geocoder', function() {
 			 MQA.Geocoder.constructPOI = function(location) {
@@ -300,11 +338,19 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	                      map.bestFit();
 	                  };
 	              });
-	    	}else{
-	    		//ha intezmenyre vagy parkokra stb.re keresunk ra
+	    	}
+			if(mainSerachType=='service'){
+	    		//ha intezmenyre.re keresunk ra
 	    		createService(serviceLat,serviceLng,serviceName,"actualservice");
 	    		
 	    	}
+			if(mainSerachType=='place'){
+	    		//ha parkokra stb.re keresunk ra
+	    		createPlace(serviceLat,serviceLng,serviceName,"actualplace");
+	    		
+	    	}
+			
+			
 		}
 		if(actionState=="routeAction"){	           
 	        	startPoint = map.getByKey("startPoint"+lastStartIndex);

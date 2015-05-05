@@ -75,7 +75,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private UserMessageState mState = new UserMessageState();
 	Panel jsPanel = new Panel();
 	private Services actualSelectedService;
-	private String actualServiceName;
+	private Places actualSelectedPlace;
+	private String actualSelectedName;
 	private Float actualLat;
 	private Float actualLng;
 	private List<String> allNames =  new ArrayList<String>();
@@ -114,6 +115,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		routeType.setValue("bicycle");
 		searchType.addItem("adress");
 		searchType.addItem("service");
+		searchType.addItem("place");
 		searchType.setValue("adress");
 		
 		
@@ -122,7 +124,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				actionState = "routeAction";
 		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-		    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+		    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 		    			allLat,allLng,allSize,actionState);
 		    		jsPanel.setContent(js);
 				
@@ -156,7 +158,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    		System.out.println(slist.get(i));
 			    	}
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
-			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 			    			allLat,allLng,allSize,actionState);
 			    		jsPanel.setContent(js);
 			    	allSize = -1;
@@ -186,7 +188,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    		System.out.println(slist.get(i));
 			    	}
 			    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 			    			allLat,allLng,allSize,actionState);
 			    		jsPanel.setContent(js);
 			    		allSize = -1;
@@ -229,13 +231,13 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
 		    		if(sv.size()>0){
 		    			actualSelectedService = sv.get(0);
-			    		actualServiceName = actualSelectedService.getName();
+			    		actualSelectedName = actualSelectedService.getName();
 			    		actualLat = actualSelectedService.getCoordX();
 			    		actualLng = actualSelectedService.getCoordY();
 			    		
 						System.out.println(actualSelectedService.toString());
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
-								(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
+								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 								allNames,allLat,allLng,allSize,actionState);
 			    		jsPanel.setContent(js);
 		    		}else{
@@ -245,11 +247,30 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    		}
 		    		
 	    		}
-				else{
+				if(searchType.getValue().equals("adress")){
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
-							(String)searchType.getValue(),actualServiceName,actualLat,actualLng,
+							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 							allNames,allLat,allLng,allSize,actionState);
 		    		jsPanel.setContent(js);
+				}
+				if(searchType.getValue().equals("place")){
+					PlacesDAO pdao = daoFactory.getPlacesDAO();
+					List<Places> plist = pdao.getPlacesByName(search.getValue());
+					if(plist.size()>0){
+						actualSelectedPlace = plist.get(0);
+						actualSelectedName = actualSelectedPlace.getName();
+						actualLat = actualSelectedPlace.getCoordX();
+						actualLng = actualSelectedPlace.getCoordY();
+						
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),
+								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
+								allNames,allLat,allLng,allSize,actionState);
+			    		jsPanel.setContent(js);
+					}else{
+						Notification.show("No such place found!",
+	  			                  "",
+	  			                  Notification.Type.WARNING_MESSAGE);
+					}
 				}
 		    }
 		});

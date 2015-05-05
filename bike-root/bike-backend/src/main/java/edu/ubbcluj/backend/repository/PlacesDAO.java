@@ -10,4 +10,5 @@ public interface PlacesDAO {
 	void updatePlace(Places place);
 	List<Places> getPlacesByName(String PlaceName);
 	List<Places> getAllPlaces();
+	Places getPlaceById(int id);
 }

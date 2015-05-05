@@ -55,6 +55,7 @@ public class Admin extends VerticalLayout implements View{
 	boolean saveAdded;
 	boolean updateAdded;
 	 boolean registerAdded;
+	 boolean deleteAdded = false;
 	 UI myUIClass;
 	 
 	// public static final String NAME = "unloggedUser";
@@ -73,19 +74,22 @@ public class Admin extends VerticalLayout implements View{
 	private TextField typeForSearch = new TextField();
 	private Float actualLat;
 	private Float actualLng;
-	
+	private String actionType = "none";
 	 private int rowIndex ;
 	 private List<Integer> days ;
 	 private List<String> closeHours;
 	 private List<String> openHours;
 	 private ComboBox searchType  = new ComboBox();
 	 private Services actualSelectedService;
-	 private String actualServiceName="none";
+	 private Places actualSelectedPlace;
+	 private String actualSelectedName="none";
 	 Panel jsPanel = new Panel();
 	private Button topsearchButton = new Button("GO");
 	private Panel mapPanel = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
 	 final DAOFactory daoFactory = DAOFactory.getInstance();
+	 private int placeStamp=0;
+	 private int serviceStamp=0;
 	
 	public Admin(UI ui){
 		myUIClass=ui;
@@ -111,18 +115,20 @@ public class Admin extends VerticalLayout implements View{
 		topsearchButton.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
+				actionType = "searchAction";
 				System.out.println("kattintottunk");
 				if(searchType.getValue().equals("service")){
+					serviceStamp = placeStamp+1;
 					ServicesDAO sdao = daoFactory.getServicesDAO();
 		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
 		    		if(sv.size()>0){
 		    			actualSelectedService = sv.get(0);
-			    		actualServiceName = actualSelectedService.getName();
+			    		actualSelectedName = actualSelectedService.getName();
 			    		actualLat = actualSelectedService.getCoordX();
 			    		actualLng = actualSelectedService.getCoordY();
 			    		
 						System.out.println(actualSelectedService.toString());
-						AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+						AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
 			    		jsPanel.setContent(js);
 		    		}else{
     					Notification.show("No such service found!",
@@ -131,9 +137,27 @@ public class Admin extends VerticalLayout implements View{
 		    		}
 		    		
 	    		}
-				else{
-					AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualServiceName,actualLat,actualLng);
+				if(searchType.getValue().equals("adress")){
+					AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
 		    		jsPanel.setContent(js);
+				}
+				if(searchType.getValue().equals("place")){
+					placeStamp = serviceStamp+1;
+					PlacesDAO pdao = daoFactory.getPlacesDAO();
+					List<Places> plist = pdao.getPlacesByName(search.getValue());
+					if(plist.size()>0){
+						actualSelectedPlace = plist.get(0);
+						actualSelectedName = actualSelectedPlace.getName();
+						actualLat = actualSelectedPlace.getCoordX();
+						actualLng = actualSelectedPlace.getCoordY();
+						
+						AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
+			    		jsPanel.setContent(js);
+					}else{
+						Notification.show("No such place found!",
+	  			                  "",
+	  			                  Notification.Type.WARNING_MESSAGE);
+					}
 				}
 		    }
 		});
@@ -141,6 +165,7 @@ public class Admin extends VerticalLayout implements View{
 		topsearchButton.setId("topsearchButton");
 		searchType.addItem("adress");
 		searchType.addItem("service");
+		searchType.addItem("place");
 		searchType.setValue("adress");
 		topgrid.setMargin(true);
 		search.setWidth("70%");
@@ -210,6 +235,7 @@ public class Admin extends VerticalLayout implements View{
 		createLogout(logout);	
 		createSave(save);
 		createUpdate(update);
+		createDelete(delete);
 		
 		
 		AdminMapLoader mp = new AdminMapLoader();
@@ -505,6 +531,9 @@ public class Admin extends VerticalLayout implements View{
 				    				}
 			    				}
 			    				
+			    				actionType = "insertService";
+			    				AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
+					    		jsPanel.setContent(js);
 			    				
 			    				serviceWindow.close();
 			    				saveAdded=false;
@@ -560,6 +589,9 @@ public class Admin extends VerticalLayout implements View{
 			    				PlacesDAO pdao = daoFactory.getPlacesDAO();
 			    				Places place = new Places(name.getValue(),placeType.getValue().toString(),Float.parseFloat(coordX.getValue()),Float.parseFloat(coordY.getValue()));
 			    				pdao.insertPlace(place);
+			    				actionType = "insertPlace";
+			    				AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
+					    		jsPanel.setContent(js);
 			    				placeWindow.close();
 			    				saveAdded=false;
 			    		    	
@@ -644,11 +676,83 @@ public class Admin extends VerticalLayout implements View{
 	
 	
 	private void createUpdate(Button upd){
+		upd.addClickListener(new Button.ClickListener() {			
+			public void buttonClick(ClickEvent event) {
+				if(serviceStamp>placeStamp){
+					serviceUpdate();
+				}
+				if(placeStamp>serviceStamp){
+					placeUpdate();
+				}
+				
+			}
+		});
+	}
 	
+	private void placeUpdate(){
 		
-		upd.addClickListener(new Button.ClickListener() {
+		final Window placeWindow = new Window("Update place: ");
+        FormLayout placelayout = new FormLayout();
+        //flayout.setMargin(true);
+        placeWindow.setContent(placelayout);  
+        final TextField coordX = new TextField("Lat coordinate: ");
+        placelayout.addComponent(coordX);
+        coordX.setValue(actualSelectedPlace.getCoordX().toString());
+        final TextField coordY = new TextField("Lng coordinate: ");
+        placelayout.addComponent(coordY);
+        final TextField name = new TextField("Place name: ");
+        coordY.setValue(actualSelectedPlace.getCoordY().toString());
+        placelayout.addComponent(name);
+        name.setValue(actualSelectedName);
+        final ComboBox placeType = new ComboBox("Place type: ");
+        placeType.addItem("dirtpark");
+        placeType.addItem("skatepark");
+        placeType.addItem("trail");
+        placeType.setValue(actualSelectedPlace.getType());
+        placelayout.addComponent(placeType);
+        
+        			            
+        Button saveplace = new Button("UPDATE");
+        saveplace.setWidth("90%");
+        placelayout.addComponent(saveplace);
+        placelayout.setHeight("25em");
+        placelayout.setWidth("30em"); 
+        placeWindow.center();
+        placeWindow.setResizable(false);
+        
+        
+        placeWindow.addCloseListener(new Window.CloseListener() {
+			private static final long serialVersionUID = 1L;
+
+			public void windowClose(CloseEvent e) {					
+				placeWindow.close();
+				saveAdded = false;
+			}
+		});
+		
+        myUIClass.addWindow(placeWindow);
+        saveplace.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
+				PlacesDAO pdao = daoFactory.getPlacesDAO();
+				//Places place = new Places(name.getValue(),placeType.getValue().toString(),Float.parseFloat(coordX.getValue()),Float.parseFloat(coordY.getValue()));
+				//pdao.insertPlace(place);
+				Places place = pdao.getPlaceById(actualSelectedPlace.getId());
+				place.setName(name.getValue());
+				place.setCoordX(Float.parseFloat(coordX.getValue()));
+				place.setCoordY(Float.parseFloat(coordY.getValue()));
+				place.setType((String) placeType.getValue());
+				pdao.updatePlace(place);
+				placeWindow.close();
+				saveAdded=false;
+		    	
+		    }
+		});
+	}
+	
+	
+	
+	private void serviceUpdate(){
 				if(actualSelectedService==null){
 					Notification.show("No service selected!",
 			                  "You should select a service first.",
@@ -920,17 +1024,119 @@ public class Admin extends VerticalLayout implements View{
 					});
 				}
 				
-		    }
-		});
-		
+
 		
 
 
 		
 	}
 	
-	public void createDelete(Button del){
-		
+	public void createDelete(final Button del){
+		del.addClickListener(new Button.ClickListener() {		
+			public void buttonClick(ClickEvent event) {
+				
+				if(placeStamp<serviceStamp){
+					actionType = "deleteService";					
+					final Window deleteserviceW = new Window("Delete service");
+					FormLayout flayout = new FormLayout();
+					Label text = new Label("Are you sure about deleting the "+actualSelectedName+" service?");
+					Button yes = new Button("YES");
+					Button no = new Button("NO");
+					flayout.addComponent(text);
+					flayout.addComponent(yes);
+					flayout.addComponent(no);
+					deleteserviceW.setContent(flayout);
+					deleteserviceW.center();
+					deleteserviceW.setResizable(false);
+					if(deleteAdded==false){
+						myUIClass.addWindow(deleteserviceW);
+						deleteAdded = true;
+					}
+					no.addClickListener(new Button.ClickListener() {					
+						public void buttonClick(ClickEvent event) {
+							deleteserviceW.close();
+		    				deleteAdded = false;	
+						}
+					});
+					yes.addClickListener(new Button.ClickListener() {					
+						public void buttonClick(ClickEvent event) {
+							ServicesDAO sdao = daoFactory.getServicesDAO();
+							ServicetypeDAO stdao = daoFactory.getServicetypeDAO();
+							List<Servicetype> servTlist = stdao.getAllServiceTypesByService(actualSelectedService);
+		    				for(Servicetype st:servTlist){
+		    					stdao.deleteServicetype(st);
+		    				}
+		    				OpenhoursDAO ohdao = daoFactory.getOpenhoursDAO();
+		    				List<Openhours> ohs = ohdao.getAllOpenhoursByService(actualSelectedService);
+		    				for(Openhours o:ohs){
+		    					ohdao.deleteOpenhour(o);
+		    				}
+		    				sdao.deleteService(actualSelectedService);
+		    				AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
+				    		jsPanel.setContent(js);
+							deleteserviceW.close();
+		    				deleteAdded = false;	
+						}
+					});
+					
+					deleteserviceW.addCloseListener(new Window.CloseListener() {
+		    			private static final long serialVersionUID = 1L;
+		    			public void windowClose(CloseEvent e) {					
+		    				deleteserviceW.close();
+		    				deleteAdded = false;
+		    			}
+		    		});
+							
+					
+				}
+				if(placeStamp>serviceStamp){
+					actionType = "deletePlace";
+					final Window deletesplaceW = new Window("Delete place");
+					FormLayout flayout = new FormLayout();
+					Label text = new Label("Are you sure about deleting the "+actualSelectedName+" place?");
+					Button yes = new Button("YES");
+					Button no = new Button("NO");
+					flayout.addComponent(text);
+					flayout.addComponent(yes);
+					flayout.addComponent(no);
+					deletesplaceW.setContent(flayout);
+					deletesplaceW.center();
+					deletesplaceW.setResizable(false);
+					if(deleteAdded==false){
+						myUIClass.addWindow(deletesplaceW);
+						deleteAdded = true;
+					}
+					no.addClickListener(new Button.ClickListener() {					
+						public void buttonClick(ClickEvent event) {
+							deletesplaceW.close();
+		    				deleteAdded = false;	
+						}
+					});
+					yes.addClickListener(new Button.ClickListener() {					
+						public void buttonClick(ClickEvent event) {
+							PlacesDAO pdao = daoFactory.getPlacesDAO();
+		    				pdao.deletePlace(actualSelectedPlace);
+		    				AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
+				    		jsPanel.setContent(js);
+							deletesplaceW.close();
+		    				deleteAdded = false;	
+						}
+					});
+					
+					deletesplaceW.addCloseListener(new Window.CloseListener() {
+		    			private static final long serialVersionUID = 1L;
+		    			public void windowClose(CloseEvent e) {					
+		    				deletesplaceW.close();
+		    				deleteAdded = false;
+		    			}
+		    		});
+							
+					
+				}
+				
+				
+			}
+		});
 	}
 
 }

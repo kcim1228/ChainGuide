@@ -10,6 +10,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import edu.ubbcluj.backend.model.Places;
+import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.repository.PlacesDAO;
 
 @SuppressWarnings("rawtypes")
@@ -131,6 +132,32 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 	
 		
 		return placesList;
+	}
+
+	@Override
+	public Places getPlaceById(int id) {
+		Places place = new Places();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Places.class).add(Restrictions.eq("id",id));
+			place = (Places) this.getQueryResult(c).get(0);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Place by ID selection failed!",ex);			
+		}
+	
+		
+		return place;
 	}
 
 }
