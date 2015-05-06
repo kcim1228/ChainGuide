@@ -199,22 +199,35 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    		for(int i=0;i<ohs.size();i++){
 		    			openServ.add(ohs.get(i).getServices());
 		    		}
-		    		slist.retainAll(openServ);//intersection(slist, openServ);
+		    		//slist.retainAll(openServ);//intersection(slist, openServ);
 		    		
 		    		System.out.println("slist: "+slist.toString());
 		    		System.out.println("openserv"+openServ.toString());
-		   
-		    		/*allSize = slist.size();
+		    		List<Integer> openlist = new ArrayList();
+		    		List<Integer> alllist = new ArrayList();	
+		    		for(Services s:openServ){
+		    			openlist.add(s.getId());
+		    		}
+		    		for(Services s:slist){
+		    			alllist.add(s.getId());
+		    		}
+		    		System.out.println("open: "+ openlist.toString());
+		    		System.out.println("all: "+ alllist.toString());
+		    		
+		    		openlist.retainAll(alllist);
+		    		System.out.println("utana: "+openlist);
+		    		
+		    		allSize = openlist.size();
 		    		for(int i=0;i<allSize;i++){
-			    		allNames.add(intersect.get(i).getName());
-			    		allLat.add(intersect.get(i).getCoordX());
-			    		allLng.add(intersect.get(i).getCoordY());
+			    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+			    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+			    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
 			    	}
 		    		JsConnecter js = new JsConnecter((String) routeType.getValue(),
-			    			(String)searchType.getValue(),actualServiceName,actualLat,actualLng,allNames,
+			    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 			    			allLat,allLng,allSize,actionState);
 			    		jsPanel.setContent(js);
-			    		allSize = -1;*/
+			    		allSize = -1;
 		    	}
 
 		    	
