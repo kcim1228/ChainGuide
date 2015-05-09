@@ -133,6 +133,58 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 		
 		return messageList;
 	}
+	
+	@Override
+	public List<Messages> getAllUnreadMessagesBySender(Users u) {
+		List<Messages> messageList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Messages.class).add(Restrictions.eq("usersBySenderId",u)).add(Restrictions.eq("flag",0));
+			messageList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Unread-Messages selection by senderId failed!",ex);			
+		}
+	
+		
+		return messageList;
+	}
+	
+	@Override
+	public List<Messages> getAllReadMessagesBySender(Users u) {
+		List<Messages> messageList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Messages.class).add(Restrictions.eq("usersBySenderId",u)).add(Restrictions.eq("flag",1));
+			messageList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Read- Messages selection by senderId failed!",ex);			
+		}
+	
+		
+		return messageList;
+	}
 
 	
 

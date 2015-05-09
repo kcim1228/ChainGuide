@@ -512,6 +512,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				    		//getUI().getNavigator().navigateTo(UnLoggedUser.NAME);
 				    		if(user.getUsertype().equals("user")){
 				    			myUIClass.getSession().setAttribute("userType", "user");
+				    			getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
 			    				getUI().getNavigator().navigateTo("loggedUser");
 			    				
 			    				// Save to VaadinServiceSession
@@ -521,6 +522,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    				
 			    			}else{
 			    				myUIClass.getSession().setAttribute("userType", "admin");
+			    				getUI().getNavigator().addView("admin", new Admin(myUIClass,user));
 			    				getUI().getNavigator().navigateTo("admin");
 			    				
 			    			}
@@ -641,6 +643,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    		String hashed = passwordHasher(pass1.getValue());
 			    		Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
 			    		usersDao.insertUser(user);
+			    		getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
 			    		getUI().getNavigator().navigateTo("loggedUser");
 		    		}
 		    		

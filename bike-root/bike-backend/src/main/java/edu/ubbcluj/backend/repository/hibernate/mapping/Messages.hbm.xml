@@ -20,5 +20,8 @@
         <property name="date" type="date">
             <column name="date" length="10" />
         </property>
+        <property name="flag" type="int">
+            <column name="flag"  />
+        </property>
     </class>
 </hibernate-mapping>

@@ -28,8 +28,8 @@ public class Home extends UI {
 		Navigator navigator = new Navigator(this, view);
 		navigator.addView("", new UnLoggedUser(this));
 		navigator.addView("unloggedUser", new UnLoggedUser(this));
-		navigator.addView("loggedUser", new LoggedUser());
-		navigator.addView("admin", new Admin(this));
+		//navigator.addView("loggedUser", new LoggedUser(this));
+		//navigator.addView("admin", new Admin(this));
 		
 		
 		

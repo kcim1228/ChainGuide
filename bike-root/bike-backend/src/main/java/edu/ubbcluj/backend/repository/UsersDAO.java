@@ -11,5 +11,6 @@ public interface UsersDAO {
 	List<Users> getAllUsers();
 	Users getUserByName(String name);
 	List<Users> getUsersByName(String name);
+	List<Users> getUsersByType(String type);
 
 }

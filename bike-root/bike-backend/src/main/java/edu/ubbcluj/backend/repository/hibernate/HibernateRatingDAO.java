@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.ubbcluj.backend.model.Rating;
 import edu.ubbcluj.backend.model.Services;
+import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.RatingDAO;
 
 @SuppressWarnings("rawtypes")
@@ -107,6 +108,32 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 	
 		
 		return ratingList;
+	}
+	
+	@Override
+	public Rating getRatingByUserAndService(Users user, Services serv){
+		Rating rating = new Rating();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Rating.class).add(Restrictions.eq("users",user)).add(Restrictions.eq("services",serv));
+			rating = (Rating) this.getQueryResult(c).get(0);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Rating by service and user selection failed!",ex);			
+		}
+	
+		
+		return rating;
 	}
 
 }

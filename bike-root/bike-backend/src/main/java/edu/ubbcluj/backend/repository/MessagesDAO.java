@@ -11,6 +11,8 @@ public interface MessagesDAO {
 	void updateMessage(Messages m);
 	List<Messages> getAllMessagesByReceiver(Users u);
 	List<Messages> getAllMessagesBySender(Users u);
+	List<Messages> getAllUnreadMessagesBySender(Users u);
+	List<Messages> getAllReadMessagesBySender(Users u);
 	
 
 }

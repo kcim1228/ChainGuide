@@ -162,5 +162,31 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		
 		return userList;
 	}
+	
+	@Override
+	public List<Users> getUsersByType(String type) {
+		List<Users> userList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Users.class).add(Restrictions.eq("usertype",type));
+			userList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException("Users selection by type failed!",ex);			
+		}
+	
+		
+		return userList;
+	}
 
 }

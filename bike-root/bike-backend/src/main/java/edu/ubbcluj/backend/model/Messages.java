@@ -16,6 +16,7 @@ public class Messages implements java.io.Serializable {
 	private Users senderId;
 	private String body;
 	private Date date;
+	private int flag;
 
 	
 	public Messages() {
@@ -26,20 +27,22 @@ public class Messages implements java.io.Serializable {
 	}
 
 	public Messages(int id, Users usersByReceiverId, Users usersBySenderId,
-			String body, Date date) {
+			String body, Date date,int flag) {
 		this.id = id;
 		this.receiverId = usersByReceiverId;
 		this.senderId = usersBySenderId;
 		this.body = body;
 		this.date = date;
+		this.flag = flag;
 	}
 	
 	public Messages(Users usersByReceiverId, Users usersBySenderId,
-			String body, Date date) {
+			String body, Date date,int flag) {
 		this.receiverId = usersByReceiverId;
 		this.senderId = usersBySenderId;
 		this.body = body;
 		this.date = date;
+		this.flag = flag;
 	}
 
 	public int getId() {
@@ -81,10 +84,16 @@ public class Messages implements java.io.Serializable {
 	public void setDate(Date date) {
 		this.date = date;
 	}
+	public int getFlag(){
+		return this.flag;
+	}
+	public void setFlag(int flag){
+		this.flag = flag;
+	}
 	
 	public String toString() {
 		return "Users [id=" + id + ", receiverId=" + receiverId.getId() + ", senderId=" + senderId.getId()
-				+", body= "+ body + ", date=" + date+ "]";
+				+", body= "+ body + ", date=" + date+ ", flag= "+flag+"]";
 	}
 
 }

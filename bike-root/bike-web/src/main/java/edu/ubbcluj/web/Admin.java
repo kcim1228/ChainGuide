@@ -1,7 +1,10 @@
 package edu.ubbcluj.web;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.vaadin.data.Property;
@@ -36,15 +39,19 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Window.CloseEvent;
 
+import edu.ubbcluj.backend.model.Messages;
 import edu.ubbcluj.backend.model.Openhours;
 import edu.ubbcluj.backend.model.Places;
+import edu.ubbcluj.backend.model.Rating;
 import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Servicetype;
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.DAOFactory;
+import edu.ubbcluj.backend.repository.MessagesDAO;
 import edu.ubbcluj.backend.repository.OpenhoursDAO;
 import edu.ubbcluj.backend.repository.PlacesDAO;
+import edu.ubbcluj.backend.repository.RatingDAO;
 import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.ServicetypeDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
@@ -55,6 +62,7 @@ public class Admin extends VerticalLayout implements View{
 	boolean saveAdded;
 	boolean updateAdded;
 	 boolean registerAdded;
+	 boolean messageAdded;
 	 boolean deleteAdded = false;
 	 UI myUIClass;
 	 
@@ -90,9 +98,12 @@ public class Admin extends VerticalLayout implements View{
 	 final DAOFactory daoFactory = DAOFactory.getInstance();
 	 private int placeStamp=0;
 	 private int serviceStamp=0;
+	 private Button message = new Button("Messages");
+	 private Users thisAdmin;
 	
-	public Admin(UI ui){
+	public Admin(UI ui, Users u){
 		myUIClass=ui;
+		thisAdmin = u;
 	}
 
 	public void enter(ViewChangeEvent event) {
@@ -206,6 +217,7 @@ public class Admin extends VerticalLayout implements View{
 		actiongrid.addComponent(jsPanel,0,6);
 		typeForSearch.setValue("adress");
 		typeForSearch.setId("typeForSearch");
+		actiongrid.addComponent(message,0,8);
 	
 		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
@@ -236,7 +248,12 @@ public class Admin extends VerticalLayout implements View{
 		createSave(save);
 		createUpdate(update);
 		createDelete(delete);
-		
+		message.addClickListener(new Button.ClickListener() {			
+			public void buttonClick(ClickEvent event) {
+				createMessage();
+				
+			}
+		});
 		
 		AdminMapLoader mp = new AdminMapLoader();
 		mapPanel.setContent(mp);
@@ -1071,6 +1088,11 @@ public class Admin extends VerticalLayout implements View{
 		    				for(Openhours o:ohs){
 		    					ohdao.deleteOpenhour(o);
 		    				}
+		    				RatingDAO rdao = daoFactory.getRatingDAO();
+		    				List<Rating> rlist = rdao.getAllRatingByService(actualSelectedService);
+		    				for(Rating r:rlist){
+		    					rdao.deleteRating(r);
+		    				}
 		    				sdao.deleteService(actualSelectedService);
 		    				AdminJsConnecter js = new AdminJsConnecter((String)searchType.getValue(),actualSelectedName,actualLat,actualLng,actionType);
 				    		jsPanel.setContent(js);
@@ -1138,5 +1160,38 @@ public class Admin extends VerticalLayout implements View{
 			}
 		});
 	}
+	
+	private void createMessage(){
+		final Window subWindow = new Window("Messages");
+        subWindow.center();
+        subWindow.setResizable(false);
+        subWindow.setWidth("40em");
+        subWindow.setHeight("30em");
+       FormLayout form = new FormLayout();
+       subWindow.setContent(form);
+       
+       if(messageAdded==false){
+   		//addWindow(subWindow);
+	   		messageAdded=true;
+	   		myUIClass.addWindow(subWindow);  		
+   		}
+       subWindow.addCloseListener(new Window.CloseListener() {
+			private static final long serialVersionUID = 1L;
+			public void windowClose(CloseEvent e) {					
+				subWindow.close();
+				messageAdded=false;
+			}
+		});
+       MessagesDAO mdao = daoFactory.getMessagesDAO();
+       List<Messages> unread = mdao.getAllUnreadMessagesBySender(thisAdmin);
+       List<Messages> read = mdao.getAllReadMessagesBySender(thisAdmin);
+       
+       Table table = new Table();
+       form.addComponent(table);
+       
+       
+       
+	}	
+
 
 }
