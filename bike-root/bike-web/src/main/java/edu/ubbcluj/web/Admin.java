@@ -11,6 +11,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -1183,15 +1184,99 @@ public class Admin extends VerticalLayout implements View{
 			}
 		});
        MessagesDAO mdao = daoFactory.getMessagesDAO();
-       List<Messages> unread = mdao.getAllUnreadMessagesBySender(thisAdmin);
-       List<Messages> read = mdao.getAllReadMessagesBySender(thisAdmin);
+       List<Messages> mess = mdao.getAllMessagesByReceiver(thisAdmin);
+       System.out.println(mess.toString());
        
-       Table table = new Table();
+       final Table table = new Table();
        form.addComponent(table);
+       table.setPageLength(7);
+       table.setWidth("90%");
+       table.setSelectable(true);
+       table.addContainerProperty("New", String.class, null);
+       table.addContainerProperty("From", String.class, null );
+       table.addContainerProperty("Date", String.class, null );
+       rowIndex = 2;
+       final List<Messages> sorted = new ArrayList<Messages>();
+       for(int i=0;i<mess.size();i++){
+    	   if(mess.get(i).getFlag()==0){
+    		   Users sender = mess.get(i).getUsersBySenderId();
+        	   String date = mess.get(i).getDate().toString();
+        	   table.addItem(new Object[]{"*",sender.getFirstname()+" "+sender.getLastname(),date},rowIndex);
+        	   sorted.add(mess.get(i));
+        	   rowIndex++;
+    	   }
+       }
+       for(int i=0;i<mess.size();i++){
+    	   	if(mess.get(i).getFlag()==1){
+    	   		Users sender = mess.get(i).getUsersBySenderId();
+    	    	   String date = mess.get(i).getDate().toString();
+    	    	   table.addItem(new Object[]{"-",sender.getFirstname()+" "+sender.getLastname(),date},rowIndex);
+            	   sorted.add(mess.get(i));
+    	    	   rowIndex++;
+    	   	}
+       }
+       table.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+    	    public void itemClick(ItemClickEvent itemClickEvent) {
+    	    	final int index = (Integer) itemClickEvent.getItemId()-2;
+    	        System.out.println(sorted.get(index).toString());
+    	        Messages thisMess = sorted.get(index);
+    	        thisMess.setFlag(1);
+    	        final MessagesDAO mdao = daoFactory.getMessagesDAO();
+    	        mdao.updateMessage(thisMess);
+    	        final Window viewMess = new Window("View message:");
+    	        viewMess.center();
+    	        viewMess.setHeight("20em");
+    	        viewMess.setWidth("30em");
+    	        viewMess.addCloseListener(new Window.CloseListener() {
+    				private static final long serialVersionUID = 1L;
+    				public void windowClose(CloseEvent e) {	
+    					table.getItem(index+2).getItemProperty("New").setValue("-");
+    					viewMess.close();
+    				}
+    			});
+    	        myUIClass.addWindow(viewMess);
+    	        FormLayout messLayout = new FormLayout();
+    	        viewMess.setContent(messLayout);
+    	        Users sender = sorted.get(index).getUsersBySenderId();
+    	        Label from = new Label("From: "+sender.getFirstname()+" "+sender.getLastname());
+    	        Label date = new Label("Date: "+sorted.get(index).getDate().toString());
+    	        Label body = new Label("Body: "+sorted.get(index).getBody());
+    	        Button deleteMess = new Button("DELETE");
+    	        messLayout.addComponent(from);
+    	        messLayout.addComponent(date);
+    	        messLayout.addComponent(body);
+    	        messLayout.addComponent(deleteMess);
+    	        
+    	        deleteMess.addClickListener(new Button.ClickListener() {				
+					public void buttonClick(ClickEvent event) {
+						mdao.deleteMessage(sorted.get(index));
+						table.removeItem(index+2);
+						table.refreshRowCache();
+						sorted.remove(index);
+						viewMess.close();
+					}
+				});
+    	        
+    	    }
+    	});
        
        
        
 	}	
-
+	
+	private void refreshMessages(List<Messages> sorted, Table table){
+		System.out.println(sorted.toString());
+		table.removeAllItems();
+		rowIndex = 2;
+		for(int i=0;i<sorted.size();i++){
+			String read = "-";
+			Users sender = sorted.get(i).getUsersBySenderId();
+			if(sorted.get(i).getFlag()==0){
+				read = "*";
+			}
+			table.addItem(new Object[]{read,sender.getFirstname()+" "+sender.getLastname(),sorted.get(i).getDate().toString()},rowIndex);
+			rowIndex++;
+		}
+	}
 
 }

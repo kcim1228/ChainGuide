@@ -8,19 +8,19 @@
             <column name="id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="usersByReceiverId" class="edu.ubbcluj.backend.model.Users" fetch="select">
+        <many-to-one name="usersByReceiverId" class="edu.ubbcluj.backend.model.Users" fetch="select" lazy="false">
             <column name="receiverId" />
         </many-to-one>
-        <many-to-one name="usersBySenderId" class="edu.ubbcluj.backend.model.Users" fetch="select">
+        <many-to-one name="usersBySenderId" class="edu.ubbcluj.backend.model.Users" fetch="select" lazy="false">
             <column name="senderId" />
         </many-to-one>
-        <property name="body" type="string">
+        <property name="body" type="string" lazy="false">
             <column name="body" length="65535" />
         </property>
-        <property name="date" type="date">
+        <property name="date" type="date" lazy="false">
             <column name="date" length="10" />
         </property>
-        <property name="flag" type="int">
+        <property name="flag" type="int" lazy="false">
             <column name="flag"  />
         </property>
     </class>
