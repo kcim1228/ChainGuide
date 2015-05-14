@@ -1,0 +1,158 @@
+%!TEX root = minta_dolgozat.tex
+
+
+
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\chapter{Felhasznált technológiák}\label{ch:FELH}
+
+\begin{osszefoglal}
+	Ebben a fejezetben a felhasznált tecnológiák kerülnek a középpontba. Szó lesz a \textit{Vaadin}\cite{Vaadin} és \textit{Hibernate}\cite{Hibernate} keretrendszerekről,  a \textit{MapQuest}\cite{MapQuestJsApi} és \textit{OpenCycleMap}\cite{OpenCycleMap} API-król illetve az \textit{Abstract Factory} tervezési mintáról.
+\end{osszefoglal}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Vaadin}\label{sec:FELH:va}
+
+\par Az alkalmazás webes felületét a \textit{Vaadin} keretrendszer segítségével valósítottuk meg. Ez egy nyílt forráskódú webalkalmazás-keretrendszer, amellyel interaktív web tartalom készíthető \textit{Java} nyelven és a hagyományos \textit{GUI} (grafikus felhasználói felület) fejlesztéshez hasonlítható. 
+\par A \textit{Vaadin} megjelenítésre a \textit{Google Web Toolkit}-et (AJAX fejlesztői eszköztár) használja, míg a szerver oldal alapját a \textit{Java Servlet}  (Java objektum, mely \textit{HTTP}\footnote{Hypertext Transfer Protocol} kérést dolgoz fel és \textit{HTTP} választ generál) technológia képezi. Maga a kódolás \textit{Java} nyelven történik, a \textit{GWT}(Google Web Toolkit) ezt \textit{Javascript} forráskódra alakítja át, ami a böngészőben kerül majd futtatásra. A \textit{GWT} csupán egy vékony megjelenítési réteg a Vaadin esetében, mivel az alkalmazás logika a szerver oldalon helyezkedik el teljes mértékben. A kommunikációra \textit{AJAX} (Asynchronous JavaScript and XML) technológiát használ, míg az adatok \textit{JSON} (Javascript Object Notation) szabvány szerint vannak kódolva.
+\par A\textit{ Vaadin} előnyére szolgál az, hogy komponensei kiegészíthetők \textit{GWT}-Widgetekkel illetve lehetőség van  \textit{CSS}-el (Cascading Style Sheets) való formázásra is, ami elengedhetetlen egy felhasználóbarát felület megalkotásában. Mivel az \textit{Eclipse} rendelkezik megfelelő beépített \textit{Vaadin} modulokkal, ez is a fejlesztés javára szolgált. A \textit{GWT} fordítónak köszönhetően a legtöbb modern böngészővel kompatibilis. Mivel ezen keretrendszer esetében szükség esetén összekapcsolható a \textit{Java} a\textit{ Javascript} kóddal, a \textit{Vaadin} ebből a szemszögből is egy helyes választásnak bizonyult. A Chain-Guide alkalmazás keretén belül így könnyebben hozzá tudtunk férni a térképszolgáltató függvényeihez a \textit{MapQuest Javascipt API}-ján keresztül. 
+\par A \textit{Vaadin 7} és az annál újabb verziók  (a megvalósított webalkalmazás a 7.2.4-es verziót használja) a következő webböngészőkkel kompatibilisek: 
+\par
+\begin{itemize}
+  \item Google Chrome 23 vagy újabb
+  \item Internet Explorer 8 vagy újabb
+  \item Mozilla Firefox 17 vagy újabb
+  \item Opera 12 vagy újabb
+  \item Safari 6 vagy újabb 
+\end{itemize}
+
+\par 
+\textcolor{red}{Ide jon majd a : technikai leírás a Vaadin keretrendszer felépítéséről (főképp azokról a részekről, melyeketfelhasználtál a projektben), alkalmazás felépítéséről, életciklusáról (illetve amit még a projekt szempontjából fontos tudnivalónak tartasz a Vaadinnal kapcsolatban)... }
+
+%
+\section{Hibernate}\label{sec:FELH:hi}
+
+\par Az alkalmazás backend része a \textit{Hibernate} programkönyvtár segítségével lett kivitelezve. A \textit{Hibernate} egy \textit{ORM} (objektum-relációs leképezést megvalósító) keretrendszer \textit{Java} platformra, melynek legfőbb célja az adatbázissal történő kommunikáció leegyszerűsítése. Segítségével az adatbázisban lévő rekordokat objektumként kezelhetjük és állapotmegörző módon adattáblákban tárolhatjuk. Legfőbb jellemzője ezek mellett, hogy adatbázis függetlenséget biztosít.
+\par A \textit{HQL} (Hibernate Query Language) a \textit{Hibernate} saját adatlekérdező nyelve, mely lehetőséget teremt lekérdezések írására és futtatására (\textit{SQL} tudás nélkül). A keretrendszer ezen \textit{HQL} lekérdezésekből generálja az adatbáziskezelő rendszer számára megfelelő \textit{SQL} (Structured Query Language) lekérdezéseket. Így, a fejlesztők előnyére, megkíméli őket az eredményhalmazok objektumokra történő konverziójától.
+\par Az adattáblák és osztályok közti leképezéseket vagy mappinget \textit{XML} (Extensible Markup Language), esetleg \textit{Java} annotációk segítségével valósítja meg. 
+
+\lstset{language=XML}
+\begin{lstlisting}
+
+<hibernate-mapping>
+    <class name="edu.ubbcluj.backend.model.Rating" table="rating" catalog="bike" optimistic-lock="version">
+        <id name="id" type="int">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" fetch="select">
+            <column name="serviceId" />
+        </many-to-one>
+        <many-to-one name="users" class="edu.ubbcluj.backend.model.Users" fetch="select">
+            <column name="userId" />
+        </many-to-one>
+        <property name="rate" type="java.lang.Integer">
+            <column name="rate" />
+        </property> }
+    </class>
+</hibernate-mapping>
+\end{lstlisting}
+
+\par 
+Az fenti példában a Rating.hbm (Hibernate Mapping File) állomány tartalma látható. Ez az XML file az Értékelés(Rating) adattábala és a neki megfelelő modell osztály között teremti meg a kapcsolatot. A {\tt <generator class="identity" /> } tag az egyedi azonosító generálására szolgál, amely az {\tt id} nevezetű, elsődleges kulcs típusú adattagot jellemzi. A {\tt many-to-one} tag név az egy-a-többhöz kapcsolat leírására szolgál míg a {\tt  property} név alatt az olyan tábla adattagokat adjuk meg, melyek nem állnak kapcsolatban más táblák mezőivel.
+
+\par A beépített ,,dirty check”\footnote{\textit{Hibernate} jellemzője, a keretrendszer leellenőrzi, hogy egy adott objektumon történt-e változás vagy sem, és ha igen, csak akkor hajtja vérgre a frissítést(update)} is pozitívumként emelhető ki, hiszen megakadályozza a felesleges beszúrásokat az adatbázisba.A \textit{Hibernate} esetében két féle betöltési módról beszélhetünk: lusta betöltés\footnote{lazy loading} és mohó betöltés. Lusta betöltés esetén csak akkor fut le a  lekérdezés, amikor először hivatkozunk az objektumra, míg a mohó esetén az már az objektum betöltésekor. Átlátható módon biztosítja a \textit{Plain Old Java Object}-ek (POJO) perzisztenciáját a felhasználók számára (az egyetlen követelmény, hogy az osztálynak legyen egy argumentum nélküli konstruktora).
+%
+\section{Apache Maven}\label{sec:FELH:am}
+
+A projekt moduljainak egyszerű menedzselését a \textit{Maven} szoftver biztosította, melynek legfőbb célja az összeállítási (build)  folyamatok automatizálása. Előnyére szolgál, hogy dinamikusan is le tud tölteni komponenseket, szoftver-csomagokat, ha szükséges. Egy \textit{XML} file (POM) segítségével adhatjuk meg, hogyan legyen a projekt felépítve, milyen sorrendben legyenek buildelve a különböző modulok, illetve, hogy milyen külső függőségeket, pluginokat, komponenseket használjon. A buildelés szabványosítása által a tervezési minták terjesztése a célja.
+\par Az alábbi példában egy részlet látható az alkalmazás backend\footnote{adat elérési réteg} részének a  pom.xml állományából. A részletben függőségként a textit{Hibernate} és textit{MySQL} konnektorok láthatóak, amiket az adatbázissal történő kommunikációra használ a rendszer.
+\lstset{language=XML}
+\begin{lstlisting}
+<dependencies>
+  	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-core</artifactId>
+		<version>4.3.8.Final</version>
+	</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.34</version>
+		</dependency>
+  </dependencies>
+\end{lstlisting}
+
+\par Az összeállítási (build) folyamat automatizálására az alábbi példa emelhető ki. A példában a {\tt <build> tag}-ek közé a \textit{CSS} állományok automatikus lefordítását és frissítését kérjük a rendszertől a projekt build-elésével együtt.
+\lstset{language=XML}
+\begin{lstlisting}
+	<build>
+		<finalName>bike-web</finalName>
+		<plugins>
+			<plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>7.2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>resources</goal>
+                            <goal>update-theme</goal>
+                            <goal>compile-theme</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+\end{lstlisting}
+
+
+%
+\section{MapQuest}\label{sec:FELH:mq}
+
+Az alkalmazás esetében a térképpel kapcsolatos informácókat és függvényeket a \textit{MapQuest} szolgáltatta. Ez egy amerikai ingyenes online térkép szolgáltatás, mely hazánkban is elérhető, és a webes desktop és mobil alkalmazásokat is egyaránt támogatja. A különböző API-k és szolgáltatásai révén egyszerűen integrálható. A fejlesztők számára szükséges egy \textit{AppKey} (Aplication Key), egy egyedi kulcs, mely által a \textit{MapQuest} szerverei azonosítani tudják az alkalmazásunkat, annak érdekében, hogy helyes válaszokat térítsenek vissza kéréseinkre. Ez ingyenesen igényelhető regisztráció\footnote{http://developer.mapquest.com/fr/web/info/account/app-keys} által. A \textit{MapQuest}  út-, közlekedés- és forgalommal kapcsolatos információit alapértelmezetten az \textit{OpenStreetMap} (szabadon szerkeszthető és felhasználható térkép) szolgáltatja. E térkép kerékpár rétege az \textit{OpenCycleMap}, amely biciklis szempontból hasznos informácókat szolgáltat világszerte, beleértve Romániát is. 
+
+\par A {\tt javacript} állományok  integrációjáról (\textit{Vaadinba} való beágyazásáról) a \textcolor{red}{referencia oda!!} részben található egy részletesebb leírás.  Röviden összefoglalva a  \textit{MapQuestJavascript API}-t nem szükséges letölteni mint különálló {\tt javascript} állomány, csupán az elérési útvonalat kell megadni  {\tt javasciptes annotáció } segítségével (az {\tt AppKey} -el együtt), hasonlóan a saját {\tt javascipt} állományok betöltéséhez. 
+\lstset{language=Java}
+\begin{lstlisting}
+import com.vaadin.annotations.JavaScript;
+
+@JavaScript({"http://open.mapquestapi.com/sdk/js/v7.2.s/mqa.toolkit.js?key=APPKEY","mylib.js"})
+
+\end{lstlisting}
+
+
+\par A \textit{Javascript Maps API} egyike a legelterjedtebb \textit{MapQuest}-es szolgáltatásoknak. Funkcionalitásait illetően lehetőséget nyújt térképes felületek létrehozásához különböző extra opciókkal (live traffic, self-localization stb.), vannak beépített útkereső függvényei, melyeknek paraméterként a {\tt bicycle} kulcsszót megadva biciklibarát útvonalak rajzoltathatóak ki a térképre. A {\tt geocoding} modul átjárhatóságot biztosít a koordinátákat tartalmazó {\tt LatLng} objektumok és a direkt módon megadott címek közt, melyek ugyanazt a pontot határozzák meg a térképen. A különböző eseménykezelő függvényeivel interaktívabbá varázsolhatók az alapműveletek, illetve a térkép objektumok is felülírhatók, személyre szabhatóak, egy felhasználóbarát felület kialakításának érdekében.  
+\par 
+Az alkalmazás legtöbbet használt moduljaként a {\tt Geocoding} modul emelhető ki. Konkrétabban a {\tt geocodeAndAddLocation} és a {\tt reverseGeocodeAndAddLocation} függvények hangsúlyozhatók ki, melyek segítségével a {\tt LatLng} objetumokból valós címek nyerhetők és jeleníthetők meg a térképen illetve fordítva. Ezek keretén belül a {\tt POI}\footnote{a térképen egy pontot megjelenítő objektum} objektumok is személyre szabhatóak, változtatható az ikonjuk, info-ablakuk, illetve felülirhatók a rájuk értelmezett események is(kattintás, mozgatás stb.). Az alkalmazás elengedhetetlen része a minden oldalon megjelenő térkép objektum amelyet az {\tt MQA} modul {\tt TileMap} függvényének meghívásával rajzolhatunk ki a paraméterként megadott opciókkal. Ezen paraméter egy olyan adat struktúra, melyben megadható, hogy hova töltődjön be a térkép, mi legyen a középpontja, mekkora legyen az alapértelmezett közelítés, stb. A  {\tt Routing} modul is az alkalmazás alapjait képezi, hiszen elengedhetetlen két pont közötti útvonal megjelenítéséhez. Az  {\tt AddRoute} függvénynek megadhatóak úgy  {\tt LatLng} objektumok mint címek. Az  {\tt options} struktúrában meghatározható a keresés típusa, például  {\tt bicycle}, amely egy olyan útvonalat jelenít meg A és B pontok között mely a legbiciklibarátabbnak nevezhető (ahol lehet a kerékpár utatakat veszi,  ha pedig nincs igyekszik találni olyan  kisebb utcákat, amely elkerüli a forgalmas útszakaszokat, figyelembe véve a közlekedési szabályokat ). A  {\tt shortest} opcióval a fizikai értelemben vett legrövidebb útszakaszt kapjuk válaszként. Az útkeresés típusa mellett megadhatók még a megjelnítésre vonatkozó extra opciók is, amellyel rövid útmutatót is megjeleníthetünk az adott útvonalra.
+
+\textcolor{red}{ ( majd utólag beírom a hivatkozást a gyakorlati rész megfelelő fejezetére, ahol a konkrét példák lesznek).}
+%
+\section{OpenCycleMap}\label{sec:FELH:ocm}
+
+Az \textit{OpenCycleMap} az \textit{OpenStreetMap} térképes szolgáltatás egy rétege (layer). Az \textit{OpenStreetMap} (OSM) egy szabadon szerkeszthető és felhasználható térképfejlesztés. A térképek egyszerű helyismeretből vagy hordozható {\tt GPS } eszközökből, légifotókból származó adatokra épülnek, amelyeket az {\tt Open Database License} (nyílt adatbázis) tárol. A regisztrált felhasználóknak lehetőségük van szerkeszteni a vektor alapú adatokat illetve {\tt GPS} nyomvonalakat is feltölthetnek. A romániai adatok szempontjából a legjobban aktualizált térképszolgáltató, illetve biciklis információk terén a legjelentősebb.
+\par 	A biciklis réteg tartalmazza az összes nemzetközileg elismert bicikliutat illetve a lokális és regionális kerékpár utak javát, ezen kívül megjeleníthetők túraútvonalak, bicikli üzletek és parkolók is egyaránt, ahol azokat a felhasználók hozzáadták a térképhez. Előnyére szolgál, hogy a változtatások (pl. ha egy új bicikli utat szeretnénk hozzáadni), 24 órán belül bekerülnek az adatbázisba, és egy-két napon belül  láthatóvá válik mindenki számára (a \ref{fig:FELH:kep1} és a \ref{fig:FELH:kep2} képek, egy általam hozzáadott bicikliutat és szerkesztési folyamatát ábrázolják).
+
+
+\begin{figure}[ht]
+  \centering
+  \pgfimage[width=0.6\linewidth]{images/cycleMap}
+  \caption[Egy általam hozzáadott bicikliút]%
+  {Egy általam hozzáadott bicikliút.}
+  \label{fig:FELH:kep1}
+\end{figure}
+
+
+\begin{figure}[ht]
+  \centering
+  \pgfimage[width=0.7\linewidth]{images/cycleMapEdit}
+  \caption[A bicikliút szerkesztési folyamata]%
+  {A bicikliút szerkesztési folyamata.}
+  \label{fig:FELH:kep2}
+\end{figure}
+
+
+%
