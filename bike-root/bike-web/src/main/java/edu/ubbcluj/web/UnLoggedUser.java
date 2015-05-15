@@ -94,14 +94,13 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		//System.out.println("unluser: "+this.getSession().getAttribute("userType"));
+		System.out.println("unluser: "+this.getSession().getAttribute("userType"));
 		
 		
 		if(this.getSession().getAttribute("userType").equals("user")){
 			getUI().getNavigator().navigateTo("loggedUser");
 		}
 		if(this.getSession().getAttribute("userType").equals("admin")){
-			System.out.println("hiba");
 			getUI().getNavigator().navigateTo("admin");
 		}
 		
@@ -365,20 +364,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		actiongrid.setRowExpandRatio(4, 2);
 		actiongrid.setMargin(true);
 		
-		//Label map = new Label("a map itt lesz");
-		
-		/*getDirection.addClickListener(new Button.ClickListener() {
-			private static final long serialVersionUID = 1L;
-			public void buttonClick(ClickEvent event) {
-		    	if(stype.equals("service")){
-		    		
-		    		ServicesDAO sdao = daoFactory.getServicesDAO();
-		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
-		    		String caption = sv.get(0).getName();
-		    		stype.setCaption(caption);
-		    	}
-		    }
-		});*/
 
 		
 		mapLayout.setSizeFull();
@@ -511,7 +496,9 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				    		loginAdded=false;
 				    		//getUI().getNavigator().navigateTo(UnLoggedUser.NAME);
 				    		if(user.getUsertype().equals("user")){
+				    			
 				    			myUIClass.getSession().setAttribute("userType", "user");
+				    			getUI().getNavigator().removeView("unloggedUser");
 				    			getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
 			    				getUI().getNavigator().navigateTo("loggedUser");
 			    				
@@ -522,6 +509,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    				
 			    			}else{
 			    				myUIClass.getSession().setAttribute("userType", "admin");
+			    				getUI().getNavigator().removeView("unloggedUser");
 			    				getUI().getNavigator().addView("admin", new Admin(myUIClass,user));
 			    				getUI().getNavigator().navigateTo("admin");
 			    				

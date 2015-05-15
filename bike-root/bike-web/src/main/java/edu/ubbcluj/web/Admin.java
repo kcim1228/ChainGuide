@@ -108,7 +108,7 @@ public class Admin extends VerticalLayout implements View{
 	}
 
 	public void enter(ViewChangeEvent event) {
-		//System.out.println("admin: "+this.getSession().getAttribute("userType"));
+		System.out.println("admin: "+this.getSession().getAttribute("userType"));
 		
 		if(this.getSession().getAttribute("userType").equals("user")){
 			getUI().getNavigator().navigateTo("loggedUser");
@@ -266,6 +266,9 @@ public class Admin extends VerticalLayout implements View{
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
 				myUIClass.getSession().setAttribute("userType", "none");
+				myUIClass.getNavigator().removeView("admin");
+				myUIClass.getSession().setAttribute("userType", "none");
+				getUI().getNavigator().addView("unloggedUser", new UnLoggedUser(myUIClass));
 				getUI().getNavigator().navigateTo("unloggedUser");
 				 
 		    }
@@ -1242,7 +1245,7 @@ public class Admin extends VerticalLayout implements View{
     	        Label date = new Label("Date: "+sorted.get(index).getDate().toString());
     	        Label body = new Label("Body: "+sorted.get(index).getBody());
     	        Button deleteMess = new Button("DELETE");
-    	        messLayout.addComponent(from);
+    	        messLayout.addComponent(from);   
     	        messLayout.addComponent(date);
     	        messLayout.addComponent(body);
     	        messLayout.addComponent(deleteMess);

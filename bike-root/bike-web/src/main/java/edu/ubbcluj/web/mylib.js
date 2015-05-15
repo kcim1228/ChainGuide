@@ -8,6 +8,12 @@ var serviceLat;
 var serviceLng;
 var oldSize=0;
 var actionState;
+var nearestLoc =[];
+var nearestStreet = [];
+var nearestCity = [];
+var nearestState = [];
+var nearestPostalCode = [];
+var Nearestindex = 0;
 window.edu_ubbcluj_web_MapLoader = function() {
 
 	
@@ -276,7 +282,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		allSize = this.getState().allSize;
 		actionState = this.getState().action;
 		
-		alert(actionState);
+		//alert(actionState);
 		//ha search keres volt
 		if(actionState=="searchAction"){
 			if(mainSerachType=='adress'){
@@ -355,76 +361,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		if(actionState=="routeAction"){	           
 	        	startPoint = map.getByKey("startPoint"+lastStartIndex);
 	        	endPoint = map.getByKey("endPoint"+lastEndIndex);
-	        	MQA.withModule('new-route', function() {
-	        		alert(routeTypeForPath);
-	        		 var opt = {
-	                         request: {
-	                        	 locations: [startPoint,endPoint ],
-	                             options: {
-	                                 avoids: [],
-	                                 avoidTimedConditions: false,
-	                                 doReverseGeocode: true,
-	                                 generalize: 0,
-	                                 routeType: routeTypeForPath,
-	                                 timeType: 1,
-	                                 locale: 'en_US',
-	                                 unit: 'k',
-	                                 enhancedNarrative: false,
-	                                 drivingStyle: 2,
-	                                 highwayEfficiency: 21.0
-	                             }
-	                         },
-	                         display: {
-	                             color: '#800000',
-	                             borderWidth: 5,
-	                             draggable: true,
-	                             draggablepoi: true
-	                         },
-	                         success: function displayNarrative(data) {
-	                        	 map.bestFit();
-	                        	 if (data.route) {
-	                        		 alert(data.route.distance);
-	                                 var legs = data.route.legs,
-	                                     html = '',
-	                                     i = 0,
-	                                     j = 0,
-	                                     trek,
-	                                     maneuver;
-
-	                                 html += '<table><tbody>';
-
-	                                 for (; i<legs.length; i++) {
-	                                     for (j=0; j<legs[i].maneuvers.length; j++) {
-	                                         maneuver = legs[i].maneuvers[j];
-	                                         html += '<tr>';
-	                                         html += '<td>';
-
-	                                         if (maneuver.iconUrl) {
-	                                             html += '<img src="' + maneuver.iconUrl + '" />  ';
-	                                         }
-
-	                                         for (k=0; k<maneuver.signs.length; k++) {
-	                                             var sign = maneuver.signs[k];
-
-	                                             if (sign && sign.url) {
-	                                                 html += '<img src="' + sign.url + '" />  ';
-	                                             }
-	                                         }
-
-	                                         html += '</td><td>' + maneuver.narrative + '</td>';
-	                                         html += '</tr>';
-	                                     }
-	                                 }
-
-	                                 html += '</tbody></table>';
-	                                 document.getElementById('route-results').innerHTML = html;
-	                             }
-	                         }
-	        		 }
-	        		 map.addRoute(opt);
-	        		 map.bestFit();
-	        		// alert("ut hozzadava");
-	        	  });
+	        	drawRoute(startPoint, endPoint, routeTypeForPath);
 	        
 	        
 		}
@@ -445,19 +382,99 @@ window.edu_ubbcluj_web_MapLoader = function() {
 			}
 		}
 		if(actionState=="nearestAction"){
-			alert("nearestAction");
-			//route-matrix: h kell hasznalni ????????????????????????????????????????????
+			//alert("nearestAction");
+			Nearestindex = 0;
 				startPoint = map.getByKey("startPoint"+lastStartIndex);
-				alert(allSize);
+				nearestLoc[0]=""+startPoint.latLng.lat+","+startPoint.latLng.lng;
 				for(j=0;j<allSize;j++){
-					alert(allNames[j]+"; "+allLat[j]+"; "+allLng[j]);
-					
+					//alert(allNames[j]+"; "+allLat[j]+"; "+allLng[j]);
+					nearestLoc[j+1]=""+allLat[j]+","+allLng[j];			
 				}
+				
+			    MQA.withModule('directions', 'longurl', function() {
+			    	// alert("belepett");
+			        /*Executes callback to the Directions Service for a route matrix with 3 parameters.*/
+			        MQA.Directions.routeMatrix(			   
+			          /*The first parameter is an array of location objects.*/
+			        		 nearestLoc,		   
+			          /*The second parameter is an options object {allToAll:true | false}.
+			            If none specified, it defaults to allToAll=false.*/
+			          { routeOptions: { allToAll:false }},
+			          /*The final parameter is a callback method to execute after completion.*/			          
+			          renderMatrixResults
+			        );
+			      });
 			
 		}
 		
 	
 	}
+function renderMatrixResults(response) {
+		//alert("feldolgozas");
+		var minDistance=10000;
+		var minIndex = 0;
+	    var allToAll = response.allToAll;
+	    var distances = response.distance;
+	    var times = response.time;
+	    var locations = response.locations; 
+	    var numRows = allToAll ? times.length : 1;
+	    for (i = 0; i < numRows; i++) {
+	      var location = locations[i];	 
+	      var timeList = allToAll ? times[i] : times;
+	      var distanceList = allToAll ? distances[i] : distances;
+	 
+	      for (j = 0; j < timeList.length; j++) {
+	    	  if(distanceList[j]>0){
+	    		  if(distanceList[j]<minDistance){
+	    			  minDistance = distanceList[j];
+	    			  minIndex = j-1;
+	    		  }
+	    	  }
+	      }
+	    }
+	   // alert("min: "+minDistance);
+	   // alert(minIndex);
+	    startPoint = map.getByKey("startPoint"+lastStartIndex);
+	    endPoint = { latLng: { lat: allLat[minIndex], lng: allLng[minIndex] }};
+	    endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
+	    endPoint.setIcon(new MQA.Icon('http://open.mapquestapi.com/staticmap/geticon?uri=poi-green_1.png', 20, 30));
+	    routeType = 'shortest';
+	    drawRoute(startPoint, endPoint, routeType);
+	    
+	  }
 
-
+function drawRoute(startPoint,endPoint, routeType){
+	MQA.withModule('new-route', function() {
+		 var opt = {
+                request: {
+               	 locations: [startPoint, endPoint ],
+                    options: {
+                        avoids: [],
+                        avoidTimedConditions: false,
+                        doReverseGeocode: true,
+                        generalize: 0,
+                        routeType:routeType,
+                        timeType: 1,
+                        locale: 'en_US',
+                        unit: 'k',
+                        enhancedNarrative: false,
+                        drivingStyle: 2,
+                        highwayEfficiency: 21.0
+                    }
+                },
+                display: {
+                    color: '#800000',
+                    borderWidth: 5,
+                    draggable: true,
+                    draggablepoi: true
+                },
+                success: function displayNarrative(data) {
+               	 map.bestFit();
+                }
+		 }
+		 map.addRoute(opt);
+		 map.bestFit();
+		// alert("ut hozzadava");
+	  });
+}
 	

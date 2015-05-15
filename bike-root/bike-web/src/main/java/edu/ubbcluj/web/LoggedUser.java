@@ -106,16 +106,15 @@ public class LoggedUser extends VerticalLayout implements View {
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		//System.out.println("unluser: "+this.getSession().getAttribute("userType"));
+		System.out.println("luser: "+this.getSession().getAttribute("userType"));
 		
 		
-		/*if(this.getSession().getAttribute("userType").equals("user")){
-			getUI().getNavigator().navigateTo("loggedUser");
+		if(this.getSession().getAttribute("userType").equals("none")){
+			getUI().getNavigator().navigateTo("unloggedUser");
 		}
 		if(this.getSession().getAttribute("userType").equals("admin")){
-			System.out.println("hiba");
 			getUI().getNavigator().navigateTo("admin");
-		}*/
+		}
 		
 		//a javascipt vegrehajtasahoz szukseges panel
 		
@@ -416,6 +415,9 @@ public class LoggedUser extends VerticalLayout implements View {
 		logout.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
+				myUIClass.getSession().setAttribute("userType", "none");
+				myUIClass.getNavigator().removeView("loggedUser");
+				getUI().getNavigator().addView("unloggedUser", new UnLoggedUser(myUIClass));
 				myUIClass.getSession().setAttribute("userType", "none");
 				getUI().getNavigator().navigateTo("unloggedUser");
 				 
