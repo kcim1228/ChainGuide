@@ -27,8 +27,25 @@
   \item Safari 6 vagy újabb 
 \end{itemize}
 
-\par 
-\textcolor{red}{Ide jon majd a : technikai leírás a Vaadin keretrendszer felépítéséről (főképp azokról a részekről, melyeketfelhasználtál a projektben), alkalmazás felépítéséről, életciklusáról (illetve amit még a projekt szempontjából fontos tudnivalónak tartasz a Vaadinnal kapcsolatban)... }
+\par A \textit{Vaadin} felépítését illetően a szerver oldali architektúrára kerül a hangsúly, mivel az alkalmazások logikájának nagy része a szerveren fut. Csak a szükséges elemeket helyezi a keretrendszer kliens oldalra, ahol \textit{AJAX} tecnológiát és \textit{Google Web Toolkit}-et  használ. A fejlesztés megkönnyítése céljából, elrejti a kliens-szerver architektúrát a fejlesztők elől, e kettő között lévő kommunikációs problémákat is megoldva. A \textit{Vaadin} keretrendszer maga dönt arról, hogy mi kerül majd kliens és mi szerver oldalra(önmaga oldja meg a kód szétválasztását), ezért hasonlít maga a kódolás egy sima desktop alkalmazáséhoz. A \textit{Vaadin} szerver oldali validációt alkalmaz minden egyes műveletnél, így a biztonsági problémák megoldása is rá van bízva.
+
+
+ Egy \textit{Vaadin} alkalmazás futás közbeni architektúrája a \ref{fig:FELH:kep3} ábrán látható.
+
+\begin{figure}[h!]
+  \centering
+  \pgfimage[width=0.7\linewidth]{images/vaadinArchi}
+  \caption[Vaadin alkalmazás architektúra]%
+  {Egy \textit{Vaadin} alkalmazás futás közbeni architektúrája.}
+  \label{fig:FELH:kep3}
+\end{figure}
+
+\par Az ábra a kliens és szerver oldalak közti kommunikációt szemlélteti egy futás közbeni állapotban, amikor a kliens oldali kód már be van töltődve a böngészőbe.A szerver oldali \textit{Vaadin} alkalmazás {\tt servlet}-ként fut egy \textit{Java} web szerveren, kiszolgálva a \textit{HTTP} kéréseket. A \textit{Vaadin Servlet} osztály fogadja a kliens kéréseit és  nekik megfelelő eseményekként továbbítja őket az alkalmazásban megadott esemény-figyelőkhöz(listener) a \textit{UI}-on belül.  A kliens oldali motor(engine) mely a böngészőben fut, fogadja a kéréseket és végrehajta a kért változtatásokat a weboldalon.
+
+\par A Chain-Guide alkalmazás keretén belül a \textit{GUI} felépítése a  {\tt com.vaadin.ui.UI} absztrakt osztály kiterjesztésével lett megvalósítva, ez képviseli az alkalmazás belépési pontját amikor az alkalmazás url-jét beírják a böngészőbe. A különböző webtartalom megjelenítéséhez különböző nézetek(view) lettek felhasználva, a {\tt com.vaadin.navigator.View} megvalósítása által. A nézetek közti navigáció a {\tt com.vaadin.navigator.Navigator} osztály segítségével lett megvalósítva, amihez szükséges volt az adott nézet regisztrációja is. Az alkalmazáson belül a navigátor bárhonnan elérhető a {\tt UI.getCurrent().getNavigator()}  metódus meghívásával.
+
+
+
 
 %
 \section{Hibernate}\label{sec:FELH:hi}

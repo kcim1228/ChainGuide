@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2015.3.23)  14 MAY 2015 17:49
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2015.3.23)  15 MAY 2015 10:43
 entering extended mode
 **minta_dolgozat.tex
 
@@ -1212,15 +1212,15 @@ Overfull \hbox (11.35796pt too wide) in paragraph at lines 10--10
 [] 
  []
 
-)pdfTeX warning (ext4): destination with the same identifier (name{page.3}) has
- been already used, duplicate ignored
+pdfTeX warning (ext4): destination with the same identifier (name{page.3}) has 
+been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.140 \include{bevezet}
-                        [3
+l.24 
+      [3
 
 
-]
+]) [4]
 (D:\EGYETEM\Allamvizsga-fileok\DOLGOZAT\sajat\szakdolgozat_minta_utf8\szakdolgo
 zat_minta_utf8\felhasznalt.tex
 2. fejezet
@@ -1238,92 +1238,96 @@ Overfull \hbox (11.35796pt too wide) in paragraph at lines 18--18
 [] 
  []
 
-[4
+[5
 
 
 
-] ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\listings\lstlang1.sty"
+]
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 43.
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\t1pcr.fd"
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+) [6]
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\listings\lstlang1.sty"
 File: lstlang1.sty 2014/09/06 1.5e listings language file
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\listings\lstmisc.sty"
 File: lstmisc.sty 2014/09/06 1.5e (Carsten Heinz)
-)
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 41.
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\t1pcr.fd"
-File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-)
+) [7 <D:/EGYETEM/Allamvizsga-fileok/DOLGOZAT/sajat/szakdolgozat_minta_utf8/szak
+dolgozat_minta_utf8/images/vaadinArchi.jpg>]
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
-) [5]
-Underfull \hbox (badness 10000) detected at line 65
+)
+Underfull \hbox (badness 10000) detected at line 82
 \T1/ptm/m/n/8 2.
  []
 
 
-Overfull \hbox (11.35796pt too wide) in paragraph at lines 65--65
+Overfull \hbox (11.35796pt too wide) in paragraph at lines 82--82
 [] 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 65
+Underfull \hbox (badness 10000) detected at line 82
 \T1/ptm/m/n/8 3.
  []
 
 
-Overfull \hbox (11.35796pt too wide) in paragraph at lines 65--65
+Overfull \hbox (11.35796pt too wide) in paragraph at lines 82--82
 [] 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 70
+Underfull \hbox (badness 10000) detected at line 87
 \T1/ptm/m/n/8 4.
  []
 
 
-Overfull \hbox (11.35796pt too wide) in paragraph at lines 70--70
+Overfull \hbox (11.35796pt too wide) in paragraph at lines 87--87
 [] 
  []
+
+[8] ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
+File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
+)
+LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <8> not available
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 92.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 )
-LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <8> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 75.
- [6]
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
-File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
-)
-Underfull \hbox (badness 10000) detected at line 116
+Underfull \hbox (badness 10000) detected at line 133
 \T1/ptm/m/n/8 5.
  []
 
 
-Overfull \hbox (11.35796pt too wide) in paragraph at lines 116--116
+Overfull \hbox (11.35796pt too wide) in paragraph at lines 133--133
 [] 
  []
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\listings\lstlang1.sty"
 File: lstlang1.sty 2014/09/06 1.5e listings language file
-)
+) [9]
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
-) [7]
-Underfull \hbox (badness 10000) detected at line 130
+)
+Underfull \hbox (badness 10000) detected at line 147
 \T1/ptm/m/n/8 6.
  []
 
 
-Overfull \hbox (11.35796pt too wide) in paragraph at lines 130--130
+Overfull \hbox (11.35796pt too wide) in paragraph at lines 147--147
 [] 
  []
 
-[8]) [9 <D:/EGYETEM/Allamvizsga-fileok/DOLGOZAT/sajat/szakdolgozat_minta_utf8/s
-zakdolgozat_minta_utf8/images/cycleMap.jpg> <D:/EGYETEM/Allamvizsga-fileok/DOLG
-OZAT/sajat/szakdolgozat_minta_utf8/szakdolgozat_minta_utf8/images/cycleMapEdit.
-jpg>]
+[10]) [11 <D:/EGYETEM/Allamvizsga-fileok/DOLGOZAT/sajat/szakdolgozat_minta_utf8
+/szakdolgozat_minta_utf8/images/cycleMap.jpg>] [12 <D:/EGYETEM/Allamvizsga-file
+ok/DOLGOZAT/sajat/szakdolgozat_minta_utf8/szakdolgozat_minta_utf8/images/cycleM
+apEdit.jpg>]
 (D:\EGYETEM\Allamvizsga-fileok\DOLGOZAT\sajat\szakdolgozat_minta_utf8\szakdolgo
-zat_minta_utf8\minta_dolgozat.bbl) [10
+zat_minta_utf8\minta_dolgozat.bbl) [13
 
 
 ]
@@ -1343,13 +1347,13 @@ Package rerunfilecheck Info: File `minta_dolgozat.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 163.
  ) 
 Here is how much of TeX's memory you used:
- 25907 strings out of 493921
- 473456 string characters out of 3144876
- 655392 words of memory out of 3000000
- 28577 multiletter control sequences out of 15000+200000
+ 25913 strings out of 493921
+ 473513 string characters out of 3144876
+ 654392 words of memory out of 3000000
+ 28578 multiletter control sequences out of 15000+200000
  73032 words of font info for 87 fonts, out of 3000000 for 9000
  899 hyphenation exceptions out of 8191
- 55i,9n,69p,1933b,1556s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 55i,9n,69p,1933b,1555s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files (x86)/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C:/Progra
 m Files (x86)/MiKTeX 2.9/fonts/type1/urw/courier/ucrb8a.pfb><C:/Program Files (
 x86)/MiKTeX 2.9/fonts/type1/urw/courier/ucrr8a.pfb><C:/Program Files (x86)/MiKT
@@ -1360,9 +1364,9 @@ times/utmb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmb8
 a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/P
 rogram Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Program File
 s (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on minta_dolgozat.pdf (13 pages, 422623 bytes).
+Output written on minta_dolgozat.pdf (16 pages, 509537 bytes).
 PDF statistics:
- 280 PDF objects out of 1000 (max. 8388607)
- 90 named destinations out of 1000 (max. 500000)
- 94 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 296 PDF objects out of 1000 (max. 8388607)
+ 94 named destinations out of 1000 (max. 500000)
+ 99 words of extra memory for PDF output out of 10000 (max. 10000000)
 
