@@ -14,6 +14,8 @@ var nearestCity = [];
 var nearestState = [];
 var nearestPostalCode = [];
 var Nearestindex = 0;
+var allLat = [];
+var allLng = [];
 window.edu_ubbcluj_web_MapLoader = function() {
 
 	
@@ -420,10 +422,10 @@ function renderMatrixResults(response) {
 	    var numRows = allToAll ? times.length : 1;
 	    for (i = 0; i < numRows; i++) {
 	      var location = locations[i];	 
-	      var timeList = allToAll ? times[i] : times;
 	      var distanceList = allToAll ? distances[i] : distances;
-	 
-	      for (j = 0; j < timeList.length; j++) {
+	     // alert("timelist-leght: "+timeList.length);
+	     // alert("allSize: "+allSize);
+	      for (j = 0; j < allSize+1; j++) {
 	    	  if(distanceList[j]>0){
 	    		  if(distanceList[j]<minDistance){
 	    			  minDistance = distanceList[j];
@@ -432,10 +434,11 @@ function renderMatrixResults(response) {
 	    	  }
 	      }
 	    }
-	   // alert("min: "+minDistance);
-	   // alert(minIndex);
+	    //alert("min: "+minDistance);
+	    //alert("minindex"+minIndex);
+	    //alert("all "+ allLat[minIndex]+" es "+allLng[minIndex ]);
 	    startPoint = map.getByKey("startPoint"+lastStartIndex);
-	    endPoint = { latLng: { lat: allLat[minIndex], lng: allLng[minIndex] }};
+	    //endPoint = { latLng: { lat: allLat[minIndex], lng: allLng[minIndex] }};
 	    endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
 	    endPoint.setIcon(new MQA.Icon('http://open.mapquestapi.com/staticmap/geticon?uri=poi-green_1.png', 20, 30));
 	    routeType = 'shortest';
@@ -444,6 +447,10 @@ function renderMatrixResults(response) {
 	  }
 
 function drawRoute(startPoint,endPoint, routeType){
+	//alert("rajzol");
+	//alert("startLat:"+startPoint.latLng.lat+"  startLng: "+startPoint.latLng.lng);
+	//alert("endLat:"+endPoint.latLng.lat+"  endLng: "+endPoint.latLng.lng);
+	//alert("type= "+routeType);
 	MQA.withModule('new-route', function() {
 		 var opt = {
                 request: {
@@ -469,6 +476,7 @@ function drawRoute(startPoint,endPoint, routeType){
                     draggablepoi: true
                 },
                 success: function displayNarrative(data) {
+                	//alert("kirajzolva");
                	 map.bestFit();
                 }
 		 }
