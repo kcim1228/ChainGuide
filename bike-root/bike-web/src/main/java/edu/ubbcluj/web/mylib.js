@@ -32,7 +32,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	
 	var options = {
             elt: document.getElementById('map'),             // ID of map element on page
-            zoom: 12,                                        // initial zoom level of the map
+            zoom: 14,                                        // initial zoom level of the map
             latLng: { lat:46.766667, lng:23.583333 }     // center of map in latitude/longitude
         };
 
@@ -40,6 +40,9 @@ window.edu_ubbcluj_web_MapLoader = function() {
 
 
         window.map = new MQA.TileMap(options);
+        navigator.geolocation.getCurrentPosition(function(position) {
+            map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+          });
         //MQA.TileMap.setSize(MQA.setSize(200,200));
         
         MQA.withModule('largezoom','traffictoggle','viewoptions','geolocationcontrol','insetmapcontrol','mousewheel', function() {
@@ -367,7 +370,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	        
 	        
 		}
-		if(actionState=="listAction"){
+		if(actionState=="serviceListAction"){
 			if(allSize>-1){
 
 				/*if (oldSize>0){
@@ -377,6 +380,21 @@ window.edu_ubbcluj_web_MapLoader = function() {
 				for(i=0;i<allSize;i++){
 					caption = "allServices";
 					createService2(allLat[i],allLng[i],allNames[i],caption);
+				}
+				map.bestFit();	
+			oldSize = allSize;	
+				
+			}
+		}
+		if(actionState=="rateAction"){
+			createService(serviceLat,serviceLng,serviceName,"actualservice");
+		}
+		if(actionState=="placeListAction"){
+			if(allSize>-1){
+				map.removeAllShapes();
+				for(i=0;i<allSize;i++){
+					caption = "allPlaces";
+					createPlace(allLat[i],allLng[i],allNames[i],caption);
 				}
 				map.bestFit();	
 			oldSize = allSize;	

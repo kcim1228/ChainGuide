@@ -8,7 +8,7 @@
             <column name="id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" fetch="select">
+        <many-to-one name="services" class="edu.ubbcluj.backend.model.Services" fetch="select" lazy="false">
             <column name="serviceId" />
         </many-to-one>
         <many-to-one name="users" class="edu.ubbcluj.backend.model.Users" fetch="select">

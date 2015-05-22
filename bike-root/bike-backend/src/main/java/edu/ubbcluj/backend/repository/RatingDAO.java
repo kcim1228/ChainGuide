@@ -12,5 +12,6 @@ public interface RatingDAO {
 	void updateRating(Rating r);
 	List<Rating> getAllRatingByService(Services serv);
 	Rating getRatingByUserAndService(Users user, Services serv);
+	List<Rating> getAllRating();
 
 }

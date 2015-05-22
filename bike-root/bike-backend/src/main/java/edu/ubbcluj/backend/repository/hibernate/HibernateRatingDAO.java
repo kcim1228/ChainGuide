@@ -111,6 +111,32 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 	}
 	
 	@Override
+	public List<Rating> getAllRating() {
+		List<Rating> ratingList = Collections.emptyList();
+		Session session = null;
+		
+		try {
+			session = SessionManager.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			final Criteria c = session.createCriteria(Rating.class);
+			ratingList = this.getQueryResult(c);
+			
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			
+			if (session != null && session.getTransaction() != null) {
+				session.getTransaction().rollback();
+			}
+			
+			throw new RuntimeException(ex.getMessage(),ex);			
+		}
+	
+		
+		return ratingList;
+	}
+	
+	@Override
 	public Rating getRatingByUserAndService(Users user, Services serv){
 		Rating rating = new Rating();
 		Session session = null;

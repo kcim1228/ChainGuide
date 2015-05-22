@@ -30,12 +30,14 @@ import com.vaadin.ui.Window.CloseEvent;
 
 import edu.ubbcluj.backend.model.Openhours;
 import edu.ubbcluj.backend.model.Places;
+import edu.ubbcluj.backend.model.Rating;
 import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.DAOFactory;
 import edu.ubbcluj.backend.repository.OpenhoursDAO;
 import edu.ubbcluj.backend.repository.PlacesDAO;
+import edu.ubbcluj.backend.repository.RatingDAO;
 import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
@@ -85,6 +87,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private int allSize = -1;
 	private String actionState = "searchAction";
 	private DAOFactory daoFactory;
+	private Button showAllButton = new Button("GO");
+	private ComboBox topRated = new ComboBox("Get top rated: ");
 	
 	
 	public UnLoggedUser(UI UIClass){
@@ -145,78 +149,62 @@ getNearest.addClickListener(new Button.ClickListener() {
 					allNames.clear();
 			    	allLat.clear();
 			    	allLng.clear();   	
-		    		ServicesDAO sdao = daoFactory.getServicesDAO();
-			    	TypeDAO tdao = daoFactory.getTypeDAO();
-			    	Type tp = tdao.getTypeByName(nearestSelect.getValue().toString());
-			    	List<Services> slist = sdao.getAllServicesByType(tp);
-			    	setAllParams(nearestCb.getValue(), slist);
+			    	setAllParams(nearestCb.getValue());
 				}
 				
 			}
 		});
 		
 
-		showAll.addListener( new Property.ValueChangeListener() {
-		    public void valueChange(ValueChangeEvent event) {
-		    	actionState = "listAction";
-		    	allNames.clear();
-		    	allLat.clear();
-		    	allLng.clear();
-		    	TypeDAO tdao = daoFactory.getTypeDAO();
-		    	Type tp = tdao.getTypeByName(showAll.getValue().toString());
-		    	ServicesDAO sdao = daoFactory.getServicesDAO();
-		    	List<Services> slist = sdao.getAllServicesByType(tp);
-		    	if(showAllCb.getValue()==false){
-			    	System.out.println(showAll.getValue());
-			    	allSize = slist.size();
-			    	for(int i=0;i<slist.size();i++){
-			    		allNames.add(slist.get(i).getName().toString());
-			    		allLat.add(slist.get(i).getCoordX());
-			    		allLng.add(slist.get(i).getCoordY());
-			    		System.out.println(slist.get(i));
-			    	}
-			    	
-		    	}else{
-		    		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
-		    		List<Openhours> ohs =  openDao.getAllOpenNow();
-		    		List<Services> openServ = new ArrayList<Services>();
-		    		for(int i=0;i<ohs.size();i++){
-		    			openServ.add(ohs.get(i).getServices());
-		    		}
-		    		//slist.retainAll(openServ);//intersection(slist, openServ);
-		    		
-		    		System.out.println("slist: "+slist.toString());
-		    		System.out.println("openserv"+openServ.toString());
-		    		List<Integer> openlist = new ArrayList();
-		    		List<Integer> alllist = new ArrayList();	
-		    		for(Services s:openServ){
-		    			openlist.add(s.getId());
-		    		}
-		    		for(Services s:slist){
-		    			alllist.add(s.getId());
-		    		}
-		    		System.out.println("open: "+ openlist.toString());
-		    		System.out.println("all: "+ alllist.toString());
-		    		
-		    		openlist.retainAll(alllist);
-		    		System.out.println("utana: "+openlist);
-		    		
-		    		allSize = openlist.size();
-		    		for(int i=0;i<allSize;i++){
-			    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
-			    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
-			    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
-			    	}
-		    	}
-		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-		    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-		    			allLat,allLng,allSize,actionState);
+		showAllButton.addListener(new Button.ClickListener() {		
+			public void buttonClick(ClickEvent event) {
+				showAll();
+				
+			}
+		});
+		
+		topRated.addListener(new Property.ValueChangeListener() {		
+			public void valueChange(ValueChangeEvent event) {
+				actionState = "rateAction";
+				String typeName = (String) topRated.getValue();
+				TypeDAO tdao = daoFactory.getTypeDAO();
+				Type type = tdao.getTypeByName(typeName);
+				ServicesDAO sdao = daoFactory.getServicesDAO();
+				RatingDAO rdao = daoFactory.getRatingDAO();
+				Float maxRate = (float) 0.0;
+				if(type!=null){
+					List<Rating> rlist = rdao.getAllRating();
+					List<Services> slist = sdao.getAllServicesByType(type);
+					
+					for(Services s:slist){
+						List<Rating> ratings = rdao.getAllRatingByService(s);
+						Float avg = (float) 0.0;
+						int count=0;
+						int sum =0;
+						for(Rating r:ratings){
+							sum = sum+ r.getRate();
+							count++;
+						}
+						if(count>0){
+							avg = (float) ((float)sum/(float)count);
+							if(maxRate<avg){
+								maxRate = avg;
+								actualSelectedName = s.getName();
+								actualLat = s.getCoordX();
+								actualLng = s.getCoordY();
+							}
+						}
+					}
+					System.out.println("maxRate: "+maxRate);
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),
+							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
+							allNames,allLat,allLng,allSize,actionState);
 		    		jsPanel.setContent(js);
-		    		allSize = -1;
-		    	
-		    	}
-		    }
-		       );
+					
+				}
+				
+			}
+		});
 		
 		topsearchButton.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -335,7 +323,9 @@ getNearest.addClickListener(new Button.ClickListener() {
 		actiongrid.addComponent(getNearest,0,8);
 		actiongrid.addComponent(showAll,0,9);
 		actiongrid.addComponent(showAllCb,0,10);
-		actiongrid.addComponent(jsPanel,0,11);
+		actiongrid.addComponent(showAllButton,0,11);
+		actiongrid.addComponent(topRated,0,12);
+		actiongrid.addComponent(jsPanel,0,13);
 		startPointForNearest.setId("nearestStart");
 		
 		
@@ -374,7 +364,7 @@ getNearest.addClickListener(new Button.ClickListener() {
 		//PointLocalizer alert = new PointLocalizer();
 		//mapLayout.addComponent(alert);
 		
-		fillSelectAreas(nearestSelect,showAll);
+		fillSelectAreas(nearestSelect,showAll,topRated);
 		createLogin(login);	
 		createRegister(register);
 		
@@ -387,7 +377,7 @@ getNearest.addClickListener(new Button.ClickListener() {
 		
 	}
 
-	private void fillSelectAreas(final ComboBox a, ComboBox b){
+	private void fillSelectAreas(final ComboBox a, ComboBox b, ComboBox c){
 		final DAOFactory daoFactory = DAOFactory.getInstance();
 		PlacesDAO placesDAO = daoFactory.getPlacesDAO();
 		TypeDAO typeDAO = daoFactory.getTypeDAO();
@@ -402,28 +392,14 @@ getNearest.addClickListener(new Button.ClickListener() {
 		for (Type p:types) {
 			a.addItem(p.getName());
 			b.addItem(p.getName());
+			c.addItem(p.getName());
 		}
 		for (Places p:places) {
 			a.addItem(p.getType());
 			b.addItem(p.getType());
 		}
 		
-		a.addValueChangeListener(new Property.ValueChangeListener() {			
-			public void valueChange(ValueChangeEvent event) {
-				System.out.println(a.getValue());
-				TypeDAO typeDAO = daoFactory.getTypeDAO();
-				Type type = typeDAO.getTypeByName(a.getValue().toString());
-				System.out.println(type.toString());
-				ServicesDAO servicesDAO = daoFactory.getServicesDAO();
-				List<Services> services = servicesDAO.getAllServicesByType(type);
-				
-				for(Services s:services){
-					System.out.println(s.toString());
-				}
-				
-				
-			}
-		});
+
 		
 	}
 	
@@ -674,57 +650,194 @@ getNearest.addClickListener(new Button.ClickListener() {
         return list;
     }
 	
-	private void setAllParams(boolean value,List<Services> slist){
+	private void setAllParams(boolean value){
 		actionState = "nearestAction";
-		ServicesDAO sdao = daoFactory.getServicesDAO();
-    	TypeDAO tdao = daoFactory.getTypeDAO();
-		 if(value==false){
-		    	allSize = slist.size();
-		    	for(int i=0;i<slist.size();i++){
-		    		allNames.add(slist.get(i).getName().toString());
-		    		allLat.add(slist.get(i).getCoordX());
-		    		allLng.add(slist.get(i).getCoordY());
-		    		System.out.println(slist.get(i));
+		String nearestType = "place";
+		TypeDAO tdao = daoFactory.getTypeDAO();
+		List<Type> tlist = tdao.getAllType();
+		for(Type t:tlist){
+			if(t.getName().equals(nearestSelect.getValue())){
+				nearestType = "service";
+			}
+		}
+		if(nearestType.equals("service")){
+			ServicesDAO sdao = daoFactory.getServicesDAO();
+	    	Type tp = tdao.getTypeByName(nearestSelect.getValue().toString());
+	    	List<Services> slist = sdao.getAllServicesByType(tp);
+
+			 if(value==false){
+			    	allSize = slist.size();
+			    	System.out.println("itt: "+slist.toString());
+			    	for(int i=0;i<slist.size();i++){
+			    		allNames.add(slist.get(i).getName().toString());
+			    		allLat.add(slist.get(i).getCoordX());
+			    		allLng.add(slist.get(i).getCoordY());
+			    		System.out.println(slist.get(i));
+			    	}
+					
+		    	}else{
+		    		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+		    		List<Openhours> ohs =  openDao.getAllOpenNow();
+		    		List<Services> openServ = new ArrayList<Services>();
+		    		for(int i=0;i<ohs.size();i++){
+		    			openServ.add(ohs.get(i).getServices());
+		    		}
+		    		//slist.retainAll(openServ);//intersection(slist, openServ);
+		    		
+		    		System.out.println("slist: "+slist.toString());
+		    		System.out.println("openserv"+openServ.toString());
+		    		List<Integer> openlist = new ArrayList();
+		    		List<Integer> alllist = new ArrayList();	
+		    		for(Services s:openServ){
+		    			openlist.add(s.getId());
+		    		}
+		    		for(Services s:slist){
+		    			alllist.add(s.getId());
+		    		}
+		    		System.out.println("open: "+ openlist.toString());
+		    		System.out.println("all: "+ alllist.toString());
+		    		
+		    		openlist.retainAll(alllist);
+		    		System.out.println("utana: "+openlist);
+		    		allSize = openlist.size();
+		    		for(int i=0;i<allSize;i++){
+			    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+			    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+			    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+			    	}
+		    		
 		    	}
-				
-	    	}else{
-	    		System.out.println("belepett");
-	    		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
-	    		List<Openhours> ohs =  openDao.getAllOpenNow();
-	    		List<Services> openServ = new ArrayList<Services>();
-	    		for(int i=0;i<ohs.size();i++){
-	    			openServ.add(ohs.get(i).getServices());
-	    		}
-	    		//slist.retainAll(openServ);//intersection(slist, openServ);
-	    		
-	    		System.out.println("slist: "+slist.toString());
-	    		System.out.println("openserv"+openServ.toString());
-	    		List<Integer> openlist = new ArrayList();
-	    		List<Integer> alllist = new ArrayList();	
-	    		for(Services s:openServ){
-	    			openlist.add(s.getId());
-	    		}
-	    		for(Services s:slist){
-	    			alllist.add(s.getId());
-	    		}
-	    		System.out.println("open: "+ openlist.toString());
-	    		System.out.println("all: "+ alllist.toString());
-	    		
-	    		openlist.retainAll(alllist);
-	    		System.out.println("utana: "+openlist);
-	    		allSize = openlist.size();
-	    		for(int i=0;i<allSize;i++){
-		    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
-		    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
-		    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
-		    	}
-	    		
-	    	}
+		}else{
+			   PlacesDAO pdao = daoFactory.getPlacesDAO();
+			   List<Places> plist = pdao.getAllPlaces();
+			   List<Places> sameType = new ArrayList<Places>();
+			   for(Places p:plist){
+				   if(p.getType().equals(nearestSelect.getValue())){
+					   sameType.add(p);
+				   }
+			   }
+			   if(sameType.size()>0){
+				   allSize = sameType.size();
+				   for(Places p:sameType){
+					   allNames.add(p.getName());
+					   allLat.add(p.getCoordX());
+					   allLng.add(p.getCoordY());
+				   }
+				   
+			   }
+		}
+
 	    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
 	    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 	    			allLat,allLng,allSize,actionState);
 	    		jsPanel.setContent(js);
 	    	allSize = -1;
 	}
+	
+	private void showAll(){
+		String allType="place";
+		boolean show = false;
+    	actionState = "placeListAction";
+    	allNames.clear();
+    	allLat.clear();
+    	allLng.clear();
+    	TypeDAO tdao = daoFactory.getTypeDAO();
+    	List<Type> typeList = tdao.getAllType();
+    	for(Type t:typeList){
+    		if(t.getName().equals(showAll.getValue())){
+    			allType = "service";
+    			actionState = "serviceListAction";
+    		}
+    	}
+    	
+    	
+	   if(allType.equals("service")){
+		   Type tp = tdao.getTypeByName(showAll.getValue().toString());
+	    	ServicesDAO sdao = daoFactory.getServicesDAO();
+	    	List<Services> slist = sdao.getAllServicesByType(tp);
+	    	if(slist.size()>0){
+	        	if(showAllCb.getValue()==false){
+	    	    	System.out.println(showAll.getValue());
+	    	    	allSize = slist.size();
+	    	    	for(int i=0;i<slist.size();i++){
+	    	    		allNames.add(slist.get(i).getName().toString());
+	    	    		allLat.add(slist.get(i).getCoordX());
+	    	    		allLng.add(slist.get(i).getCoordY());
+	    	    		System.out.println(slist.get(i));
+	    	    	}
+	    	    	show = true;
+	        	}else{
+	        		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+	        		List<Openhours> ohs =  openDao.getAllOpenNow();
+	        		if(ohs.size()>0){
+	        			List<Services> openServ = new ArrayList<Services>();
+	            		for(int i=0;i<ohs.size();i++){
+	            			openServ.add(ohs.get(i).getServices());
+	            		}
+	            		//slist.retainAll(openServ);//intersection(slist, openServ);
+	            		
+	            		System.out.println("slist: "+slist.toString());
+	            		System.out.println("openserv"+openServ.toString());
+	            		List<Integer> openlist = new ArrayList();
+	            		List<Integer> alllist = new ArrayList();	
+	            		for(Services s:openServ){
+	            			openlist.add(s.getId());
+	            		}
+	            		for(Services s:slist){
+	            			alllist.add(s.getId());
+	            		}
+	            		System.out.println("open: "+ openlist.toString());
+	            		System.out.println("all: "+ alllist.toString());
+	            		
+	            		openlist.retainAll(alllist);
+	            		System.out.println("utana: "+openlist);
+	            		
+	            		allSize = openlist.size();
+	            		for(int i=0;i<allSize;i++){
+	        	    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+	        	    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+	        	    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+	        	    	}
+	            		show = true;
+	        		}
+	        		
+	        		
+	        	}
+	        	if(show){
+	        		JsConnecter js = new JsConnecter((String) routeType.getValue(),
+	            			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+	            			allLat,allLng,allSize,actionState);
+	            		jsPanel.setContent(js);
+	            		allSize = -1;
+	        	}
+	        	
+	    	}
+	   }else{
+		   PlacesDAO pdao = daoFactory.getPlacesDAO();
+		   List<Places> plist = pdao.getAllPlaces();
+		   List<Places> sameType = new ArrayList<Places>();
+		   for(Places p:plist){
+			   if(p.getType().equals(showAll.getValue())){
+				   sameType.add(p);
+			   }
+		   }
+		   if(sameType.size()>0){
+			   allSize = sameType.size();
+			   for(Places p:sameType){
+				   allNames.add(p.getName());
+				   allLat.add(p.getCoordX());
+				   allLng.add(p.getCoordY());
+			   }
+			   JsConnecter js = new JsConnecter((String) routeType.getValue(),
+           			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+           			allLat,allLng,allSize,actionState);
+           		jsPanel.setContent(js);
+           		allSize = -1;
+			   
+		   }
+	   }
+	    	
+	}
+
 
 }
