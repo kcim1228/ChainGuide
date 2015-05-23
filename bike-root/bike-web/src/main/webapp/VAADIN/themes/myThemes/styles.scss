@@ -5,7 +5,7 @@
 
 	.mapPanel{
 		width: 100%;
-		height: 500px;
+		height: 48em;
 	}
 	
 	.alma{
@@ -16,4 +16,30 @@
 	.notVisible{
 		display:none;
 	}
+	
+	.topGrid{
+		background-color:#339A66;
+		height: 1em;
+		-webkit-box-shadow: 1px 8px 23px 6px rgba(0,0,0,0.31);
+		-moz-box-shadow: 1px 8px 23px 6px rgba(0,0,0,0.31);
+		box-shadow: 1px 8px 23px 6px rgba(0,0,0,0.31);
+	}
+	.mainColor{
+		background-color: #F5E0CB;
+	}
+	.textFieldColor{
+		background-color:#FFFFDB;
+	}
+	.textFieldColor:focus{
+		background-color:#FFFFDB;
+	}
+	.comboBoxColor{
+		background:#FFFFDB;
+	}
+	
+	.logButton{
+		border-width:0px;	
+    	border-style:none;
+	}
+	
 }

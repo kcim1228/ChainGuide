@@ -7066,7 +7066,7 @@ body .myThemes.v-app .v-app-loading {
 
 .myThemes .mapPanel {
 	width: 100%;
-	height: 500px;
+	height: 48em;
 }
 
 .myThemes .alma {
@@ -7076,4 +7076,33 @@ body .myThemes.v-app .v-app-loading {
 
 .myThemes .notVisible {
 	display: none;
+}
+
+.myThemes .topGrid {
+	background-color: #339A66;
+	height: 1em;
+	-webkit-box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
+	-moz-box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
+	box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
+}
+
+.myThemes .mainColor {
+	background-color: #F5E0CB;
+}
+
+.myThemes .textFieldColor {
+	background-color: #FFFFDB;
+}
+
+.myThemes .textFieldColor:focus {
+	background-color: #FFFFDB;
+}
+
+.myThemes .comboBoxColor {
+	background: #FFFFDB;
+}
+
+.myThemes .logButton {
+	border-width: 0px;
+	border-style: none;
 }

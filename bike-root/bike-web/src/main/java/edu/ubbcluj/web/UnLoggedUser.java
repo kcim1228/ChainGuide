@@ -55,7 +55,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
 	private GridLayout actiongrid = new GridLayout(1,14);
-	private TextArea search = new TextArea("Search: ");
+	private TextArea search = new TextArea();
 	private TextArea aPoint = new TextArea("A:");
 	private TextArea bPoint = new TextArea("B:");
 	private TextArea startPointForNearest = new TextArea("Select a Start point: ");
@@ -73,7 +73,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private Panel mapPanel = new Panel();
 	private Panel narrative = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
-	private ComboBox searchType = new ComboBox("serch for");
+	private ComboBox searchType = new ComboBox();
 	private UserMessageState mState = new UserMessageState();
 	Panel jsPanel = new Panel();
 	private Services actualSelectedService;
@@ -258,6 +258,11 @@ getNearest.addClickListener(new Button.ClickListener() {
 				}
 		    }
 		});
+		search.setStyleName("textFieldColor");
+		aPoint.setStyleName("textFieldColor");
+		bPoint.setStyleName("textFieldColor");
+		startPointForNearest.setStyleName("textFieldColor");
+		login.setStyleName("logButton");
 		
 		routeType.setRequired(true);
 		routeType.setDescription("Choose a travel-mode");		
@@ -269,14 +274,16 @@ getNearest.addClickListener(new Button.ClickListener() {
 		getNearest.setId("getNearest");		
 		topgrid.setMargin(true);
 		search.setWidth("70%");
-		search.setHeight("1.7em");
+		//search.setHeight("1.7em");
+		search.setRows(1);
 		topgrid.setWidth("100%");
 		topgrid.setHeight("10%");
+		topgrid.setStyleName("topGrid");
 		search.setRows(1);
 		search.setDescription("Here you can serch for places, services, etc.");
 		search.setId("searchTextField");
 		maingrid.setWidth("100%");
-		maingrid.setHeight("70%");
+		maingrid.setHeight("85%");
 
 		logingrid.addComponent(login,0,0);
 		logingrid.addComponent(register,1,0);
@@ -284,8 +291,9 @@ getNearest.addClickListener(new Button.ClickListener() {
 		topgrid.addComponent(topsearchButton,2,0);
 		topgrid.addComponent(searchType,1,0);
 		topgrid.addComponent(logingrid, 3,0);
+		topgrid.setComponentAlignment(search, Alignment.BOTTOM_LEFT);
 		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
-		topgrid.setComponentAlignment(topsearchButton,  Alignment.TOP_LEFT);
+		topgrid.setComponentAlignment(topsearchButton,  Alignment.BOTTOM_LEFT);
 		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
 		
 		logingrid.setComponentAlignment(login, Alignment.TOP_RIGHT);
@@ -293,6 +301,7 @@ getNearest.addClickListener(new Button.ClickListener() {
 		logingrid.setWidth("100%");
 		logingrid.setColumnExpandRatio(0, 5);
 		logingrid.setColumnExpandRatio(1, 1);
+		
 		topgrid.setColumnExpandRatio(0, 6);
 		topgrid.setColumnExpandRatio(1, 1);
 		topgrid.setColumnExpandRatio(2, 1);
@@ -352,9 +361,17 @@ getNearest.addClickListener(new Button.ClickListener() {
 		mapLayout.addComponent(mapPanel);
 		mapLayout.addComponent(narrative);
 		
-		this.addComponent(new Label("ChainGuide"));
+		Label top = new Label("ChainGuide");
+		top.setWidth("100%");
+		top.setHeight("4%");
+		this.addComponent(top);
 		this.addComponent(topgrid);
+		Label div = new Label(".");
+		this.addComponent(div);
+		div.setHeight("1%");
 		this.addComponent(maingrid);
+		this.setStyleName("mainColor");
+		
 		
 		maingrid.addComponent(actiongrid,1,0);
 		maingrid.addComponent(mapLayout, 0, 0);
