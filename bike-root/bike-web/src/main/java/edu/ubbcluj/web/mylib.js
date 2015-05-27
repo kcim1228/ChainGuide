@@ -115,9 +115,20 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		      var response = data.results[0].locations[0];
 		      adress = response.street + ', ';
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
-		      document.getElementById('aPoint').value = adress;
-		      document.getElementById('nearestStart').value = adress;
-		      var evt = document.createEvent('HTMLEvents');
+		      alert("NEAREST: "+document.getElementById('nearestStart'));
+		      
+		      alert("aPONIT: "+document.getElementById('aPoint'));
+		      
+		      if(document.getElementById('aPoint')==null){
+		    	  document.getElementById('nearestStart').value = adress;
+		      }
+		      if(document.getElementById('nearestStart')==null){
+		    	  document.getElementById('aPoint').value = adress;  
+		      }
+		     
+		      
+		    
+		     var evt = document.createEvent('HTMLEvents');
 		      evt.initEvent('change', true, false);
 		      ns = document.getElementById('nearestStart');
 		      ns.dispatchEvent(evt);

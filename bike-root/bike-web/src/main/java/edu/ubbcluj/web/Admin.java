@@ -103,7 +103,8 @@ public class Admin extends VerticalLayout implements View{
 	 private Users thisAdmin;
 	
 	public Admin(UI ui, Users u){
-		myUIClass=ui;
+		//myUIClass=ui;
+		myUIClass = UI.getCurrent();
 		thisAdmin = u;
 	}
 

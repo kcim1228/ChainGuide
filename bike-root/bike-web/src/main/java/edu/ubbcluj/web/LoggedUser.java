@@ -104,7 +104,8 @@ public class LoggedUser extends VerticalLayout implements View {
 	
 	
 	public LoggedUser(UI UIClass,Users us){
-		myUIClass = UIClass;
+		//myUIClass = UIClass;
+		myUIClass = UI.getCurrent();
 		thisUser = us;
 		
 		//this.setCaption("alma");

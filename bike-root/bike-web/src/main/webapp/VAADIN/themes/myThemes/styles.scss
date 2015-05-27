@@ -18,7 +18,7 @@
 	}
 	
 	.topGrid{
-		background-color:#339A66;
+		background-color:#5CAD85;
 		height: 1em;
 		-webkit-box-shadow: 1px 8px 23px 6px rgba(0,0,0,0.31);
 		-moz-box-shadow: 1px 8px 23px 6px rgba(0,0,0,0.31);
@@ -42,4 +42,39 @@
     	border-style:none;
 	}
 	
+	.v-accordion{
+		background-color:#5CAD85;
+	}
+	.v-accordion-item{
+		background-color:#5CAD85;
+	}
+	
+	.v-accordion-item-caption{
+		background-color:#5CAD85;
+	}
+	
+	
+	.v-accordion-item-caption .v-caption {
+		background-color:#5CAD85;
+		text-align:center;
+	}
+	
+	.v-accordion-item-caption .v-caption .v-captiontext {
+		color: white;
+		font-size:1.3em;
+		text-shadow: 2px 2px 6px #000000;
+		text-align:center;
+	}
+	
+	.green{
+		background-color:#5CAD85;
+	}
+	
+	.accTab{
+		background-color: #F5E0CB;
+		-webkit-box-shadow: inset 0px 10px 24px -9px rgba(0,0,0,0.75);
+		-moz-box-shadow: inset 0px 10px 24px -9px rgba(0,0,0,0.75);
+		box-shadow: inset 0px 10px 24px -9px rgba(0,0,0,0.75);
+	}
+
 }

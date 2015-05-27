@@ -10,6 +10,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.UserError;
+import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -21,8 +22,10 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -54,7 +57,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
-	private GridLayout actiongrid = new GridLayout(1,14);
+	private GridLayout actiongrid = new GridLayout(1,15);
 	private TextArea search = new TextArea();
 	private TextArea aPoint = new TextArea("A:");
 	private TextArea bPoint = new TextArea("B:");
@@ -92,8 +95,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	
 	
 	public UnLoggedUser(UI UIClass){
-		myUIClass = UIClass;
-		
+		//myUIClass = UIClass;
+		myUIClass = UI.getCurrent();
 		//this.setCaption("alma");
 	}
 
@@ -258,6 +261,13 @@ getNearest.addClickListener(new Button.ClickListener() {
 				}
 		    }
 		});
+		
+
+            
+        
+		
+		
+		
 		search.setStyleName("textFieldColor");
 		aPoint.setStyleName("textFieldColor");
 		bPoint.setStyleName("textFieldColor");
@@ -307,14 +317,12 @@ getNearest.addClickListener(new Button.ClickListener() {
 		topgrid.setColumnExpandRatio(2, 1);
 		topgrid.setColumnExpandRatio(3, 5);
 		
-		actiongrid.addComponent(direction,0,0);
 		actiongrid.setWidth("100%");
 		actiongrid.setHeight("100%");
 		aPoint.setRows(1);
 		aPoint.setId("aPoint");
 		bPoint.setId("bPoint");
 		bPoint.setRows(1);
-		startPointForNearest.setRows(1);
 		aPoint.setWidth("90%");
 		aPoint.setRows(2);
 		bPoint.setRows(2);
@@ -322,42 +330,58 @@ getNearest.addClickListener(new Button.ClickListener() {
 		bPoint.setWidth("90%");
 		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
 		bPoint.setDescription("Type or choose from the map an End point for your trip .");
-		actiongrid.addComponent(aPoint,0,1);
-		actiongrid.addComponent(bPoint,0,2);
-		actiongrid.addComponent(routeType,0,3);
-		actiongrid.addComponent(getDirection,0,4);
-		actiongrid.addComponent(nearestSelect,0,5);
-		actiongrid.addComponent(nearestCb,0,6);
-		actiongrid.addComponent(startPointForNearest,0,7);
-		actiongrid.addComponent(getNearest,0,8);
-		actiongrid.addComponent(showAll,0,9);
-		actiongrid.addComponent(showAllCb,0,10);
-		actiongrid.addComponent(showAllButton,0,11);
-		actiongrid.addComponent(topRated,0,12);
-		actiongrid.addComponent(jsPanel,0,13);
 		startPointForNearest.setId("nearestStart");
 		
+	//------------------------------------
 		
-		actiongrid.setComponentAlignment(aPoint, Alignment.MIDDLE_LEFT);
-		actiongrid.setComponentAlignment(bPoint, Alignment.MIDDLE_LEFT);
-		actiongrid.setComponentAlignment(getDirection, Alignment.MIDDLE_CENTER);
-		actiongrid.setComponentAlignment(nearestSelect, Alignment.MIDDLE_LEFT);
-		actiongrid.setComponentAlignment(getNearest, Alignment.MIDDLE_CENTER);
+		// Create the Accordion.
+		Accordion accordion = new Accordion();
+		//accordion.setWidth("98%");
+	accordion.setHeight("100%");
+            final VerticalLayout dirlayout = new VerticalLayout();
+            dirlayout.setStyleName("accTab");
+            Button b = new Button("gomb");
+            dirlayout.addComponent(aPoint);
+            dirlayout.addComponent(bPoint);
+            dirlayout.addComponent(routeType);
+            dirlayout.addComponent(getDirection);
+            dirlayout.setMargin(true);
+            Tab tabDir = accordion.addTab(dirlayout, "Get direction");
+           // tabDir.setStyleName("green");
+            
+        
+            final VerticalLayout nearlayout = new VerticalLayout();
+            nearlayout.setStyleName("accTab");
+            nearlayout.addComponent(nearestSelect);
+            nearlayout.addComponent(nearestCb);
+            nearlayout.addComponent(startPointForNearest);
+            nearlayout.addComponent(getNearest);
+            nearlayout.setMargin(true);
+            accordion.addTab(nearlayout, "Get nearest");
+            
+            final VerticalLayout alllayout = new VerticalLayout();
+            alllayout.setStyleName("accTab");
+            alllayout.addComponent(showAll);
+            alllayout.addComponent(showAllCb);
+            alllayout.addComponent(showAllButton);
+            alllayout.setMargin(true);
+            accordion.addTab(alllayout, "Get all");
+            
+            final VerticalLayout ratelayout = new VerticalLayout();
+            ratelayout.setStyleName("accTab");
+            ratelayout.addComponent(topRated);
+            ratelayout.setMargin(true);
+            accordion.addTab(ratelayout, "Get top rated");
 		
-		actiongrid.setRowExpandRatio(4, 2);
-		actiongrid.setMargin(true);
+		actiongrid.addComponent(accordion,0,13);
+		actiongrid.addComponent(jsPanel,0,14);
 		
-
 		
 		mapLayout.setSizeFull();
 		mapPanel.setId("map");
 		mapPanel.setStyleName("mapPanel");
 		narrative.setId("route-results");
 		mapPanel.setSizeFull();	
-		
-	
-	
-		
 		mapLayout.addComponent(mapPanel);
 		mapLayout.addComponent(narrative);
 		
@@ -372,26 +396,16 @@ getNearest.addClickListener(new Button.ClickListener() {
 		this.addComponent(maingrid);
 		this.setStyleName("mainColor");
 		
-		
 		maingrid.addComponent(actiongrid,1,0);
 		maingrid.addComponent(mapLayout, 0, 0);
-		maingrid.setColumnExpandRatio(0, 4);
+		maingrid.setColumnExpandRatio(0, 5);
 		maingrid.setColumnExpandRatio(1, 1);
-		
-		//PointLocalizer alert = new PointLocalizer();
-		//mapLayout.addComponent(alert);
-		
 		fillSelectAreas(nearestSelect,showAll,topRated);
 		createLogin(login);	
-		createRegister(register);
-		
-		
+		createRegister(register);	
 		MapLoader mp = new MapLoader();
 		mapPanel.setContent(mp);
-		
-		
-		
-		
+	
 	}
 
 	private void fillSelectAreas(final ComboBox a, ComboBox b, ComboBox c){
