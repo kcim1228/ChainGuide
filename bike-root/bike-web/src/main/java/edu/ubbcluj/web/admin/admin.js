@@ -3,7 +3,7 @@ var serviceName = "none";
 var serviceLat;
 var serviceLng;
 var actionType;
-window.edu_ubbcluj_web_AdminMapLoader = function() {
+window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 
 	
 
@@ -144,7 +144,7 @@ function createPlace(X,Y,name){
 }
 	
 
-window.edu_ubbcluj_web_AdminJsConnecter = function() {
+window.edu_ubbcluj_web_admin_AdminJsConnecter = function() {
 	mainSerachType=this.getState().searchType;
 	//this.getState().actualLat = "alma";
 	//this.getState().actualLng = "korte";

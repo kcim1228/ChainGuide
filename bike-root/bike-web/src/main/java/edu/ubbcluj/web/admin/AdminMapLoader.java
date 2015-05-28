@@ -1,4 +1,4 @@
-package edu.ubbcluj.web;
+package edu.ubbcluj.web.admin;
 
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.cdi.UIScoped;

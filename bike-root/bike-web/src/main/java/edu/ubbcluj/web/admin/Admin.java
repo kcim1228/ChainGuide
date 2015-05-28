@@ -1,4 +1,4 @@
-package edu.ubbcluj.web;
+package edu.ubbcluj.web.admin;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,6 +57,7 @@ import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.ServicetypeDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
+import edu.ubbcluj.web.user.UnLoggedUser;
 
 public class Admin extends VerticalLayout implements View{
 	

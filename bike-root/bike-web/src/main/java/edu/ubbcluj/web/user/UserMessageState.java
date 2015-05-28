@@ -1,4 +1,4 @@
-package edu.ubbcluj.web;
+package edu.ubbcluj.web.user;
 
 import java.util.List;
 

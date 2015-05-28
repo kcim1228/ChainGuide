@@ -1,16 +1,20 @@
-package edu.ubbcluj.web;
+package edu.ubbcluj.web.user;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.ValueChangeListener;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -21,16 +25,15 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TabSheet.Tab;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 
+import edu.ubbcluj.backend.model.Messages;
 import edu.ubbcluj.backend.model.Openhours;
 import edu.ubbcluj.backend.model.Places;
 import edu.ubbcluj.backend.model.Rating;
@@ -38,6 +41,7 @@ import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.DAOFactory;
+import edu.ubbcluj.backend.repository.MessagesDAO;
 import edu.ubbcluj.backend.repository.OpenhoursDAO;
 import edu.ubbcluj.backend.repository.PlacesDAO;
 import edu.ubbcluj.backend.repository.RatingDAO;
@@ -46,10 +50,10 @@ import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
 
 
-public class UnLoggedUser extends VerticalLayout implements View {
+public class LoggedUser extends VerticalLayout implements View {
 	
 	
-	 boolean loginAdded;
+	 boolean rateAdded;
 	 boolean registerAdded;
 	 UI myUIClass;
 	 
@@ -57,13 +61,13 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
-	private GridLayout actiongrid = new GridLayout(1,15);
-	private TextArea search = new TextArea();
+	private GridLayout actiongrid = new GridLayout(1,17);
+	private TextArea search = new TextArea("Search: ");
 	private TextArea aPoint = new TextArea("A:");
 	private TextArea bPoint = new TextArea("B:");
 	private TextArea startPointForNearest = new TextArea("Select a Start point: ");
-	private Button login = new Button("Login");
-	private Button register = new Button("Register");
+	private Button logout = new Button("Logout");
+
 	private Button getDirection = new Button("GO");
 	private Button getNearest = new Button("GO");
 	private Label direction = new Label("Get directions: ");
@@ -76,7 +80,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private Panel mapPanel = new Panel();
 	private Panel narrative = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
-	private ComboBox searchType = new ComboBox();
+	private ComboBox searchType = new ComboBox("serch for");
 	private UserMessageState mState = new UserMessageState();
 	Panel jsPanel = new Panel();
 	private Services actualSelectedService;
@@ -89,24 +93,31 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private List<Float> allLng = new ArrayList<Float>();
 	private int allSize = -1;
 	private String actionState = "searchAction";
+	private Button rate = new Button("Service Rating");
+	private int rowIndex;
+	private Users thisUser;
+	private Button message = new Button("Contact");
+	private boolean messageAdded = false;
 	private DAOFactory daoFactory;
 	private Button showAllButton = new Button("GO");
 	private ComboBox topRated = new ComboBox("Get top rated: ");
 	
 	
-	public UnLoggedUser(UI UIClass){
+	public LoggedUser(UI UIClass,Users us){
 		//myUIClass = UIClass;
 		myUIClass = UI.getCurrent();
+		thisUser = us;
+		
 		//this.setCaption("alma");
 	}
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		System.out.println("unluser: "+this.getSession().getAttribute("userType"));
+		System.out.println("luser: "+this.getSession().getAttribute("userType"));
 		
 		
-		if(this.getSession().getAttribute("userType").equals("user")){
-			getUI().getNavigator().navigateTo("loggedUser");
+		if(this.getSession().getAttribute("userType").equals("none")){
+			getUI().getNavigator().navigateTo("unloggedUser");
 		}
 		if(this.getSession().getAttribute("userType").equals("admin")){
 			getUI().getNavigator().navigateTo("admin");
@@ -134,34 +145,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 		    			allLat,allLng,allSize,actionState);
 		    		jsPanel.setContent(js);
-				
-			}
-		});
-		
-getNearest.addClickListener(new Button.ClickListener() {
-			
-			public void buttonClick(ClickEvent event) {
-				
-				System.out.println("nearestselect value: "+nearestSelect.getValue());
-				System.out.println("text= "+startPointForNearest.getValue());
-				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue()==null)){
-					Notification.show("Please select a start point and a service-type!",
-			                  "",
-			                  Notification.Type.WARNING_MESSAGE);
-				}else{
-					allNames.clear();
-			    	allLat.clear();
-			    	allLng.clear();   	
-			    	setAllParams(nearestCb.getValue());
-				}
-				
-			}
-		});
-		
-
-		showAllButton.addListener(new Button.ClickListener() {		
-			public void buttonClick(ClickEvent event) {
-				showAll();
 				
 			}
 		});
@@ -208,6 +191,36 @@ getNearest.addClickListener(new Button.ClickListener() {
 				
 			}
 		});
+		
+		getNearest.addClickListener(new Button.ClickListener() {
+			
+			public void buttonClick(ClickEvent event) {
+				actionState = "nearestAction";
+				System.out.println("nearestselect value: "+nearestSelect.getValue());
+				System.out.println("text= "+startPointForNearest.getValue());
+				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue()==null)){
+					Notification.show("Please select a start point and a service-type!",
+			                  "",
+			                  Notification.Type.WARNING_MESSAGE);
+				}else{
+					allNames.clear();
+			    	allLat.clear();
+			    	allLng.clear();   	
+			    	setAllParams(nearestCb.getValue());
+				}
+				
+			}
+		});
+		
+
+		showAllButton.addListener(new Button.ClickListener() {			
+			public void buttonClick(ClickEvent event) {
+				showAll();
+				
+			}
+		});
+		
+		
 		
 		topsearchButton.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -262,18 +275,6 @@ getNearest.addClickListener(new Button.ClickListener() {
 		    }
 		});
 		
-
-            
-        
-		
-		
-		
-		search.setStyleName("textFieldColor");
-		aPoint.setStyleName("textFieldColor");
-		bPoint.setStyleName("textFieldColor");
-		startPointForNearest.setStyleName("textFieldColor");
-		login.setStyleName("logButton");
-		
 		routeType.setRequired(true);
 		routeType.setDescription("Choose a travel-mode");		
 		nearestSelect.setDescription("What are you looking for?");
@@ -284,45 +285,41 @@ getNearest.addClickListener(new Button.ClickListener() {
 		getNearest.setId("getNearest");		
 		topgrid.setMargin(true);
 		search.setWidth("70%");
-		//search.setHeight("1.7em");
-		search.setRows(1);
+		search.setHeight("1.7em");
 		topgrid.setWidth("100%");
 		topgrid.setHeight("10%");
-		topgrid.setStyleName("topGrid");
 		search.setRows(1);
 		search.setDescription("Here you can serch for places, services, etc.");
 		search.setId("searchTextField");
 		maingrid.setWidth("100%");
-		maingrid.setHeight("85%");
+		maingrid.setHeight("70%");
 
-		logingrid.addComponent(login,0,0);
-		logingrid.addComponent(register,1,0);
+		logingrid.addComponent(logout,1,0);
 		topgrid.addComponent(search,0,0);
 		topgrid.addComponent(topsearchButton,2,0);
 		topgrid.addComponent(searchType,1,0);
 		topgrid.addComponent(logingrid, 3,0);
-		topgrid.setComponentAlignment(search, Alignment.BOTTOM_LEFT);
 		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
-		topgrid.setComponentAlignment(topsearchButton,  Alignment.BOTTOM_LEFT);
+		topgrid.setComponentAlignment(topsearchButton,  Alignment.TOP_LEFT);
 		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
 		
-		logingrid.setComponentAlignment(login, Alignment.TOP_RIGHT);
-		logingrid.setComponentAlignment(register, Alignment.TOP_RIGHT);
+		logingrid.setComponentAlignment(logout, Alignment.TOP_RIGHT);
 		logingrid.setWidth("100%");
 		logingrid.setColumnExpandRatio(0, 5);
 		logingrid.setColumnExpandRatio(1, 1);
-		
 		topgrid.setColumnExpandRatio(0, 6);
 		topgrid.setColumnExpandRatio(1, 1);
 		topgrid.setColumnExpandRatio(2, 1);
 		topgrid.setColumnExpandRatio(3, 5);
 		
+		actiongrid.addComponent(direction,0,0);
 		actiongrid.setWidth("100%");
 		actiongrid.setHeight("100%");
 		aPoint.setRows(1);
 		aPoint.setId("aPoint");
 		bPoint.setId("bPoint");
 		bPoint.setRows(1);
+		startPointForNearest.setRows(1);
 		aPoint.setWidth("90%");
 		aPoint.setRows(2);
 		bPoint.setRows(2);
@@ -330,51 +327,32 @@ getNearest.addClickListener(new Button.ClickListener() {
 		bPoint.setWidth("90%");
 		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
 		bPoint.setDescription("Type or choose from the map an End point for your trip .");
+		actiongrid.addComponent(aPoint,0,1);
+		actiongrid.addComponent(bPoint,0,2);
+		actiongrid.addComponent(routeType,0,3);
+		actiongrid.addComponent(getDirection,0,4);
+		actiongrid.addComponent(nearestSelect,0,5);
+		actiongrid.addComponent(nearestCb,0,6);
+		actiongrid.addComponent(startPointForNearest,0,7);
+		actiongrid.addComponent(getNearest,0,8);
+		actiongrid.addComponent(showAll,0,9);
+		actiongrid.addComponent(showAllCb,0,10);
+		actiongrid.addComponent(showAllButton,0,11);
+		actiongrid.addComponent(topRated,0,12);
+		actiongrid.addComponent(jsPanel,0,13);
+		actiongrid.addComponent(rate,0,14);
+		actiongrid.addComponent(message,0,15);
 		startPointForNearest.setId("nearestStart");
 		
-	//------------------------------------
 		
-		// Create the Accordion.
-		Accordion accordion = new Accordion();
-		//accordion.setWidth("98%");
-	accordion.setHeight("100%");
-            final VerticalLayout dirlayout = new VerticalLayout();
-            dirlayout.setStyleName("accTab");
-            Button b = new Button("gomb");
-            dirlayout.addComponent(aPoint);
-            dirlayout.addComponent(bPoint);
-            dirlayout.addComponent(routeType);
-            dirlayout.addComponent(getDirection);
-            dirlayout.setMargin(true);
-            Tab tabDir = accordion.addTab(dirlayout, "Get direction");
-           // tabDir.setStyleName("green");
-            
-        
-            final VerticalLayout nearlayout = new VerticalLayout();
-            nearlayout.setStyleName("accTab");
-            nearlayout.addComponent(nearestSelect);
-            nearlayout.addComponent(nearestCb);
-            nearlayout.addComponent(startPointForNearest);
-            nearlayout.addComponent(getNearest);
-            nearlayout.setMargin(true);
-            accordion.addTab(nearlayout, "Get nearest");
-            
-            final VerticalLayout alllayout = new VerticalLayout();
-            alllayout.setStyleName("accTab");
-            alllayout.addComponent(showAll);
-            alllayout.addComponent(showAllCb);
-            alllayout.addComponent(showAllButton);
-            alllayout.setMargin(true);
-            accordion.addTab(alllayout, "Get all");
-            
-            final VerticalLayout ratelayout = new VerticalLayout();
-            ratelayout.setStyleName("accTab");
-            ratelayout.addComponent(topRated);
-            ratelayout.setMargin(true);
-            accordion.addTab(ratelayout, "Get top rated");
+		actiongrid.setComponentAlignment(aPoint, Alignment.MIDDLE_LEFT);
+		actiongrid.setComponentAlignment(bPoint, Alignment.MIDDLE_LEFT);
+		actiongrid.setComponentAlignment(getDirection, Alignment.MIDDLE_CENTER);
+		actiongrid.setComponentAlignment(nearestSelect, Alignment.MIDDLE_LEFT);
+		actiongrid.setComponentAlignment(getNearest, Alignment.MIDDLE_CENTER);
 		
-		actiongrid.addComponent(accordion,0,13);
-		actiongrid.addComponent(jsPanel,0,14);
+		actiongrid.setRowExpandRatio(4, 2);
+		actiongrid.setMargin(true);
 		
 		
 		mapLayout.setSizeFull();
@@ -382,33 +360,194 @@ getNearest.addClickListener(new Button.ClickListener() {
 		mapPanel.setStyleName("mapPanel");
 		narrative.setId("route-results");
 		mapPanel.setSizeFull();	
+		
+		rate.addClickListener(new Button.ClickListener() {			
+			public void buttonClick(ClickEvent event) {
+				createRate();
+			}
+		});
+	
+		message.addClickListener(new Button.ClickListener() {			
+			public void buttonClick(ClickEvent event) {
+				createMessage();
+				
+			}
+		});
+		
 		mapLayout.addComponent(mapPanel);
 		mapLayout.addComponent(narrative);
 		
-		Label top = new Label("ChainGuide");
-		top.setWidth("100%");
-		top.setHeight("4%");
-		this.addComponent(top);
+		this.addComponent(new Label("ChainGuide"));
 		this.addComponent(topgrid);
-		Label div = new Label(".");
-		this.addComponent(div);
-		div.setHeight("1%");
 		this.addComponent(maingrid);
-		this.setStyleName("mainColor");
 		
 		maingrid.addComponent(actiongrid,1,0);
 		maingrid.addComponent(mapLayout, 0, 0);
-		maingrid.setColumnExpandRatio(0, 5);
+		maingrid.setColumnExpandRatio(0, 4);
 		maingrid.setColumnExpandRatio(1, 1);
+		
+		//PointLocalizer alert = new PointLocalizer();
+		//mapLayout.addComponent(alert);
+		
 		fillSelectAreas(nearestSelect,showAll,topRated);
-		createLogin(login);	
-		createRegister(register);	
+		logout.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+				myUIClass.getSession().setAttribute("userType", "none");
+				myUIClass.getNavigator().removeView("loggedUser");
+				getUI().getNavigator().addView("unloggedUser", new UnLoggedUser(myUIClass));
+				myUIClass.getSession().setAttribute("userType", "none");
+				getUI().getNavigator().navigateTo("unloggedUser");
+				 
+		    }
+		});
+
+		
+		
 		MapLoader mp = new MapLoader();
 		mapPanel.setContent(mp);
-	
+		
+		
+		
+		
 	}
 
-	private void fillSelectAreas(final ComboBox a, ComboBox b, ComboBox c){
+	private void createRate(){
+		final List<Integer> ids = new ArrayList<Integer>();
+		final Window subWindow = new Window("Ratings");
+        subWindow.center();
+        subWindow.setResizable(false);
+        subWindow.setWidth("30em");
+        subWindow.setHeight("30em");
+       FormLayout grid = new FormLayout();
+       subWindow.setContent(grid);
+       final TextField searching = new TextField();
+       searching.setInputPrompt("Search by service name");
+       grid.addComponent(searching);
+       Button listButton = new Button("list");
+       grid.addComponent(listButton);
+       
+       final Table table = new Table();
+      // table.setSelectable(true);
+       table.setWidth("95%");
+       table.setPageLength(7);
+       table.setColumnWidth("Average", 20);
+       
+       table.addContainerProperty("Service", String.class, null);
+       table.addContainerProperty("Average",  String.class, null);
+       table.addContainerProperty("Rate 	",  ComboBox.class, null);
+       final DAOFactory daoFactory = DAOFactory.getInstance();
+       
+       grid.addComponent(table);
+       listButton.addClickListener(new Button.ClickListener() {
+		public void buttonClick(ClickEvent event) {
+			ServicesDAO sdao = daoFactory.getServicesDAO();
+			RatingDAO rdao = daoFactory.getRatingDAO();
+			List<Services> servlist = sdao.getAllServicesByName(searching.getValue());
+			rowIndex = 1;
+			
+			for(Services s:servlist){
+				List<Rating> ratings = rdao.getAllRatingByService(s);
+				System.out.println(ratings.toString());
+				Float avg = (float) 0.0;
+				int count=0;
+				int sum =0;
+				for(Rating r:ratings){
+					sum = sum+ r.getRate();
+					count++;
+				}
+				if(count>0){
+					System.out.println("sum "+sum+" c: "+count);
+					avg = (float) ((float)sum/(float)count);
+					System.out.println("avg: "+avg);
+				}
+				
+				ComboBox cb = new ComboBox();
+				rowIndex++;
+				cb.addItem("-");
+				cb.addItem("1");
+				cb.addItem("2");
+				cb.addItem("3");
+				cb.addItem("4");
+				cb.addItem("5");
+				
+				cb.setValue("-");
+				cb.setWidth("5em");
+				String average = Float.toString(avg);
+				table.addItem(new Object[]{s.getName(),average,cb},rowIndex);
+				ids.add(s.getId());
+			}
+			
+		}
+	});
+       
+       
+       Button rateButton = new Button("Done");
+       grid.addComponent(rateButton);
+       final ServicesDAO servdao = daoFactory.getServicesDAO();
+       final RatingDAO rdao = daoFactory.getRatingDAO();
+       rateButton.addClickListener(new Button.ClickListener() {
+		public void buttonClick(ClickEvent event) {
+			if(rowIndex>1){
+				for(int i=2;i<=rowIndex;i++){
+					ComboBox cb = (ComboBox) table.getItem(i).getItemProperty("Rate 	").getValue();
+					String value = cb.getValue().toString();
+					if (value!="-"){
+						Services serv = servdao.getServiceById(ids.get(i-2 ));
+						//ids.remove(0);
+						Rating r = new Rating(serv, thisUser, Integer.parseInt(value));
+					
+						List<Rating> rates = rdao.getAllRatingByService(serv);
+						boolean alredyRated = false;
+						if(rates!=null){
+							for(int j=0;j<rates.size();j++){
+								int id = rates.get(j).getUsers().getId();
+								if(id==thisUser.getId()){
+									alredyRated=true;
+								}
+							}
+						}
+						if(alredyRated==false){
+							rdao.insertRating(r);
+							System.out.println("insert: "+r);
+						}
+						else{
+							System.out.println("service: "+serv);
+							Rating oldrate = rdao.getRatingByUserAndService(thisUser, serv);
+							oldrate.setRate(Integer.parseInt(value));
+							rdao.updateRating(oldrate);
+							System.out.println("update: "+oldrate);
+						}
+					}
+					
+				}
+			}
+			subWindow.close();
+			rateAdded=false;
+			
+		}
+	});
+
+        
+        subWindow.addCloseListener(new Window.CloseListener() {
+			private static final long serialVersionUID = 1L;
+
+			public void windowClose(CloseEvent e) {					
+				subWindow.close();
+				rateAdded=false;
+			}
+		});
+        
+    	if(rateAdded==false){
+    		//addWindow(subWindow);
+    		rateAdded=true;
+    		myUIClass.addWindow(subWindow);
+    		
+    	}
+		
+	}
+	
+	private void fillSelectAreas(final ComboBox a, ComboBox b,ComboBox c){
 		final DAOFactory daoFactory = DAOFactory.getInstance();
 		PlacesDAO placesDAO = daoFactory.getPlacesDAO();
 		TypeDAO typeDAO = daoFactory.getTypeDAO();
@@ -433,208 +572,76 @@ getNearest.addClickListener(new Button.ClickListener() {
 
 		
 	}
-	
-	private void createLogin(Button login){
-		  	final Window subWindow = new Window("Login");
-	        FormLayout flayout = new FormLayout();
-	        flayout.setMargin(true);
-	        subWindow.setContent(flayout);  
-	        final TextField username = new TextField("Username: ");
-	        username.focus();
-	        flayout.addComponent(username);
-	        final PasswordField pass = new PasswordField("Password: ");
-	        flayout.addComponent(pass);
-	        Button log = new Button("Login");
-	        log.setWidth("70%");
-	        flayout.addComponent(log);
-	        flayout.setHeight("20em");
-	        flayout.setWidth("25em"); 
-	        subWindow.center();
-	        subWindow.setResizable(false);
-	        username.setRequired(true);
-	        pass.setRequired(true);
-	        
-	        login.addClickListener(new Button.ClickListener() {
-				private static final long serialVersionUID = 1L;
-				public void buttonClick(ClickEvent event) {
-			    	if(loginAdded==false){
-			    		//addWindow(subWindow);
-			    		loginAdded=true;
-			    		myUIClass.addWindow(subWindow);
-			    		
-			    	}
-			    }
-			});
-	        
-	        subWindow.addCloseListener(new Window.CloseListener() {
-				private static final long serialVersionUID = 1L;
-
-				public void windowClose(CloseEvent e) {					
-					subWindow.close();
-					loginAdded=false;
-				}
-			});
-	        
-	        log.addClickListener(new Button.ClickListener() {
-			    public void buttonClick(ClickEvent event) {
-			    	DAOFactory daoFactory = DAOFactory.getInstance();
-		    		UsersDAO usersDao = daoFactory.getUsersDAO();
-		    		try{
-		    			Users user = usersDao.getUserByName(username.getValue());
-		    			String hashed = passwordHasher(pass.getValue());
-		    			if(hashed.equals(user.getPassword())){
-		    				subWindow.close();
-				    		loginAdded=false;
-				    		//getUI().getNavigator().navigateTo(UnLoggedUser.NAME);
-				    		if(user.getUsertype().equals("user")){
-				    			
-				    			myUIClass.getSession().setAttribute("userType", "user");
-				    			getUI().getNavigator().removeView("unloggedUser");
-				    			getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
-			    				getUI().getNavigator().navigateTo("loggedUser");
-			    				
-			    				// Save to VaadinServiceSession
-			    		       
-			    		        // Save to HttpSession
-			    		       
-			    				
-			    			}else{
-			    				myUIClass.getSession().setAttribute("userType", "admin");
-			    				getUI().getNavigator().removeView("unloggedUser");
-			    				getUI().getNavigator().addView("admin", new Admin(myUIClass,user));
-			    				getUI().getNavigator().navigateTo("admin");
-			    				
-			    			}
-				    		
-		    			}else{
-		    				pass.setComponentError(new UserError("Wrong password!"));
-		    			}
-		    			
-		    		}catch(RuntimeException ex){
-		    			username.setComponentError( new UserError("No such user with this username!"));
-		    		}
-		    		
-		    		
-			    }
-			});
-	}
-	
-	private void createRegister(Button register){
-		final Window subWindow = new Window("Regiter");
-        FormLayout flayout = new FormLayout();
-        flayout.setMargin(true);
-        subWindow.setContent(flayout);
-        final TextField fname = new TextField("First Name: ");
-        flayout.addComponent(fname);
-        final TextField lname = new TextField("Last Name: ");
-        flayout.addComponent(lname);
-        final TextField username = new TextField("Username: ");
-        flayout.addComponent(username);
-        username.setRequired(true);
-        username.setInvalidAllowed(false);
-        username.setDescription("Username must contain only alphabetic characters and numbers");
-        final PasswordField pass1 = new PasswordField("Password: ");
-        flayout.addComponent(pass1);
-        pass1.setRequired(true);
-        pass1.setInvalidAllowed(false);
-        final PasswordField pass2 = new PasswordField("Re-type: ");
-        flayout.addComponent(pass2);
-        pass2.setRequired(true);
-        pass2.setInvalidAllowed(false);
-        final TextField email = new TextField("Email: ");
-        flayout.addComponent(email);
-        Button reg = new Button("Register");
-        flayout.addComponent(reg);
-        reg.setWidth("70%");
-        flayout.setHeight("30em");
-        flayout.setWidth("25em"); 
+	private void createMessage(){
+		final Window subWindow = new Window("Contact");
         subWindow.center();
         subWindow.setResizable(false);
-        
-        
-        register.addClickListener(new Button.ClickListener() {
-		    public void buttonClick(ClickEvent event) {
-		    	if(registerAdded==false){
-		    		myUIClass.addWindow(subWindow);
-		    		registerAdded=true;
-		    	}
-		    }
-		});
-        
-        subWindow.addListener(new Window.CloseListener() {			
+        subWindow.setWidth("30em");
+        subWindow.setHeight("30em");
+       FormLayout form = new FormLayout();
+       subWindow.setContent(form);
+       
+       if(messageAdded==false){
+   		//addWindow(subWindow);
+	   		messageAdded=true;
+	   		myUIClass.addWindow(subWindow);  		
+   		}
+       subWindow.addCloseListener(new Window.CloseListener() {
+			private static final long serialVersionUID = 1L;
 			public void windowClose(CloseEvent e) {					
-				registerAdded=false;
+				subWindow.close();
+				messageAdded=false;
 			}
 		});
-        
-        reg.addClickListener(new Button.ClickListener() {
-		    public void buttonClick(ClickEvent event) {
-		    	boolean okay=true;
-		    	DAOFactory daoFactory = DAOFactory.getInstance();
-	    		UsersDAO usersDao = daoFactory.getUsersDAO();
-	    		List<Users> existingUser = null;
-		    	if(!username.isValid()){
-		    		username.setComponentError(new UserError("Please pick a username!"));
-		    		okay=false;
-		    	}else{
-		    			 existingUser = usersDao.getUsersByName("");
-		    	}
-		    	
-		    	if(!pass1.isValid()){
-		    		pass1.setComponentError(new UserError("Please type in your password!"));
-		    		okay=false;
-		    	}
-		    	if(!pass2.isValid()){
-		    		pass2.setComponentError(new UserError("Please re-type your password!"));
-		    		okay=false;
-		    	}
-		    	if(!pass1.getValue().equals(pass2.getValue())){
-		    	
-		    		pass2.setComponentError(new UserError("The passwords are not the same!"));
-		    		okay=false;
-		    	}
-		    	if((email!=null)||(!email.equals(""))){
-		    		if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-		    				+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
-		    			okay=false;
-		    			email.setComponentError(new UserError("This is not a valid email adress!"));
-		    		}
-		    	}
-		    	if(okay){
-		    		boolean exist = false;
-		    		
-		    		for(Users u:existingUser){
-		    			System.out.println(u.getUsername());
-		    			if(u.getUsername().equals(username.getValue())){
-		    				
-		    				exist = true;
-		    			}
-		    		}
-		    		
-		    		if(exist){
-		    			Notification.show("Username alredy i use", "Pick up another", com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
-		    		}
-		    		else{
-		    			
-		    			subWindow.close();
-			    		//System.out.println(fname.getValue()+","+lname.getValue()+","+username.getValue()+","+pass1.getValue()+","+email.getValue());
-			    		
-			    		String hashed = passwordHasher(pass1.getValue());
-			    		Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
-			    		usersDao.insertUser(user);
-			    		getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
-			    		getUI().getNavigator().navigateTo("loggedUser");
-		    		}
-		    		
-		    		
-		    		
-		    	}
-		    	
-		    	
-		    }
-		});
-        
-	}
+       Button newMessage = new Button("Create new message");
+       form.addComponent(newMessage);
+       newMessage.addClickListener(new Button.ClickListener() {		
+		public void buttonClick(ClickEvent event) {
+			final Window newMessWindow = new Window("New message");
+			newMessWindow.center();
+			newMessWindow.setWidth("35em");
+			newMessWindow.setHeight("30em");
+			myUIClass.addWindow(newMessWindow);
+			newMessWindow.addCloseListener(new Window.CloseListener() {
+				private static final long serialVersionUID = 1L;
+				public void windowClose(CloseEvent e) {					
+					newMessWindow.close();
+				}
+			});
+			FormLayout newMessForm = new FormLayout();
+			newMessWindow.setContent(newMessForm);
+			Label to = new Label("To: Admins");
+			newMessForm.addComponent(to);
+			final TextField body = new TextField("Body: ");
+			newMessForm.addComponent(body);
+			body.setHeight("10em");
+			body.setWidth("90%");
+			Button send = new Button("SEND");
+			newMessForm.addComponent(send);
+			send.addClickListener(new Button.ClickListener() {				
+				public void buttonClick(ClickEvent event) {
+					newMessWindow.close();
+					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					Date date = new Date();
+					DAOFactory daoFactory = DAOFactory.getInstance();
+					UsersDAO udao = daoFactory.getUsersDAO();
+					MessagesDAO mdao = daoFactory.getMessagesDAO();
+					List<Users> adminList = udao.getUsersByType("admin");
+					for(Users u:adminList){
+						Messages mess = new Messages(u,thisUser,body.getValue(),date,0);
+						System.out.println(mess);
+						mdao.insertMessage(mess);
+					}
+				}
+			});
+		}
+	});
+       
+       
+	}	
+
+	
+	
 	
 	protected void addWindow(Window subWindow) {
 		this.addComponent(subWindow);
@@ -844,6 +851,7 @@ getNearest.addClickListener(new Button.ClickListener() {
 	        	
 	    	}
 	   }else{
+		   System.out.println("Hely kereses volt");
 		   PlacesDAO pdao = daoFactory.getPlacesDAO();
 		   List<Places> plist = pdao.getAllPlaces();
 		   List<Places> sameType = new ArrayList<Places>();
@@ -852,6 +860,7 @@ getNearest.addClickListener(new Button.ClickListener() {
 				   sameType.add(p);
 			   }
 		   }
+		   System.out.println(sameType.toString());
 		   if(sameType.size()>0){
 			   allSize = sameType.size();
 			   for(Places p:sameType){
@@ -869,6 +878,5 @@ getNearest.addClickListener(new Button.ClickListener() {
 	   }
 	    	
 	}
-
 
 }

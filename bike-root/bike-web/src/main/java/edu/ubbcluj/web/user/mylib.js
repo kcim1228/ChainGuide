@@ -16,7 +16,7 @@ var nearestPostalCode = [];
 var Nearestindex = 0;
 var allLat = [];
 var allLng = [];
-window.edu_ubbcluj_web_MapLoader = function() {
+window.edu_ubbcluj_web_user_MapLoader = function() {
 
 	
 
@@ -115,10 +115,6 @@ window.edu_ubbcluj_web_MapLoader = function() {
 		      var response = data.results[0].locations[0];
 		      adress = response.street + ', ';
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
-		      alert("NEAREST: "+document.getElementById('nearestStart'));
-		      
-		      alert("aPONIT: "+document.getElementById('aPoint'));
-		      
 		      if(document.getElementById('aPoint')==null){
 		    	  document.getElementById('nearestStart').value = adress;
 		      }
@@ -282,7 +278,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	}
 	
 	
-	window.edu_ubbcluj_web_JsConnecter = function() {
+	window.edu_ubbcluj_web_user_JsConnecter = function() {
 		//alert('route: ' + this.getState().routeType+' serach: '+ this.getState().searchType);
 		
 		
@@ -318,8 +314,8 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	        			 	 
 	                    // p.setRolloverContent('lat: '+p.latLng.lat+' lng: '+p.latLng.lng);
 	                    // p.setInfoTitleHTML(p.getRolloverContent());
-	                     p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>'+
-	                    		 '<button type="button" onclick="setEndPoint('+p.latLng.lat+','+p.latLng.lng+')">END</button> ');
+	                   //  p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>'+
+	                    		// '<button type="button" onclick="setEndPoint('+p.latLng.lat+','+p.latLng.lng+')">END</button> ');
 
 	                    // map.addShape(p);
 	                    MQA.EventManager.addListener(p, 'mouseover', function(evt){
@@ -332,7 +328,7 @@ window.edu_ubbcluj_web_MapLoader = function() {
 	                            p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>'+
 	                           		 '<button type="button" onclick="setEndPoint('+p.latLng.lat+','+p.latLng.lng+')">END</button> ');    
 	                    	}   
-	                    });                   
+	                    });                  
 	                     return p;
 	                 };
 	                

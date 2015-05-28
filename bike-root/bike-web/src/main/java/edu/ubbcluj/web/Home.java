@@ -1,12 +1,13 @@
 package edu.ubbcluj.web;
 
 
-import edu.ubbcluj.web.UnLoggedUser;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+
+import edu.ubbcluj.web.user.UnLoggedUser;
 
 @Theme("myThemes")
 public class Home extends UI {
