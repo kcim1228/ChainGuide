@@ -100,16 +100,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		System.out.println("unluser: "+this.getSession().getAttribute("userType"));
-		
-		
-		if(this.getSession().getAttribute("userType").equals("user")){
-			getUI().getNavigator().navigateTo("loggedUser");
-		}
-		if(this.getSession().getAttribute("userType").equals("admin")){
-			getUI().getNavigator().navigateTo("admin");
-		}
-		
+		System.out.println("unluser: "+this.getSession().getAttribute("userName"));
 		
 		
 		getDirection.addClickListener(new Button.ClickListener() {
@@ -480,24 +471,24 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		    			if(hashed.equals(user.getPassword())){
 		    				subWindow.close();
 				    		loginAdded=false;
-				    		//getUI().getNavigator().navigateTo(UnLoggedUser.NAME);
+				    		myUIClass.getSession().setAttribute("userName", user.getUsername());
 				    		if(user.getUsertype().equals("user")){
-				    			
-				    			myUIClass.getSession().setAttribute("userType", "user");
-				    			getUI().getNavigator().removeView("unloggedUser");
-				    			getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
-			    				getUI().getNavigator().navigateTo("loggedUser");
+				    			getUI().getNavigator().removeView("");
+				    			getUI().getNavigator().addView("", new LoggedUser(user));
+			    				getUI().getNavigator().navigateTo("");
 			    				
-			    				// Save to VaadinServiceSession
-			    		       
-			    		        // Save to HttpSession
+			    				//admin is if-be es exaption
 			    		       
 			    				
-			    			}else{
-			    				myUIClass.getSession().setAttribute("userType", "admin");
-			    				getUI().getNavigator().removeView("unloggedUser");
-			    				getUI().getNavigator().addView("admin", new Admin(myUIClass,user));
-			    				getUI().getNavigator().navigateTo("admin");
+			    			}
+				    		else{
+				    			if(user.getUsertype().equals("admin")){
+				    				getUI().getNavigator().removeView("");
+				    				getUI().getNavigator().addView("", new Admin(user));
+				    				getUI().getNavigator().navigateTo("");
+				    			}else{
+				    				//ha egyik tipus sem....
+				    			}
 			    				
 			    			}
 				    		
@@ -617,8 +608,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			    		String hashed = passwordHasher(pass1.getValue());
 			    		Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
 			    		usersDao.insertUser(user);
-			    		getUI().getNavigator().addView("loggedUser", new LoggedUser(myUIClass,user));
-			    		getUI().getNavigator().navigateTo("loggedUser");
+			    		myUIClass.getSession().setAttribute("userName", user.getUsername());
+			    		getUI().getNavigator().removeView("");
+			    		getUI().getNavigator().addView("", new LoggedUser(user));
+			    		getUI().getNavigator().navigateTo("");
 		    		}
 		    		
 		    		

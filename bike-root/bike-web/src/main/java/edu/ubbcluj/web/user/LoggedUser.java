@@ -103,7 +103,7 @@ public class LoggedUser extends VerticalLayout implements View {
 	private ComboBox topRated = new ComboBox("Get top rated: ");
 	
 	
-	public LoggedUser(UI UIClass,Users us){
+	public LoggedUser(Users us){
 		//myUIClass = UIClass;
 		myUIClass = UI.getCurrent();
 		thisUser = us;
@@ -113,15 +113,7 @@ public class LoggedUser extends VerticalLayout implements View {
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		System.out.println("luser: "+this.getSession().getAttribute("userType"));
-		
-		
-		if(this.getSession().getAttribute("userType").equals("none")){
-			getUI().getNavigator().navigateTo("unloggedUser");
-		}
-		if(this.getSession().getAttribute("userType").equals("admin")){
-			getUI().getNavigator().navigateTo("admin");
-		}
+		System.out.println("logged user: "+this.getSession().getAttribute("userName"));
 		
 		//a javascipt vegrehajtasahoz szukseges panel
 		
@@ -393,11 +385,10 @@ public class LoggedUser extends VerticalLayout implements View {
 		logout.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
-				myUIClass.getSession().setAttribute("userType", "none");
-				myUIClass.getNavigator().removeView("loggedUser");
-				getUI().getNavigator().addView("unloggedUser", new UnLoggedUser(myUIClass));
-				myUIClass.getSession().setAttribute("userType", "none");
-				getUI().getNavigator().navigateTo("unloggedUser");
+				myUIClass.getSession().setAttribute("userName", "");
+				myUIClass.getNavigator().removeView("");
+				getUI().getNavigator().addView("", new UnLoggedUser(myUIClass));
+				getUI().getNavigator().navigateTo("");
 				 
 		    }
 		});
@@ -648,33 +639,6 @@ public class LoggedUser extends VerticalLayout implements View {
 		
 	}
 
-	private String  passwordHasher(String password){
-		String passwordToHash = password;
-		String generatedPassword = null;
-		try {
-			// Create MessageDigest instance for MD5
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			//Add password bytes to digest
-			md.update(passwordToHash.getBytes());
-			//Get the hash's bytes 
-			byte[] bytes = md.digest();
-			//This bytes[] has bytes in decimal format;
-			//Convert it to hexadecimal format
-			StringBuilder sb = new StringBuilder();
-			for(int i=0; i< bytes.length ;i++)
-			{
-				sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-			}
-			//Get complete hashed password in hex format
-			generatedPassword = sb.toString();
-		} 
-		catch (NoSuchAlgorithmException e) 
-		{
-			e.printStackTrace();
-		}
-		return generatedPassword;
-	
-	}
 	
 	public  List<Services> intersection(List<Services> list1, List<Services> list2) {
         List<Services> list = new ArrayList<Services>();

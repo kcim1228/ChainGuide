@@ -67,6 +67,7 @@
                 <version>7.4.6</version>
                 <executions>
                     <execution>
+                    <phase>install</phase>
                         <goals>
                             <goal>clean</goal>
                             <goal>resources</goal>

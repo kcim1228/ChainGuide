@@ -68,7 +68,6 @@ public class Admin extends VerticalLayout implements View{
 	 boolean deleteAdded = false;
 	 UI myUIClass;
 	 
-	// public static final String NAME = "unloggedUser";
 	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
@@ -103,22 +102,15 @@ public class Admin extends VerticalLayout implements View{
 	 private Button message = new Button("Messages");
 	 private Users thisAdmin;
 	
-	public Admin(UI ui, Users u){
+	public Admin( Users u){
 		//myUIClass=ui;
 		myUIClass = UI.getCurrent();
 		thisAdmin = u;
 	}
 
 	public void enter(ViewChangeEvent event) {
-		System.out.println("admin: "+this.getSession().getAttribute("userType"));
+		System.out.println("admin: "+this.getSession().getAttribute("userName"));
 		
-		if(this.getSession().getAttribute("userType").equals("user")){
-			getUI().getNavigator().navigateTo("loggedUser");
-		}
-		
-		if(this.getSession().getAttribute("userType").equals("none")){
-			getUI().getNavigator().navigateTo("unloggedUser");
-		}
 		
 		lat.setId("lat");
 		lng.setId("lng");
@@ -267,11 +259,10 @@ public class Admin extends VerticalLayout implements View{
 		logout.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
-				myUIClass.getSession().setAttribute("userType", "none");
-				myUIClass.getNavigator().removeView("admin");
-				myUIClass.getSession().setAttribute("userType", "none");
-				getUI().getNavigator().addView("unloggedUser", new UnLoggedUser(myUIClass));
-				getUI().getNavigator().navigateTo("unloggedUser");
+				myUIClass.getSession().setAttribute("userName", "");
+				myUIClass.getNavigator().removeView("");
+				getUI().getNavigator().addView("", new UnLoggedUser(myUIClass));
+				getUI().getNavigator().navigateTo("");
 				 
 		    }
 		});
