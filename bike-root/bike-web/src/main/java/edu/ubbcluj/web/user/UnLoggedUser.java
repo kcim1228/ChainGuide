@@ -51,9 +51,9 @@ import edu.ubbcluj.web.admin.Admin;
 public class UnLoggedUser extends VerticalLayout implements View {
 	
 	
-	 boolean loginAdded;
-	 boolean registerAdded;
-	 UI myUIClass;
+	private boolean loginAdded;
+	private boolean registerAdded;
+	private UI myUIClass;
 	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
@@ -252,6 +252,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		searchType.addItem("service");
 		searchType.addItem("place");
 		searchType.setValue("adress");  
+		
+		/*topsearchButton.setStyleName("btn");
+		getDirection.setStyleName("btn");
+		getNearest.setStyleName("btn");*/
         
 			
 		search.setStyleName("textFieldColor");
@@ -422,7 +426,9 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	
 	private void createLogin(Button login){
 		  	final Window subWindow = new Window("Login");
+		  	subWindow.setStyleName("subWindow");
 	        FormLayout flayout = new FormLayout();
+	        flayout.setStyleName("subWindow");
 	        flayout.setMargin(true);
 	        subWindow.setContent(flayout);  
 	        final TextField username = new TextField("Username: ");

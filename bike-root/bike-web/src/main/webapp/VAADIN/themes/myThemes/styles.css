@@ -7141,3 +7141,23 @@ body .myThemes.v-app .v-app-loading {
 	-moz-box-shadow: inset 0px 10px 24px -9px rgba(0, 0, 0, 0.75);
 	box-shadow: inset 0px 10px 24px -9px rgba(0, 0, 0, 0.75);
 }
+
+.myThemes .v-button {
+	background-color: #e3c198;
+}
+
+.myThemes .v-button-wrap {
+	background-color: #e3c198;
+}
+
+.myThemes .v-button v-widget {
+	background-color: #e3c198;
+}
+
+.myThemes .v-button-caption {
+	background-color: #e3c198;
+}
+
+.myThemes .subWindow {
+	background-color: #5CAD85;
+}

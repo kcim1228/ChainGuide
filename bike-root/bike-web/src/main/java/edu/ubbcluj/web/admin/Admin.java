@@ -65,6 +65,7 @@ public class Admin extends VerticalLayout implements View{
 	boolean updateAdded;
 	 boolean registerAdded;
 	 boolean messageAdded;
+	 boolean setAdminAdded = false;
 	 boolean deleteAdded = false;
 	 UI myUIClass;
 	 
@@ -74,7 +75,7 @@ public class Admin extends VerticalLayout implements View{
 	private GridLayout actiongrid = new GridLayout(1,11);
 	private TextArea search = new TextArea("Search: ");
 	private Button logout = new Button("Logout");
-
+	private Button setAdmin = new Button ("Manage roles");
 	private Button save = new Button("SAVE / NEW");
 	private Button delete = new Button("DELETE");
 	private Button update = new Button("UPDATE");
@@ -206,6 +207,7 @@ public class Admin extends VerticalLayout implements View{
 		actiongrid.addComponent(save,0,1);
 		actiongrid.addComponent(delete,0,2);
 		actiongrid.addComponent(update,0,3);
+		
 		actiongrid.addComponent(lat,0,4);
 		actiongrid.addComponent(lng,0,5);
 		actiongrid.addComponent(typeForSearch,0,7);
@@ -213,6 +215,7 @@ public class Admin extends VerticalLayout implements View{
 		typeForSearch.setValue("adress");
 		typeForSearch.setId("typeForSearch");
 		actiongrid.addComponent(message,0,8);
+		actiongrid.addComponent(setAdmin,0,9);
 	
 		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
@@ -243,6 +246,7 @@ public class Admin extends VerticalLayout implements View{
 		createSave(save);
 		createUpdate(update);
 		createDelete(delete);
+		createRoleManagerButton();
 		message.addClickListener(new Button.ClickListener() {			
 			public void buttonClick(ClickEvent event) {
 				createMessage();
@@ -267,6 +271,87 @@ public class Admin extends VerticalLayout implements View{
 		    }
 		});
 		
+	}
+	
+	private void createRoleManagerButton(){
+		final Window subWindow = new Window("Manage roles: ");
+		FormLayout flayout = new FormLayout();
+		subWindow.setContent(flayout);
+		subWindow.center();
+		subWindow.setResizable(false);
+		subWindow.setWidth("20em");
+		subWindow.setHeight("30em");
+		 final Table table = new Table();	
+		  table.setPageLength(7);
+	      table.setWidth("90%");
+	      table.setSelectable(true);
+	      table.addContainerProperty("UserName", String.class, null);
+	      table.addContainerProperty("Admin-type", CheckBox.class, null );
+	      final UsersDAO udao = daoFactory.getUsersDAO();
+	      List<Users> ulist = udao.getAllUsers();
+	      rowIndex = 2;
+	      final List<Boolean> oldValues = new ArrayList<Boolean>();
+	      for(Users u:ulist){
+	    	  String username = u.getUsername();
+	    	  String userType = u.getUsertype();
+	    	  CheckBox cb = new CheckBox();
+	    	  boolean adminBool = false;
+	    	  if(userType.equals("admin")){
+	    		  adminBool = true;
+	    	  }
+	    	  table.addItem(new Object[]{username,cb},rowIndex);
+	    	  cb.setValue(adminBool);
+	    	  oldValues.add(adminBool);
+	    	  rowIndex++;
+	      }
+	      flayout.addComponent(table);
+	      Button saveAdmins = new Button("SAVE");
+	      flayout.addComponent(saveAdmins);
+	      setAdmin.addClickListener(new Button.ClickListener() {		
+			public void buttonClick(ClickEvent event) {
+				if(setAdminAdded==false){
+					setAdminAdded = true;
+					myUIClass.addWindow(subWindow);
+				}
+				
+			}
+		});
+	      subWindow.addCloseListener(new Window.CloseListener() {
+				private static final long serialVersionUID = 1L;
+
+				public void windowClose(CloseEvent e) {					
+					subWindow.close();
+					setAdminAdded = false;
+				}
+			});
+	      
+	      saveAdmins.addClickListener(new Button.ClickListener() {		
+			public void buttonClick(ClickEvent event) {
+				int i = 0;
+                for (Object id : table.getItemIds()) {
+                    Property propertyCb = table.getContainerProperty(id, "Admin-type");
+                    Property userprop = table.getContainerProperty(id, "UserName");
+                    CheckBox cbox =  (CheckBox) propertyCb.getValue();
+                    String name = userprop.getValue().toString();
+                    Boolean old = oldValues.get(i);
+                    Boolean value = cbox.getValue();
+                    if(value!=old){
+                    	Users user = udao.getUserByName(name);
+                    	if(value==true){
+                          	user.setUsertype("admin");
+                    	}else{
+                          	user.setUsertype("user");
+                    	}
+ 
+                    	udao.updateUser(user);  	
+                    }
+                    
+                   i++;
+                }
+                subWindow.close();
+				setAdminAdded = false;
+			}
+		});
 	}
 	
 	private void createSave(Button save){
