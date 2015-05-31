@@ -16,6 +16,7 @@ var nearestPostalCode = [];
 var Nearestindex = 0;
 var allLat = [];
 var allLng = [];
+var routeAdded = false;
 window.edu_ubbcluj_web_user_MapLoader = function() {
 
 	
@@ -117,18 +118,18 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
 		      if(document.getElementById('aPoint')==null){
 		    	  document.getElementById('nearestStart').value = adress;
+		    	  var evt = document.createEvent('HTMLEvents');
+			      evt.initEvent('change', true, false);
+			      ns = document.getElementById('nearestStart');
+			      ns.dispatchEvent(evt);
 		      }
 		      if(document.getElementById('nearestStart')==null){
 		    	  document.getElementById('aPoint').value = adress;  
-		      }
-		     
-		      
-		    
-		     var evt = document.createEvent('HTMLEvents');
-		      evt.initEvent('change', true, false);
-		      ns = document.getElementById('nearestStart');
-		      ns.dispatchEvent(evt);
-		      
+			      var evt2 = document.createEvent('HTMLEvents');
+			      evt2.initEvent('change', true, false);
+			      st = document.getElementById('aPoint');
+			      st.dispatchEvent(evt2); 
+		      }	      
 		    }
 		  });
 		map.removeShape(map.getByKey("kezdeti"));
@@ -169,6 +170,12 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		      adress = response.street + ', ';
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
 		      document.getElementById('bPoint').value = adress;
+		      
+		      var evt = document.createEvent('HTMLEvents');
+		      evt.initEvent('change', true, false);
+		      endp = document.getElementById('bPoint');
+		      endp.dispatchEvent(evt);
+		      
 		    }
 		  });
 		map.removeShape(map.getByKey("kezdeti")); 
@@ -467,16 +474,24 @@ function renderMatrixResults(response) {
 	    endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
 	    endPoint.setIcon(new MQA.Icon('http://open.mapquestapi.com/staticmap/geticon?uri=poi-green_1.png', 20, 30));
 	    routeType = 'shortest';
-	    drawRoute(startPoint, endPoint, routeType);
 	    
+	    drawRoute(startPoint, endPoint, routeType);
+	    var evt = document.createEvent('HTMLEvents');
+	      evt.initEvent('change', true, false);
+	      sp = document.getElementById('nearestStart');
+	      sp.value = "";
+	      sp.dispatchEvent(evt); 
 	  }
 
-function drawRoute(startPoint,endPoint, routeType){
+function drawRoute(startPoint,endPoint, routeType){ 
 	//alert("rajzol");
 	//alert("startLat:"+startPoint.latLng.lat+"  startLng: "+startPoint.latLng.lng);
 	//alert("endLat:"+endPoint.latLng.lat+"  endLng: "+endPoint.latLng.lng);
 	//alert("type= "+routeType);
+	//map.removeAllShapes();
+	//alert("minden leszedve");
 	MQA.withModule('new-route', function() {
+		
 		 var opt = {
                 request: {
                	 locations: [startPoint, endPoint ],
@@ -501,13 +516,14 @@ function drawRoute(startPoint,endPoint, routeType){
                     draggablepoi: true
                 },
                 success: function displayNarrative(data) {
-                	//alert("kirajzolva");
+                	alert("success");
                	 map.bestFit();
                 }
 		 }
 		 map.addRoute(opt);
 		 map.bestFit();
-		// alert("ut hozzadava");
+		 //alert("ut hozzadava");
+		 routeAdded = true;
 	  });
 }
 	

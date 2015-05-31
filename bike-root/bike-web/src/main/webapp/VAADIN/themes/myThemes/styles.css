@@ -7158,6 +7158,20 @@ body .myThemes.v-app .v-app-loading {
 	background-color: #e3c198;
 }
 
-.myThemes .subWindow {
+.myThemes .v-window-outerheader {
 	background-color: #5CAD85;
+	background-image: none;
+	background: #5CAD85;
+}
+
+.myThemes .v-window-header {
+	background-color: #5CAD85;
+}
+
+.myThemes .v-window-closebox {
+	opacity: 0.6;
+}
+
+.myThemes .subWindow {
+	background-color: #F5E0CB;
 }

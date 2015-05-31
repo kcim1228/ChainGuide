@@ -22,10 +22,8 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -46,11 +44,13 @@ import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
 import edu.ubbcluj.web.admin.Admin;
 
-
-
 public class UnLoggedUser extends VerticalLayout implements View {
-	
-	
+
+
+	/**
+	 * Kátay Csilla
+	 */
+	private static final long serialVersionUID = 1L;
 	private boolean loginAdded;
 	private boolean registerAdded;
 	private UI myUIClass;
@@ -59,14 +59,13 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private GridLayout maingrid = new GridLayout(2,1);
 	private GridLayout actiongrid = new GridLayout(1,15);
 	private TextArea search = new TextArea();
-	private TextArea aPoint = new TextArea("A:");
-	private TextArea bPoint = new TextArea("B:");
+	private TextArea aPoint = new TextArea("Start:");
+	private TextArea bPoint = new TextArea("End:");
 	private TextArea startPointForNearest = new TextArea("Select a Start point: ");
 	private Button login = new Button("Login");
 	private Button register = new Button("Register");
 	private Button getDirection = new Button("GO");
 	private Button getNearest = new Button("GO");
-	private Label direction = new Label("Get directions: ");
 	private ComboBox nearestSelect = new ComboBox ("Get nearest: ");
 	private ComboBox showAll = new ComboBox("Show all: ");
 	private CheckBox nearestCb = new CheckBox("open now");
@@ -77,7 +76,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private Panel narrative = new Panel();
 	private VerticalLayout mapLayout = new VerticalLayout();
 	private ComboBox searchType = new ComboBox();
-	private UserMessageState mState = new UserMessageState();
 	Panel jsPanel = new Panel();
 	private Services actualSelectedService;
 	private Places actualSelectedPlace;
@@ -92,58 +90,225 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private DAOFactory daoFactory;
 	private Button showAllButton = new Button("GO");
 	private ComboBox topRated = new ComboBox("Get top rated: ");
-	
-	
+
+
 	public UnLoggedUser(UI UIClass){
 		myUIClass = UI.getCurrent();
 	}
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		System.out.println("unluser: "+this.getSession().getAttribute("userName"));
+		
+		daoFactory = DAOFactory.getInstance();
+		
+		//Appearance of View
+		search.setValue("strada horea, cluj napoca");	
+		routeType.addItem("bicycle");
+		routeType.addItem("shortest");
+		routeType.setValue("bicycle");
+		searchType.addItem("adress");
+		searchType.addItem("service");
+		searchType.addItem("place");
+		searchType.setValue("adress");  
+		search.setStyleName("textFieldColor");
+		aPoint.setStyleName("textFieldColor");
+		bPoint.setStyleName("textFieldColor");
+		jsPanel.setStyleName("notVisible");
+		startPointForNearest.setStyleName("textFieldColor");
+		login.setStyleName("logButton");
+		routeType.setRequired(true);
+		routeType.setDescription("Choose a travel-mode");		
+		nearestSelect.setDescription("What are you looking for?");
+		topsearchButton.setId("topsearchButton");
+		searchType.setId("searchTypeCheck");
+		searchType.setStyleName("check");
+		getDirection.setId("getDirection");
+		getNearest.setId("getNearest");		
+		topgrid.setMargin(true);
+		search.setWidth("70%");
+		search.setRows(1);
+		topgrid.setWidth("100%");
+		topgrid.setHeight("10%");
+		topgrid.setStyleName("topGrid");
+		search.setRows(1);
+		search.setDescription("Here you can serch for places, services, etc.");
+		search.setId("searchTextField");
+		maingrid.setWidth("100%");
+		maingrid.setHeight("85%");
+		
+		logingrid.addComponent(login,0,0);
+		logingrid.addComponent(register,1,0);
+		topgrid.addComponent(search,0,0);
+		topgrid.addComponent(topsearchButton,2,0);
+		topgrid.addComponent(searchType,1,0);
+		topgrid.addComponent(logingrid, 3,0);
+		topgrid.setComponentAlignment(search, Alignment.BOTTOM_LEFT);
+		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
+		topgrid.setComponentAlignment(topsearchButton,  Alignment.BOTTOM_LEFT);
+		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
+
+		logingrid.setComponentAlignment(login, Alignment.TOP_RIGHT);
+		logingrid.setComponentAlignment(register, Alignment.TOP_RIGHT);
+		logingrid.setWidth("100%");
+		logingrid.setColumnExpandRatio(0, 5);
+		logingrid.setColumnExpandRatio(1, 1);
+
+		topgrid.setColumnExpandRatio(0, 6);
+		topgrid.setColumnExpandRatio(1, 1);
+		topgrid.setColumnExpandRatio(2, 1);
+		topgrid.setColumnExpandRatio(3, 5);
+
+		actiongrid.setWidth("100%");
+		actiongrid.setHeight("100%");
+		aPoint.setRows(1);
+		aPoint.setId("aPoint");
+		bPoint.setId("bPoint");
+		bPoint.setRows(1);
+		aPoint.setWidth("90%");
+		aPoint.setRows(2);
+		bPoint.setRows(2);
+		startPointForNearest.setRows(2);
+		bPoint.setWidth("90%");
+		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
+		bPoint.setDescription("Type or choose from the map an End point for your trip .");
+		startPointForNearest.setId("nearestStart");
+		
+		// Create the Accordion.
+		Accordion accordion = new Accordion();
+		accordion.setHeight("100%");
+		final VerticalLayout dirlayout = new VerticalLayout();
+		dirlayout.setStyleName("accTab");
+		dirlayout.addComponent(aPoint);
+		dirlayout.addComponent(bPoint);
+		dirlayout.addComponent(routeType);
+		dirlayout.addComponent(getDirection);
+		dirlayout.setMargin(true);
+		accordion.addTab(dirlayout,"Get direction");
+
+		final VerticalLayout nearlayout = new VerticalLayout();
+		nearlayout.setStyleName("accTab");
+		nearlayout.addComponent(nearestSelect);
+		nearlayout.addComponent(nearestCb);
+		nearlayout.addComponent(startPointForNearest);
+		nearlayout.addComponent(getNearest);
+		nearlayout.setMargin(true);
+		accordion.addTab(nearlayout, "Get nearest");
+
+		final VerticalLayout alllayout = new VerticalLayout();
+		alllayout.setStyleName("accTab");
+		alllayout.addComponent(showAll);
+		alllayout.addComponent(showAllCb);
+		alllayout.addComponent(showAllButton);
+		alllayout.setMargin(true);
+		accordion.addTab(alllayout, "Get all");
+
+		final VerticalLayout ratelayout = new VerticalLayout();
+		ratelayout.setStyleName("accTab");
+		ratelayout.addComponent(topRated);
+		ratelayout.setMargin(true);
+		accordion.addTab(ratelayout, "Get top rated");
+
+		actiongrid.addComponent(accordion,0,13);
+		actiongrid.addComponent(jsPanel,0,14);
+		mapLayout.setSizeFull();
+		mapPanel.setId("map");
+		mapPanel.setStyleName("mapPanel");
+		narrative.setId("route-results");
+		mapPanel.setSizeFull();	
+		mapLayout.addComponent(mapPanel);
+
+		Label top = new Label("ChainGuide");
+		top.setWidth("100%");
+		top.setHeight("4%");
+		this.addComponent(top);
+		this.addComponent(topgrid);
+		Label div = new Label(".");
+		this.addComponent(div);
+		div.setHeight("1%");
+		this.addComponent(maingrid);
+		this.setStyleName("mainColor");
+		maingrid.addComponent(actiongrid,1,0);
+		maingrid.addComponent(mapLayout, 0, 0);
+		maingrid.setColumnExpandRatio(0, 5);
+		maingrid.setColumnExpandRatio(1, 1);
+		fillSelectAreas(nearestSelect,showAll,topRated);
+		createLogin(login);	
+		createRegister(register);	
+		MapLoader mp = new MapLoader();
+		mapPanel.setContent(mp);
 		
 		
+		//action-listeners:
 		getDirection.addClickListener(new Button.ClickListener() {
-			
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void buttonClick(ClickEvent event) {
 				actionState = "routeAction";
-		    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-		    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-		    			allLat,allLng,allSize,actionState);
-		    		jsPanel.setContent(js);
-				
+				System.out.println("a: "+aPoint.getValue()+" b: "+bPoint.getValue() );
+				if((aPoint.getValue().equals(""))||(aPoint.getValue()==null)||
+					(bPoint.getValue().equals(""))||(bPoint.getValue()==null)){
+					Notification.show("Please select a START and an END point for your route!",
+							"",
+							Notification.Type.WARNING_MESSAGE);
+				}else{
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),
+							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+							allLat,allLng,allSize,actionState);
+					jsPanel.setContent(js);
+					aPoint.setValue("");
+					bPoint.setValue("");
+				}
 			}
 		});
-		
+
 		getNearest.addClickListener(new Button.ClickListener() {
-			
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void buttonClick(ClickEvent event) {
-				
+
 				System.out.println("nearestselect value: "+nearestSelect.getValue());
 				System.out.println("text= "+startPointForNearest.getValue());
 				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue()==null)){
-					Notification.show("Please select a start point and a service-type!",
-			                  "",
-			                  Notification.Type.WARNING_MESSAGE);
+					Notification.show("Please select a START point and a Service-type!",
+							"",
+							Notification.Type.WARNING_MESSAGE);
 				}else{
 					allNames.clear();
-			    	allLat.clear();
-			    	allLng.clear();   	
-			    	setAllParams(nearestCb.getValue());
+					allLat.clear();
+					allLng.clear();   	
+					setAllParams(nearestCb.getValue());
+					
 				}
-				
 			}
 		});
-		
+
 
 		showAllButton.addListener(new Button.ClickListener() {		
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void buttonClick(ClickEvent event) {
 				showAll();
-				
+
 			}
 		});
-		
+
 		topRated.addListener(new Property.ValueChangeListener() {		
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void valueChange(ValueChangeEvent event) {
 				actionState = "rateAction";
 				String typeName = (String) topRated.getValue();
@@ -153,9 +318,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				RatingDAO rdao = daoFactory.getRatingDAO();
 				Float maxRate = (float) 0.0;
 				if(type!=null){
-					List<Rating> rlist = rdao.getAllRating();
 					List<Services> slist = sdao.getAllServicesByType(type);
-					
 					for(Services s:slist){
 						List<Rating> ratings = rdao.getAllRatingByService(s);
 						Float avg = (float) 0.0;
@@ -175,47 +338,44 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							}
 						}
 					}
-					System.out.println("maxRate: "+maxRate);
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 							allNames,allLat,allLng,allSize,actionState);
-		    		jsPanel.setContent(js);
-					
+					jsPanel.setContent(js);
 				}
-				
 			}
 		});
-		
+
 		topsearchButton.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
 				actionState = "searchAction";
 				if(searchType.getValue().equals("service")){
 					ServicesDAO sdao = daoFactory.getServicesDAO();
-		    		List<Services> sv = sdao.getAllServicesByName(search.getValue());
-		    		if(sv.size()>0){
-		    			actualSelectedService = sv.get(0);
-			    		actualSelectedName = actualSelectedService.getName();
-			    		actualLat = actualSelectedService.getCoordX();
-			    		actualLng = actualSelectedService.getCoordY();
-			    		
+					List<Services> sv = sdao.getAllServicesByName(search.getValue());
+					if(sv.size()>0){
+						actualSelectedService = sv.get(0);
+						actualSelectedName = actualSelectedService.getName();
+						actualLat = actualSelectedService.getCoordX();
+						actualLng = actualSelectedService.getCoordY();
+
 						System.out.println(actualSelectedService.toString());
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
 								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 								allNames,allLat,allLng,allSize,actionState);
-			    		jsPanel.setContent(js);
-		    		}else{
-    					Notification.show("No such service found!",
-  			                  "",
-  			                  Notification.Type.WARNING_MESSAGE);
-		    		}
-		    		
-	    		}
+						jsPanel.setContent(js);
+					}else{
+						Notification.show("No such service found!",
+								"",
+								Notification.Type.WARNING_MESSAGE);
+					}
+
+				}
 				if(searchType.getValue().equals("adress")){
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 							allNames,allLat,allLng,allSize,actionState);
-		    		jsPanel.setContent(js);
+					jsPanel.setContent(js);
 				}
 				if(searchType.getValue().equals("place")){
 					PlacesDAO pdao = daoFactory.getPlacesDAO();
@@ -225,177 +385,19 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						actualSelectedName = actualSelectedPlace.getName();
 						actualLat = actualSelectedPlace.getCoordX();
 						actualLng = actualSelectedPlace.getCoordY();
-						
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
 								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 								allNames,allLat,allLng,allSize,actionState);
-			    		jsPanel.setContent(js);
+						jsPanel.setContent(js);
 					}else{
 						Notification.show("No such place found!",
-	  			                  "",
-	  			                  Notification.Type.WARNING_MESSAGE);
+								"",
+								Notification.Type.WARNING_MESSAGE);
 					}
 				}
-		    }
+			}
 		});
-		
 
-		//a javascipt vegrehajtasahoz szukseges panel
-		
-		jsPanel.setStyleName("notVisible");
-		 daoFactory = DAOFactory.getInstance();
-		search.setValue("strada horea, cluj napoca");	
-		routeType.addItem("bicycle");
-		routeType.addItem("shortest");
-		routeType.setValue("bicycle");
-		searchType.addItem("adress");
-		searchType.addItem("service");
-		searchType.addItem("place");
-		searchType.setValue("adress");  
-		
-		/*topsearchButton.setStyleName("btn");
-		getDirection.setStyleName("btn");
-		getNearest.setStyleName("btn");*/
-        
-			
-		search.setStyleName("textFieldColor");
-		aPoint.setStyleName("textFieldColor");
-		bPoint.setStyleName("textFieldColor");
-		startPointForNearest.setStyleName("textFieldColor");
-		login.setStyleName("logButton");
-		
-		routeType.setRequired(true);
-		routeType.setDescription("Choose a travel-mode");		
-		nearestSelect.setDescription("What are you looking for?");
-		topsearchButton.setId("topsearchButton");
-		searchType.setId("searchTypeCheck");
-		searchType.setStyleName("check");
-		getDirection.setId("getDirection");
-		getNearest.setId("getNearest");		
-		topgrid.setMargin(true);
-		search.setWidth("70%");
-		//search.setHeight("1.7em");
-		search.setRows(1);
-		topgrid.setWidth("100%");
-		topgrid.setHeight("10%");
-		topgrid.setStyleName("topGrid");
-		search.setRows(1);
-		search.setDescription("Here you can serch for places, services, etc.");
-		search.setId("searchTextField");
-		maingrid.setWidth("100%");
-		maingrid.setHeight("85%");
-
-		logingrid.addComponent(login,0,0);
-		logingrid.addComponent(register,1,0);
-		topgrid.addComponent(search,0,0);
-		topgrid.addComponent(topsearchButton,2,0);
-		topgrid.addComponent(searchType,1,0);
-		topgrid.addComponent(logingrid, 3,0);
-		topgrid.setComponentAlignment(search, Alignment.BOTTOM_LEFT);
-		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
-		topgrid.setComponentAlignment(topsearchButton,  Alignment.BOTTOM_LEFT);
-		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
-		
-		logingrid.setComponentAlignment(login, Alignment.TOP_RIGHT);
-		logingrid.setComponentAlignment(register, Alignment.TOP_RIGHT);
-		logingrid.setWidth("100%");
-		logingrid.setColumnExpandRatio(0, 5);
-		logingrid.setColumnExpandRatio(1, 1);
-		
-		topgrid.setColumnExpandRatio(0, 6);
-		topgrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(2, 1);
-		topgrid.setColumnExpandRatio(3, 5);
-		
-		actiongrid.setWidth("100%");
-		actiongrid.setHeight("100%");
-		aPoint.setRows(1);
-		aPoint.setId("aPoint");
-		bPoint.setId("bPoint");
-		bPoint.setRows(1);
-		aPoint.setWidth("90%");
-		aPoint.setRows(2);
-		bPoint.setRows(2);
-		startPointForNearest.setRows(2);
-		bPoint.setWidth("90%");
-		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
-		bPoint.setDescription("Type or choose from the map an End point for your trip .");
-		startPointForNearest.setId("nearestStart");
-		
-	//------------------------------------
-		
-		// Create the Accordion.
-		Accordion accordion = new Accordion();
-		//accordion.setWidth("98%");
-	accordion.setHeight("100%");
-            final VerticalLayout dirlayout = new VerticalLayout();
-            dirlayout.setStyleName("accTab");
-            Button b = new Button("gomb");
-            dirlayout.addComponent(aPoint);
-            dirlayout.addComponent(bPoint);
-            dirlayout.addComponent(routeType);
-            dirlayout.addComponent(getDirection);
-            dirlayout.setMargin(true);
-            Tab tabDir = accordion.addTab(dirlayout, "Get direction");
-           // tabDir.setStyleName("green");
-            
-        
-            final VerticalLayout nearlayout = new VerticalLayout();
-            nearlayout.setStyleName("accTab");
-            nearlayout.addComponent(nearestSelect);
-            nearlayout.addComponent(nearestCb);
-            nearlayout.addComponent(startPointForNearest);
-            nearlayout.addComponent(getNearest);
-            nearlayout.setMargin(true);
-            accordion.addTab(nearlayout, "Get nearest");
-            
-            final VerticalLayout alllayout = new VerticalLayout();
-            alllayout.setStyleName("accTab");
-            alllayout.addComponent(showAll);
-            alllayout.addComponent(showAllCb);
-            alllayout.addComponent(showAllButton);
-            alllayout.setMargin(true);
-            accordion.addTab(alllayout, "Get all");
-            
-            final VerticalLayout ratelayout = new VerticalLayout();
-            ratelayout.setStyleName("accTab");
-            ratelayout.addComponent(topRated);
-            ratelayout.setMargin(true);
-            accordion.addTab(ratelayout, "Get top rated");
-		
-		actiongrid.addComponent(accordion,0,13);
-		actiongrid.addComponent(jsPanel,0,14);
-		
-		
-		mapLayout.setSizeFull();
-		mapPanel.setId("map");
-		mapPanel.setStyleName("mapPanel");
-		narrative.setId("route-results");
-		mapPanel.setSizeFull();	
-		mapLayout.addComponent(mapPanel);
-		mapLayout.addComponent(narrative);
-		
-		Label top = new Label("ChainGuide");
-		top.setWidth("100%");
-		top.setHeight("4%");
-		this.addComponent(top);
-		this.addComponent(topgrid);
-		Label div = new Label(".");
-		this.addComponent(div);
-		div.setHeight("1%");
-		this.addComponent(maingrid);
-		this.setStyleName("mainColor");
-		
-		maingrid.addComponent(actiongrid,1,0);
-		maingrid.addComponent(mapLayout, 0, 0);
-		maingrid.setColumnExpandRatio(0, 5);
-		maingrid.setColumnExpandRatio(1, 1);
-		fillSelectAreas(nearestSelect,showAll,topRated);
-		createLogin(login);	
-		createRegister(register);	
-		MapLoader mp = new MapLoader();
-		mapPanel.setContent(mp);
-	
 	}
 
 	private void fillSelectAreas(final ComboBox a, ComboBox b, ComboBox c){
@@ -419,220 +421,250 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			a.addItem(p.getType());
 			b.addItem(p.getType());
 		}
-		
 
-		
+
+
 	}
-	
+
 	private void createLogin(Button login){
-		  	final Window subWindow = new Window("Login");
-		  	subWindow.setStyleName("subWindow");
-	        FormLayout flayout = new FormLayout();
-	        flayout.setStyleName("subWindow");
-	        flayout.setMargin(true);
-	        subWindow.setContent(flayout);  
-	        final TextField username = new TextField("Username: ");
-	        username.focus();
-	        flayout.addComponent(username);
-	        final PasswordField pass = new PasswordField("Password: ");
-	        flayout.addComponent(pass);
-	        Button log = new Button("Login");
-	        log.setWidth("70%");
-	        flayout.addComponent(log);
-	        flayout.setHeight("20em");
-	        flayout.setWidth("25em"); 
-	        subWindow.center();
-	        subWindow.setResizable(false);
-	        username.setRequired(true);
-	        pass.setRequired(true);
-	        
-	        login.addClickListener(new Button.ClickListener() {
-				private static final long serialVersionUID = 1L;
-				public void buttonClick(ClickEvent event) {
-			    	if(loginAdded==false){
-			    		//addWindow(subWindow);
-			    		loginAdded=true;
-			    		myUIClass.addWindow(subWindow);
-			    		
-			    	}
-			    }
-			});
-	        
-	        subWindow.addCloseListener(new Window.CloseListener() {
-				private static final long serialVersionUID = 1L;
+		final Window subWindow = new Window("Login");
+		subWindow.setStyleName("subWindow");
+		FormLayout flayout = new FormLayout();
+		flayout.setStyleName("subWindow");
+		flayout.setMargin(true);
+		subWindow.setContent(flayout);  
+		final TextField username = new TextField("Username: ");
+		username.setStyleName("textFieldColor");
+		username.focus();
+		flayout.addComponent(username);
+		final PasswordField pass = new PasswordField("Password: ");
+		pass.setStyleName("textFieldColor");
+		flayout.addComponent(pass);
+		Button log = new Button("Login");
+		log.setWidth("70%");
+		flayout.addComponent(log);
+		flayout.setHeight("20em");
+		flayout.setWidth("25em"); 
+		subWindow.center();
+		subWindow.setResizable(false);
+		username.setRequired(true);
+		pass.setRequired(true);
 
-				public void windowClose(CloseEvent e) {					
-					subWindow.close();
-					loginAdded=false;
+		login.addClickListener(new Button.ClickListener() {
+			private static final long serialVersionUID = 1L;
+			public void buttonClick(ClickEvent event) {
+				if(loginAdded==false){
+					//addWindow(subWindow);
+					loginAdded=true;
+					myUIClass.addWindow(subWindow);
+
 				}
-			});
-	        
-	        log.addClickListener(new Button.ClickListener() {
-			    public void buttonClick(ClickEvent event) {
-			    	DAOFactory daoFactory = DAOFactory.getInstance();
-		    		UsersDAO usersDao = daoFactory.getUsersDAO();
-		    		try{
-		    			Users user = usersDao.getUserByName(username.getValue());
-		    			String hashed = passwordHasher(pass.getValue());
-		    			if(hashed.equals(user.getPassword())){
-		    				subWindow.close();
-				    		loginAdded=false;
-				    		myUIClass.getSession().setAttribute("userName", user.getUsername());
-				    		if(user.getUsertype().equals("user")){
-				    			getUI().getNavigator().removeView("");
-				    			getUI().getNavigator().addView("", new LoggedUser(user));
-			    				getUI().getNavigator().navigateTo("");
-			    				
-			    				//admin is if-be es exaption
-			    		       
-			    				
-			    			}
-				    		else{
-				    			if(user.getUsertype().equals("admin")){
-				    				getUI().getNavigator().removeView("");
-				    				getUI().getNavigator().addView("", new Admin(user));
-				    				getUI().getNavigator().navigateTo("");
-				    			}else{
-				    				//ha egyik tipus sem....
-				    			}
-			    				
-			    			}
-				    		
-		    			}else{
-		    				pass.setComponentError(new UserError("Wrong password!"));
-		    			}
-		    			
-		    		}catch(RuntimeException ex){
-		    			username.setComponentError( new UserError("No such user with this username!"));
-		    		}
-		    		
-		    		
-			    }
-			});
-	}
-	
-	private void createRegister(Button register){
-		final Window subWindow = new Window("Regiter");
-        FormLayout flayout = new FormLayout();
-        flayout.setMargin(true);
-        subWindow.setContent(flayout);
-        final TextField fname = new TextField("First Name: ");
-        flayout.addComponent(fname);
-        final TextField lname = new TextField("Last Name: ");
-        flayout.addComponent(lname);
-        final TextField username = new TextField("Username: ");
-        flayout.addComponent(username);
-        username.setRequired(true);
-        username.setInvalidAllowed(false);
-        username.setDescription("Username must contain only alphabetic characters and numbers");
-        final PasswordField pass1 = new PasswordField("Password: ");
-        flayout.addComponent(pass1);
-        pass1.setRequired(true);
-        pass1.setInvalidAllowed(false);
-        final PasswordField pass2 = new PasswordField("Re-type: ");
-        flayout.addComponent(pass2);
-        pass2.setRequired(true);
-        pass2.setInvalidAllowed(false);
-        final TextField email = new TextField("Email: ");
-        flayout.addComponent(email);
-        Button reg = new Button("Register");
-        flayout.addComponent(reg);
-        reg.setWidth("70%");
-        flayout.setHeight("30em");
-        flayout.setWidth("25em"); 
-        subWindow.center();
-        subWindow.setResizable(false);
-        
-        
-        register.addClickListener(new Button.ClickListener() {
-		    public void buttonClick(ClickEvent event) {
-		    	if(registerAdded==false){
-		    		myUIClass.addWindow(subWindow);
-		    		registerAdded=true;
-		    	}
-		    }
+			}
 		});
-        
-        subWindow.addListener(new Window.CloseListener() {			
+
+		subWindow.addCloseListener(new Window.CloseListener() {
+			private static final long serialVersionUID = 1L;
+
+			public void windowClose(CloseEvent e) {					
+				subWindow.close();
+				loginAdded=false;
+			}
+		});
+
+		log.addClickListener(new Button.ClickListener() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				DAOFactory daoFactory = DAOFactory.getInstance();
+				UsersDAO usersDao = daoFactory.getUsersDAO();
+				try{
+					Users user = usersDao.getUserByName(username.getValue());
+					String hashed = passwordHasher(pass.getValue());
+					if(hashed.equals(user.getPassword())){
+						subWindow.close();
+						loginAdded=false;
+						myUIClass.getSession().setAttribute("userName", user.getUsername());
+						if(user.getUsertype().equals("user")){
+							getUI().getNavigator().removeView("");
+							getUI().getNavigator().addView("", new LoggedUser(user));
+							getUI().getNavigator().navigateTo("");
+
+							//admin is if-be es exaption
+
+
+						}
+						else{
+							if(user.getUsertype().equals("admin")){
+								getUI().getNavigator().removeView("");
+								getUI().getNavigator().addView("", new Admin(user));
+								getUI().getNavigator().navigateTo("");
+							}else{
+								//ha egyik tipus sem....
+							}
+
+						}
+
+					}else{
+						pass.setComponentError(new UserError("Wrong password!"));
+					}
+
+				}catch(RuntimeException ex){
+					username.setComponentError( new UserError("No such user with this username!"));
+				}
+
+
+			}
+		});
+	}
+
+	@SuppressWarnings("deprecation")
+	private void createRegister(Button register){
+		final Window subWindow = new Window("Register");
+		FormLayout flayout = new FormLayout();
+		flayout.setStyleName("subWindow");
+		flayout.setMargin(true);
+		subWindow.setContent(flayout);
+		final TextField fname = new TextField("First Name: ");
+		fname.setStyleName("textFieldColor");
+		flayout.addComponent(fname);
+		final TextField lname = new TextField("Last Name: ");
+		lname.setStyleName("textFieldColor");
+		flayout.addComponent(lname);
+		final TextField username = new TextField("Username: ");
+		username.setStyleName("textFieldColor");
+		flayout.addComponent(username);
+		username.setRequired(true);
+		username.setInvalidAllowed(false);
+		username.setDescription("Username must contain only alphabetic characters and numbers");
+		final PasswordField pass1 = new PasswordField("Password: ");
+		pass1.setStyleName("textFieldColor");
+		flayout.addComponent(pass1);
+		pass1.setRequired(true);
+		pass1.setInvalidAllowed(false);
+		final PasswordField pass2 = new PasswordField("Re-type: ");
+		pass2.setStyleName("textFieldColor");
+		flayout.addComponent(pass2);
+		pass2.setRequired(true);
+		pass2.setInvalidAllowed(false);
+		final TextField email = new TextField("Email: ");
+		email.setStyleName("textFieldColor");
+		flayout.addComponent(email);
+		Button reg = new Button("Register");
+		flayout.addComponent(reg);
+		reg.setWidth("70%");
+		flayout.setHeight("30em");
+		flayout.setWidth("25em"); 
+		subWindow.center();
+		subWindow.setResizable(false);
+
+
+		register.addClickListener(new Button.ClickListener() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				if(registerAdded==false){
+					myUIClass.addWindow(subWindow);
+					registerAdded=true;
+				}
+			}
+		});
+
+		subWindow.addListener(new Window.CloseListener() {			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void windowClose(CloseEvent e) {					
 				registerAdded=false;
 			}
 		});
-        
-        reg.addClickListener(new Button.ClickListener() {
-		    public void buttonClick(ClickEvent event) {
-		    	boolean okay=true;
-		    	DAOFactory daoFactory = DAOFactory.getInstance();
-	    		UsersDAO usersDao = daoFactory.getUsersDAO();
-	    		List<Users> existingUser = null;
-		    	if(!username.isValid()){
-		    		username.setComponentError(new UserError("Please pick a username!"));
-		    		okay=false;
-		    	}else{
-		    			 existingUser = usersDao.getUsersByName("");
-		    	}
-		    	
-		    	if(!pass1.isValid()){
-		    		pass1.setComponentError(new UserError("Please type in your password!"));
-		    		okay=false;
-		    	}
-		    	if(!pass2.isValid()){
-		    		pass2.setComponentError(new UserError("Please re-type your password!"));
-		    		okay=false;
-		    	}
-		    	if(!pass1.getValue().equals(pass2.getValue())){
-		    	
-		    		pass2.setComponentError(new UserError("The passwords are not the same!"));
-		    		okay=false;
-		    	}
-		    	if((email!=null)||(!email.equals(""))){
-		    		if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-		    				+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
-		    			okay=false;
-		    			email.setComponentError(new UserError("This is not a valid email adress!"));
-		    		}
-		    	}
-		    	if(okay){
-		    		boolean exist = false;
-		    		
-		    		for(Users u:existingUser){
-		    			System.out.println(u.getUsername());
-		    			if(u.getUsername().equals(username.getValue())){
-		    				
-		    				exist = true;
-		    			}
-		    		}
-		    		
-		    		if(exist){
-		    			Notification.show("Username alredy i use", "Pick up another", com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
-		    		}
-		    		else{
-		    			
-		    			subWindow.close();
-			    		//System.out.println(fname.getValue()+","+lname.getValue()+","+username.getValue()+","+pass1.getValue()+","+email.getValue());
-			    		
-			    		String hashed = passwordHasher(pass1.getValue());
-			    		Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
-			    		usersDao.insertUser(user);
-			    		myUIClass.getSession().setAttribute("userName", user.getUsername());
-			    		getUI().getNavigator().removeView("");
-			    		getUI().getNavigator().addView("", new LoggedUser(user));
-			    		getUI().getNavigator().navigateTo("");
-		    		}
-		    		
-		    		
-		    		
-		    	}
-		    	
-		    	
-		    }
+
+		reg.addClickListener(new Button.ClickListener() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				boolean okay=true;
+				DAOFactory daoFactory = DAOFactory.getInstance();
+				UsersDAO usersDao = daoFactory.getUsersDAO();
+				List<Users> existingUser = null;
+				if(!username.isValid()){
+					username.setComponentError(new UserError("Please pick a username!"));
+					okay=false;
+				}else{
+					existingUser = usersDao.getUsersByName("");
+				}
+
+				if(!pass1.isValid()){
+					pass1.setComponentError(new UserError("Please type in your password!"));
+					okay=false;
+				}
+				if(!pass2.isValid()){
+					pass2.setComponentError(new UserError("Please re-type your password!"));
+					okay=false;
+				}
+				if(!pass1.getValue().equals(pass2.getValue())){
+
+					pass2.setComponentError(new UserError("The passwords are not the same!"));
+					okay=false;
+				}
+				if((email!=null)||(!email.equals(""))){
+					if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+							+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
+						okay=false;
+						email.setComponentError(new UserError("This is not a valid email adress!"));
+					}
+				}
+				if(okay){
+					boolean exist = false;
+
+					for(Users u:existingUser){
+						System.out.println(u.getUsername());
+						if(u.getUsername().equals(username.getValue())){
+
+							exist = true;
+						}
+					}
+
+					if(exist){
+						Notification.show("Username alredy i use", "Pick up another", com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
+					}
+					else{
+
+						subWindow.close();
+						//System.out.println(fname.getValue()+","+lname.getValue()+","+username.getValue()+","+pass1.getValue()+","+email.getValue());
+
+						String hashed = passwordHasher(pass1.getValue());
+						Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
+						usersDao.insertUser(user);
+						myUIClass.getSession().setAttribute("userName", user.getUsername());
+						getUI().getNavigator().removeView("");
+						getUI().getNavigator().addView("", new LoggedUser(user));
+						getUI().getNavigator().navigateTo("");
+					}
+
+
+
+				}
+
+
+			}
 		});
-        
+
 	}
-	
+
 	protected void addWindow(Window subWindow) {
 		this.addComponent(subWindow);
-		
+
 	}
 
 	private String  passwordHasher(String password){
@@ -660,21 +692,21 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			e.printStackTrace();
 		}
 		return generatedPassword;
-	
-	}
-	
-	public  List<Services> intersection(List<Services> list1, List<Services> list2) {
-        List<Services> list = new ArrayList<Services>();
 
-        for (Services t : list1) {
-            if(list2.contains(t)) {
-                list.add(t);
-            }
-        }
-        System.out.println("lista:"+list);
-        return list;
-    }
-	
+	}
+
+	public  List<Services> intersection(List<Services> list1, List<Services> list2) {
+		List<Services> list = new ArrayList<Services>();
+
+		for (Services t : list1) {
+			if(list2.contains(t)) {
+				list.add(t);
+			}
+		}
+		System.out.println("lista:"+list);
+		return list;
+	}
+
 	private void setAllParams(boolean value){
 		actionState = "nearestAction";
 		String nearestType = "place";
@@ -687,181 +719,181 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		}
 		if(nearestType.equals("service")){
 			ServicesDAO sdao = daoFactory.getServicesDAO();
-	    	Type tp = tdao.getTypeByName(nearestSelect.getValue().toString());
-	    	List<Services> slist = sdao.getAllServicesByType(tp);
+			Type tp = tdao.getTypeByName(nearestSelect.getValue().toString());
+			List<Services> slist = sdao.getAllServicesByType(tp);
 
-			 if(value==false){
-			    	allSize = slist.size();
-			    	System.out.println("itt: "+slist.toString());
-			    	for(int i=0;i<slist.size();i++){
-			    		allNames.add(slist.get(i).getName().toString());
-			    		allLat.add(slist.get(i).getCoordX());
-			    		allLng.add(slist.get(i).getCoordY());
-			    		System.out.println(slist.get(i));
-			    	}
-					
-		    	}else{
-		    		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
-		    		List<Openhours> ohs =  openDao.getAllOpenNow();
-		    		List<Services> openServ = new ArrayList<Services>();
-		    		for(int i=0;i<ohs.size();i++){
-		    			openServ.add(ohs.get(i).getServices());
-		    		}
-		    		//slist.retainAll(openServ);//intersection(slist, openServ);
-		    		
-		    		System.out.println("slist: "+slist.toString());
-		    		System.out.println("openserv"+openServ.toString());
-		    		List<Integer> openlist = new ArrayList();
-		    		List<Integer> alllist = new ArrayList();	
-		    		for(Services s:openServ){
-		    			openlist.add(s.getId());
-		    		}
-		    		for(Services s:slist){
-		    			alllist.add(s.getId());
-		    		}
-		    		System.out.println("open: "+ openlist.toString());
-		    		System.out.println("all: "+ alllist.toString());
-		    		
-		    		openlist.retainAll(alllist);
-		    		System.out.println("utana: "+openlist);
-		    		allSize = openlist.size();
-		    		for(int i=0;i<allSize;i++){
-			    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
-			    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
-			    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
-			    	}
-		    		
-		    	}
+			if(value==false){
+				allSize = slist.size();
+				System.out.println("itt: "+slist.toString());
+				for(int i=0;i<slist.size();i++){
+					allNames.add(slist.get(i).getName().toString());
+					allLat.add(slist.get(i).getCoordX());
+					allLng.add(slist.get(i).getCoordY());
+					System.out.println(slist.get(i));
+				}
+
+			}else{
+				OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+				List<Openhours> ohs =  openDao.getAllOpenNow();
+				List<Services> openServ = new ArrayList<Services>();
+				for(int i=0;i<ohs.size();i++){
+					openServ.add(ohs.get(i).getServices());
+				}
+				//slist.retainAll(openServ);//intersection(slist, openServ);
+
+				System.out.println("slist: "+slist.toString());
+				System.out.println("openserv"+openServ.toString());
+				List<Integer> openlist = new ArrayList<Integer>();
+				List<Integer> alllist = new ArrayList<Integer>();	
+				for(Services s:openServ){
+					openlist.add(s.getId());
+				}
+				for(Services s:slist){
+					alllist.add(s.getId());
+				}
+				System.out.println("open: "+ openlist.toString());
+				System.out.println("all: "+ alllist.toString());
+
+				openlist.retainAll(alllist);
+				System.out.println("utana: "+openlist);
+				allSize = openlist.size();
+				for(int i=0;i<allSize;i++){
+					allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+					allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+					allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+				}
+
+			}
 		}else{
-			   PlacesDAO pdao = daoFactory.getPlacesDAO();
-			   List<Places> plist = pdao.getAllPlaces();
-			   List<Places> sameType = new ArrayList<Places>();
-			   for(Places p:plist){
-				   if(p.getType().equals(nearestSelect.getValue())){
-					   sameType.add(p);
-				   }
-			   }
-			   if(sameType.size()>0){
-				   allSize = sameType.size();
-				   for(Places p:sameType){
-					   allNames.add(p.getName());
-					   allLat.add(p.getCoordX());
-					   allLng.add(p.getCoordY());
-				   }
-				   
-			   }
+			PlacesDAO pdao = daoFactory.getPlacesDAO();
+			List<Places> plist = pdao.getAllPlaces();
+			List<Places> sameType = new ArrayList<Places>();
+			for(Places p:plist){
+				if(p.getType().equals(nearestSelect.getValue())){
+					sameType.add(p);
+				}
+			}
+			if(sameType.size()>0){
+				allSize = sameType.size();
+				for(Places p:sameType){
+					allNames.add(p.getName());
+					allLat.add(p.getCoordX());
+					allLng.add(p.getCoordY());
+				}
+
+			}
 		}
 
-	    	JsConnecter js = new JsConnecter((String) routeType.getValue(),
-	    			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-	    			allLat,allLng,allSize,actionState);
-	    		jsPanel.setContent(js);
-	    	allSize = -1;
+		JsConnecter js = new JsConnecter((String) routeType.getValue(),
+				(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+				allLat,allLng,allSize,actionState);
+		jsPanel.setContent(js);
+		allSize = -1;
 	}
-	
+
 	private void showAll(){
 		String allType="place";
 		boolean show = false;
-    	actionState = "placeListAction";
-    	allNames.clear();
-    	allLat.clear();
-    	allLng.clear();
-    	TypeDAO tdao = daoFactory.getTypeDAO();
-    	List<Type> typeList = tdao.getAllType();
-    	for(Type t:typeList){
-    		if(t.getName().equals(showAll.getValue())){
-    			allType = "service";
-    			actionState = "serviceListAction";
-    		}
-    	}
-    	
-    	
-	   if(allType.equals("service")){
-		   Type tp = tdao.getTypeByName(showAll.getValue().toString());
-	    	ServicesDAO sdao = daoFactory.getServicesDAO();
-	    	List<Services> slist = sdao.getAllServicesByType(tp);
-	    	if(slist.size()>0){
-	        	if(showAllCb.getValue()==false){
-	    	    	System.out.println(showAll.getValue());
-	    	    	allSize = slist.size();
-	    	    	for(int i=0;i<slist.size();i++){
-	    	    		allNames.add(slist.get(i).getName().toString());
-	    	    		allLat.add(slist.get(i).getCoordX());
-	    	    		allLng.add(slist.get(i).getCoordY());
-	    	    		System.out.println(slist.get(i));
-	    	    	}
-	    	    	show = true;
-	        	}else{
-	        		OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
-	        		List<Openhours> ohs =  openDao.getAllOpenNow();
-	        		if(ohs.size()>0){
-	        			List<Services> openServ = new ArrayList<Services>();
-	            		for(int i=0;i<ohs.size();i++){
-	            			openServ.add(ohs.get(i).getServices());
-	            		}
-	            		//slist.retainAll(openServ);//intersection(slist, openServ);
-	            		
-	            		System.out.println("slist: "+slist.toString());
-	            		System.out.println("openserv"+openServ.toString());
-	            		List<Integer> openlist = new ArrayList();
-	            		List<Integer> alllist = new ArrayList();	
-	            		for(Services s:openServ){
-	            			openlist.add(s.getId());
-	            		}
-	            		for(Services s:slist){
-	            			alllist.add(s.getId());
-	            		}
-	            		System.out.println("open: "+ openlist.toString());
-	            		System.out.println("all: "+ alllist.toString());
-	            		
-	            		openlist.retainAll(alllist);
-	            		System.out.println("utana: "+openlist);
-	            		
-	            		allSize = openlist.size();
-	            		for(int i=0;i<allSize;i++){
-	        	    		allNames.add(sdao.getServiceById(openlist.get(i)).getName());
-	        	    		allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
-	        	    		allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
-	        	    	}
-	            		show = true;
-	        		}
-	        		
-	        		
-	        	}
-	        	if(show){
-	        		JsConnecter js = new JsConnecter((String) routeType.getValue(),
-	            			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-	            			allLat,allLng,allSize,actionState);
-	            		jsPanel.setContent(js);
-	            		allSize = -1;
-	        	}
-	        	
-	    	}
-	   }else{
-		   PlacesDAO pdao = daoFactory.getPlacesDAO();
-		   List<Places> plist = pdao.getAllPlaces();
-		   List<Places> sameType = new ArrayList<Places>();
-		   for(Places p:plist){
-			   if(p.getType().equals(showAll.getValue())){
-				   sameType.add(p);
-			   }
-		   }
-		   if(sameType.size()>0){
-			   allSize = sameType.size();
-			   for(Places p:sameType){
-				   allNames.add(p.getName());
-				   allLat.add(p.getCoordX());
-				   allLng.add(p.getCoordY());
-			   }
-			   JsConnecter js = new JsConnecter((String) routeType.getValue(),
-           			(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-           			allLat,allLng,allSize,actionState);
-           		jsPanel.setContent(js);
-           		allSize = -1;
-			   
-		   }
-	   }
-	    	
+		actionState = "placeListAction";
+		allNames.clear();
+		allLat.clear();
+		allLng.clear();
+		TypeDAO tdao = daoFactory.getTypeDAO();
+		List<Type> typeList = tdao.getAllType();
+		for(Type t:typeList){
+			if(t.getName().equals(showAll.getValue())){
+				allType = "service";
+				actionState = "serviceListAction";
+			}
+		}
+
+
+		if(allType.equals("service")){
+			Type tp = tdao.getTypeByName(showAll.getValue().toString());
+			ServicesDAO sdao = daoFactory.getServicesDAO();
+			List<Services> slist = sdao.getAllServicesByType(tp);
+			if(slist.size()>0){
+				if(showAllCb.getValue()==false){
+					System.out.println(showAll.getValue());
+					allSize = slist.size();
+					for(int i=0;i<slist.size();i++){
+						allNames.add(slist.get(i).getName().toString());
+						allLat.add(slist.get(i).getCoordX());
+						allLng.add(slist.get(i).getCoordY());
+						System.out.println(slist.get(i));
+					}
+					show = true;
+				}else{
+					OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+					List<Openhours> ohs =  openDao.getAllOpenNow();
+					if(ohs.size()>0){
+						List<Services> openServ = new ArrayList<Services>();
+						for(int i=0;i<ohs.size();i++){
+							openServ.add(ohs.get(i).getServices());
+						}
+						//slist.retainAll(openServ);//intersection(slist, openServ);
+
+						System.out.println("slist: "+slist.toString());
+						System.out.println("openserv"+openServ.toString());
+						List<Integer> openlist = new ArrayList<Integer>();
+						List<Integer> alllist = new ArrayList<Integer>();	
+						for(Services s:openServ){
+							openlist.add(s.getId());
+						}
+						for(Services s:slist){
+							alllist.add(s.getId());
+						}
+						System.out.println("open: "+ openlist.toString());
+						System.out.println("all: "+ alllist.toString());
+
+						openlist.retainAll(alllist);
+						System.out.println("utana: "+openlist);
+
+						allSize = openlist.size();
+						for(int i=0;i<allSize;i++){
+							allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+							allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+							allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+						}
+						show = true;
+					}
+
+
+				}
+				if(show){
+					JsConnecter js = new JsConnecter((String) routeType.getValue(),
+							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+							allLat,allLng,allSize,actionState);
+					jsPanel.setContent(js);
+					allSize = -1;
+				}
+
+			}
+		}else{
+			PlacesDAO pdao = daoFactory.getPlacesDAO();
+			List<Places> plist = pdao.getAllPlaces();
+			List<Places> sameType = new ArrayList<Places>();
+			for(Places p:plist){
+				if(p.getType().equals(showAll.getValue())){
+					sameType.add(p);
+				}
+			}
+			if(sameType.size()>0){
+				allSize = sameType.size();
+				for(Places p:sameType){
+					allNames.add(p.getName());
+					allLat.add(p.getCoordX());
+					allLng.add(p.getCoordY());
+				}
+				JsConnecter js = new JsConnecter((String) routeType.getValue(),
+						(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+						allLat,allLng,allSize,actionState);
+				jsPanel.setContent(js);
+				allSize = -1;
+
+			}
+		}
+
 	}
 
 
