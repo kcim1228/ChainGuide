@@ -4,7 +4,7 @@
 	@include reindeer;
 
 	.mapPanel{
-		width: 98%;
+		width: 90%;
 		height: 48em;
 	}
 	
@@ -78,21 +78,7 @@
 	}
 	
 
-		
-	.v-button {
-	    background-color: #e3c198;
-	    }
-	    	
-	.v-button-wrap {
-	    background-color: #e3c198;
-	    }
-	  .v-button v-widget {
-	    background-color: #e3c198;
-	    }
-	 .v-button-caption{
-	 	background-color: #e3c198;
-	 }
-	
+
 	.v-window-outerheader {
 		background-color:#5CAD85;
 		background-image:none;
@@ -109,7 +95,89 @@
 		background-color: #F5E0CB;
 	}
 	    
-	 
+	    
+	    .v-button:focus {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button:focus .v-button-wrap {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button:active,
+		.v-button.v-pressed {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button:active .v-button-wrap,
+		.v-button.v-pressed .v-button-wrap {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button,
+		.v-disabled.v-button {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button-wrap,
+		.v-disabled.v-button .v-button-wrap {
+			  background: #e8c8a7;
+			  background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+			  background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+			 -webkit-border-radius: 5;
+			  -moz-border-radius: 5;
+			  border-radius: 5px;
+		    }
+		
+		.v-button-caption {
+			background-color:none;
+
+		    }
+		
+		
 	
 
 }

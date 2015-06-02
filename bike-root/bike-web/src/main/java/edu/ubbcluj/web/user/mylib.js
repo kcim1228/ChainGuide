@@ -140,7 +140,7 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		caption = "endPoint"+lastEndIndex;
 		map.removeShape(map.getByKey(caption)); 
 		lastEndIndex = lastEndIndex + 1;
-		map.removeShape(map.getByKey("endPoint"+lastEndIndex)); 
+		//map.removeShape(map.getByKey("endPoint"+lastEndIndex)); 
 		MQA.withModule('geocoder', function() {
 			
 			//felulirom az alapertelmezett pontot
@@ -471,10 +471,11 @@ function renderMatrixResults(response) {
 	    //alert("all "+ allLat[minIndex]+" es "+allLng[minIndex ]);
 	    startPoint = map.getByKey("startPoint"+lastStartIndex);
 	    //endPoint = { latLng: { lat: allLat[minIndex], lng: allLng[minIndex] }};
-	    endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
+	   endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
 	    endPoint.setIcon(new MQA.Icon('http://open.mapquestapi.com/staticmap/geticon?uri=poi-green_1.png', 20, 30));
-	    routeType = 'shortest';
 	    
+	
+	    routeType = 'shortest';
 	    drawRoute(startPoint, endPoint, routeType);
 	    var evt = document.createEvent('HTMLEvents');
 	      evt.initEvent('change', true, false);
@@ -485,9 +486,9 @@ function renderMatrixResults(response) {
 
 function drawRoute(startPoint,endPoint, routeType){ 
 	//alert("rajzol");
-	//alert("startLat:"+startPoint.latLng.lat+"  startLng: "+startPoint.latLng.lng);
-	//alert("endLat:"+endPoint.latLng.lat+"  endLng: "+endPoint.latLng.lng);
-	//alert("type= "+routeType);
+	alert("startLat:"+startPoint.latLng.lat+"  startLng: "+startPoint.latLng.lng);
+	alert("endLat:"+endPoint.latLng.lat+"  endLng: "+endPoint.latLng.lng);
+	alert("type= "+routeType);
 	//map.removeAllShapes();
 	//alert("minden leszedve");
 	MQA.withModule('new-route', function() {
@@ -523,7 +524,6 @@ function drawRoute(startPoint,endPoint, routeType){
 		 map.addRoute(opt);
 		 map.bestFit();
 		 //alert("ut hozzadava");
-		 routeAdded = true;
 	  });
 }
 	

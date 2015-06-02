@@ -182,6 +182,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		dirlayout.addComponent(bPoint);
 		dirlayout.addComponent(routeType);
 		dirlayout.addComponent(getDirection);
+		dirlayout.setComponentAlignment(getDirection, Alignment.BOTTOM_CENTER);
 		dirlayout.setMargin(true);
 		accordion.addTab(dirlayout,"Get direction");
 
@@ -191,6 +192,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		nearlayout.addComponent(nearestCb);
 		nearlayout.addComponent(startPointForNearest);
 		nearlayout.addComponent(getNearest);
+		nearlayout.setComponentAlignment(getNearest, Alignment.BOTTOM_CENTER);
 		nearlayout.setMargin(true);
 		accordion.addTab(nearlayout, "Get nearest");
 
@@ -199,6 +201,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		alllayout.addComponent(showAll);
 		alllayout.addComponent(showAllCb);
 		alllayout.addComponent(showAllButton);
+		alllayout.setComponentAlignment(showAllButton, Alignment.BOTTOM_CENTER);
 		alllayout.setMargin(true);
 		accordion.addTab(alllayout, "Get all");
 
@@ -259,8 +262,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 							allLat,allLng,allSize,actionState);
 					jsPanel.setContent(js);
-					aPoint.setValue("");
-					bPoint.setValue("");
+					//aPoint.setValue("");
+					//bPoint.setValue("");
 				}
 			}
 		});
@@ -792,108 +795,113 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	}
 
 	private void showAll(){
-		String allType="place";
-		boolean show = false;
-		actionState = "placeListAction";
-		allNames.clear();
-		allLat.clear();
-		allLng.clear();
-		TypeDAO tdao = daoFactory.getTypeDAO();
-		List<Type> typeList = tdao.getAllType();
-		for(Type t:typeList){
-			if(t.getName().equals(showAll.getValue())){
-				allType = "service";
-				actionState = "serviceListAction";
+		if((showAll.getValue()==null)||(showAll.getValue().equals(""))){
+			Notification.show("Please select a service or a place type! ",
+					"",
+					Notification.Type.WARNING_MESSAGE);
+		}else{
+			String allType="place";
+			boolean show = false;
+			actionState = "placeListAction";
+			allNames.clear();
+			allLat.clear();
+			allLng.clear();
+			TypeDAO tdao = daoFactory.getTypeDAO();
+			List<Type> typeList = tdao.getAllType();
+			for(Type t:typeList){
+				if(t.getName().equals(showAll.getValue())){
+					allType = "service";
+					actionState = "serviceListAction";
+				}
 			}
-		}
 
 
-		if(allType.equals("service")){
-			Type tp = tdao.getTypeByName(showAll.getValue().toString());
-			ServicesDAO sdao = daoFactory.getServicesDAO();
-			List<Services> slist = sdao.getAllServicesByType(tp);
-			if(slist.size()>0){
-				if(showAllCb.getValue()==false){
-					System.out.println(showAll.getValue());
-					allSize = slist.size();
-					for(int i=0;i<slist.size();i++){
-						allNames.add(slist.get(i).getName().toString());
-						allLat.add(slist.get(i).getCoordX());
-						allLng.add(slist.get(i).getCoordY());
-						System.out.println(slist.get(i));
-					}
-					show = true;
-				}else{
-					OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
-					List<Openhours> ohs =  openDao.getAllOpenNow();
-					if(ohs.size()>0){
-						List<Services> openServ = new ArrayList<Services>();
-						for(int i=0;i<ohs.size();i++){
-							openServ.add(ohs.get(i).getServices());
-						}
-						//slist.retainAll(openServ);//intersection(slist, openServ);
-
-						System.out.println("slist: "+slist.toString());
-						System.out.println("openserv"+openServ.toString());
-						List<Integer> openlist = new ArrayList<Integer>();
-						List<Integer> alllist = new ArrayList<Integer>();	
-						for(Services s:openServ){
-							openlist.add(s.getId());
-						}
-						for(Services s:slist){
-							alllist.add(s.getId());
-						}
-						System.out.println("open: "+ openlist.toString());
-						System.out.println("all: "+ alllist.toString());
-
-						openlist.retainAll(alllist);
-						System.out.println("utana: "+openlist);
-
-						allSize = openlist.size();
-						for(int i=0;i<allSize;i++){
-							allNames.add(sdao.getServiceById(openlist.get(i)).getName());
-							allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
-							allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+			if(allType.equals("service")){
+				Type tp = tdao.getTypeByName(showAll.getValue().toString());
+				ServicesDAO sdao = daoFactory.getServicesDAO();
+				List<Services> slist = sdao.getAllServicesByType(tp);
+				if(slist.size()>0){
+					if(showAllCb.getValue()==false){
+						System.out.println(showAll.getValue());
+						allSize = slist.size();
+						for(int i=0;i<slist.size();i++){
+							allNames.add(slist.get(i).getName().toString());
+							allLat.add(slist.get(i).getCoordX());
+							allLng.add(slist.get(i).getCoordY());
+							System.out.println(slist.get(i));
 						}
 						show = true;
+					}else{
+						OpenhoursDAO openDao = daoFactory.getOpenhoursDAO();
+						List<Openhours> ohs =  openDao.getAllOpenNow();
+						if(ohs.size()>0){
+							List<Services> openServ = new ArrayList<Services>();
+							for(int i=0;i<ohs.size();i++){
+								openServ.add(ohs.get(i).getServices());
+							}
+							//slist.retainAll(openServ);//intersection(slist, openServ);
+
+							System.out.println("slist: "+slist.toString());
+							System.out.println("openserv"+openServ.toString());
+							List<Integer> openlist = new ArrayList<Integer>();
+							List<Integer> alllist = new ArrayList<Integer>();	
+							for(Services s:openServ){
+								openlist.add(s.getId());
+							}
+							for(Services s:slist){
+								alllist.add(s.getId());
+							}
+							System.out.println("open: "+ openlist.toString());
+							System.out.println("all: "+ alllist.toString());
+
+							openlist.retainAll(alllist);
+							System.out.println("utana: "+openlist);
+
+							allSize = openlist.size();
+							for(int i=0;i<allSize;i++){
+								allNames.add(sdao.getServiceById(openlist.get(i)).getName());
+								allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
+								allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
+							}
+							show = true;
+						}
+
+
+					}
+					if(show){
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),
+								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+								allLat,allLng,allSize,actionState);
+						jsPanel.setContent(js);
+						allSize = -1;
 					}
 
-
 				}
-				if(show){
+			}else{
+				PlacesDAO pdao = daoFactory.getPlacesDAO();
+				List<Places> plist = pdao.getAllPlaces();
+				List<Places> sameType = new ArrayList<Places>();
+				for(Places p:plist){
+					if(p.getType().equals(showAll.getValue())){
+						sameType.add(p);
+					}
+				}
+				if(sameType.size()>0){
+					allSize = sameType.size();
+					for(Places p:sameType){
+						allNames.add(p.getName());
+						allLat.add(p.getCoordX());
+						allLng.add(p.getCoordY());
+					}
 					JsConnecter js = new JsConnecter((String) routeType.getValue(),
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 							allLat,allLng,allSize,actionState);
 					jsPanel.setContent(js);
 					allSize = -1;
-				}
 
-			}
-		}else{
-			PlacesDAO pdao = daoFactory.getPlacesDAO();
-			List<Places> plist = pdao.getAllPlaces();
-			List<Places> sameType = new ArrayList<Places>();
-			for(Places p:plist){
-				if(p.getType().equals(showAll.getValue())){
-					sameType.add(p);
 				}
-			}
-			if(sameType.size()>0){
-				allSize = sameType.size();
-				for(Places p:sameType){
-					allNames.add(p.getName());
-					allLat.add(p.getCoordX());
-					allLng.add(p.getCoordY());
-				}
-				JsConnecter js = new JsConnecter((String) routeType.getValue(),
-						(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-						allLat,allLng,allSize,actionState);
-				jsPanel.setContent(js);
-				allSize = -1;
-
 			}
 		}
-
 	}
 
 

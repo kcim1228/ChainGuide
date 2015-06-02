@@ -7065,7 +7065,7 @@ body .myThemes.v-app .v-app-loading {
 }
 
 .myThemes .mapPanel {
-	width: 98%;
+	width: 90%;
 	height: 48em;
 }
 
@@ -7142,22 +7142,6 @@ body .myThemes.v-app .v-app-loading {
 	box-shadow: inset 0px 10px 24px -9px rgba(0, 0, 0, 0.75);
 }
 
-.myThemes .v-button {
-	background-color: #e3c198;
-}
-
-.myThemes .v-button-wrap {
-	background-color: #e3c198;
-}
-
-.myThemes .v-button v-widget {
-	background-color: #e3c198;
-}
-
-.myThemes .v-button-caption {
-	background-color: #e3c198;
-}
-
 .myThemes .v-window-outerheader {
 	background-color: #5CAD85;
 	background-image: none;
@@ -7174,4 +7158,80 @@ body .myThemes.v-app .v-app-loading {
 
 .myThemes .subWindow {
 	background-color: #F5E0CB;
+}
+
+.myThemes .v-button:focus {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button:focus .v-button-wrap {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button:active, .myThemes .v-button.v-pressed {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button:active .v-button-wrap, .myThemes .v-button.v-pressed .v-button-wrap {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button, .myThemes .v-disabled.v-button {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button-wrap, .myThemes .v-disabled.v-button .v-button-wrap {
+	background: #e8c8a7;
+	background-image: -webkit-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -moz-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -ms-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: -o-linear-gradient(top, #e8c8a7, #b89264);
+	background-image: linear-gradient(to bottom, #e8c8a7, #b89264);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+}
+
+.myThemes .v-button-caption {
+	background-color: none;
 }
