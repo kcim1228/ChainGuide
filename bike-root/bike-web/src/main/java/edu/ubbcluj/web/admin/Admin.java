@@ -73,7 +73,7 @@ public class Admin extends VerticalLayout implements View{
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
 	private GridLayout actiongrid = new GridLayout(1,11);
-	private TextArea search = new TextArea("Search: ");
+	private TextArea search = new TextArea();
 	private Button logout = new Button("Logout");
 	private Button setAdmin = new Button ("Manage roles");
 	private Button save = new Button("SAVE / NEW");
@@ -104,13 +104,98 @@ public class Admin extends VerticalLayout implements View{
 	 private Users thisAdmin;
 	
 	public Admin( Users u){
-		//myUIClass=ui;
 		myUIClass = UI.getCurrent();
 		thisAdmin = u;
 	}
 
 	public void enter(ViewChangeEvent event) {
-		System.out.println("admin: "+this.getSession().getAttribute("userName"));
+		topsearchButton.setId("topsearchButton");
+		searchType.addItem("adress");
+		searchType.addItem("service");
+		searchType.addItem("place");
+		searchType.setValue("adress");
+		topgrid.setMargin(true);
+		topgrid.setStyleName("topGrid");
+		search.setWidth("70%");
+		search.setHeight("1.7em");
+		search.setValue("strada horea, cluj napoca");
+		search.setStyleName("textFieldColor");
+		topgrid.setWidth("100%");
+		topgrid.setHeight("10%");
+		search.setRows(1);
+		search.setDescription("Here you can serch for places, services, etc.");
+		search.setId("searchTextField");
+		maingrid.setWidth("100%");
+		maingrid.setHeight("70%");
+
+		logingrid.addComponent(logout,1,0);
+
+		topgrid.addComponent(search,0,0);
+		topgrid.addComponent(searchType,1,0);
+		topgrid.addComponent(topsearchButton,2,0);
+		topgrid.addComponent(logingrid, 3,0);
+		topgrid.setComponentAlignment(search, Alignment.BOTTOM_LEFT);
+		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
+		topgrid.setComponentAlignment(topsearchButton,  Alignment.BOTTOM_LEFT);
+		topgrid.setComponentAlignment(searchType,  Alignment.BOTTOM_LEFT);
+
+		logingrid.setComponentAlignment(logout, Alignment.TOP_RIGHT);
+		logingrid.setWidth("100%");
+		logingrid.setColumnExpandRatio(0, 5);
+		logingrid.setColumnExpandRatio(1, 1);
+		topgrid.setColumnExpandRatio(0, 6);
+		topgrid.setColumnExpandRatio(1, 1);
+		topgrid.setColumnExpandRatio(2, 1);
+		topgrid.setColumnExpandRatio(3, 5);
+		actiongrid.setWidth("100%");
+		actiongrid.setHeight("100%");
+		actiongrid.addComponent(save,0,1);
+		actiongrid.addComponent(delete,0,2);
+		actiongrid.addComponent(update,0,3);
+		
+		actiongrid.addComponent(lat,0,4);
+		actiongrid.addComponent(lng,0,5);
+		//actiongrid.addComponent(typeForSearch,0,7);
+		actiongrid.addComponent(jsPanel,0,6);
+		//typeForSearch.setValue("adress");
+		//typeForSearch.setId("typeForSearch");
+		lat.setStyleName("notVisible");
+		lng.setStyleName("notVisible");
+		actiongrid.addComponent(message,0,8);
+		actiongrid.addComponent(setAdmin,0,9);
+	
+		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
+		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
+		actiongrid.setComponentAlignment(update, Alignment.MIDDLE_CENTER);		
+		actiongrid.setRowExpandRatio(4, 2);
+		actiongrid.setMargin(true);
+		update.setId("update");
+		
+		//Label map = new Label("a map itt lesz");
+		
+		mapLayout.setSizeFull();
+		mapPanel.setId("map");
+		mapPanel.setStyleName("mapPanel");
+		mapPanel.setSizeFull();							
+		mapLayout.addComponent(mapPanel);	
+		this.addComponent(new Label("ChainGuide"));
+		this.addComponent(topgrid);
+		Label div = new Label(".");
+		this.addComponent(div);
+		this.addComponent(maingrid);		
+		maingrid.addComponent(actiongrid,1,0);
+		maingrid.addComponent(mapLayout, 0, 0);
+		maingrid.setColumnExpandRatio(0, 4);
+		maingrid.setColumnExpandRatio(1, 1);
+		this.setStyleName("mainColor");
+		//PointLocalizer alert = new PointLocalizer();
+		//mapLayout.addComponent(alert);
+		
+		createLogout(logout);	
+		createSave(save);
+		createUpdate(update);
+		createDelete(delete);
+		createRoleManagerButton();
 		
 		
 		lat.setId("lat");
@@ -169,84 +254,7 @@ public class Admin extends VerticalLayout implements View{
 		    }
 		});
 		
-		topsearchButton.setId("topsearchButton");
-		searchType.addItem("adress");
-		searchType.addItem("service");
-		searchType.addItem("place");
-		searchType.setValue("adress");
-		topgrid.setMargin(true);
-		search.setWidth("70%");
-		search.setHeight("1.7em");
-		search.setValue("strada horea, cluj napoca");
-		topgrid.setWidth("100%");
-		topgrid.setHeight("10%");
-		search.setRows(1);
-		search.setDescription("Here you can serch for places, services, etc.");
-		search.setId("searchTextField");
-		maingrid.setWidth("100%");
-		maingrid.setHeight("70%");
-
-		logingrid.addComponent(logout,1,0);
-
-		topgrid.addComponent(search,0,0);
-		topgrid.addComponent(searchType,1,0);
-		topgrid.addComponent(topsearchButton,2,0);
-		topgrid.addComponent(logingrid, 3,0);
-		topgrid.setComponentAlignment(logingrid,  Alignment.TOP_RIGHT);
-		topgrid.setComponentAlignment(topsearchButton,  Alignment.TOP_LEFT);		
-		logingrid.setComponentAlignment(logout, Alignment.TOP_RIGHT);
-		logingrid.setWidth("100%");
-		logingrid.setColumnExpandRatio(0, 5);
-		logingrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(0, 6);
-		topgrid.setColumnExpandRatio(1, 1);
-		topgrid.setColumnExpandRatio(2, 1);
-		topgrid.setColumnExpandRatio(3, 5);
-		actiongrid.setWidth("100%");
-		actiongrid.setHeight("100%");
-		actiongrid.addComponent(save,0,1);
-		actiongrid.addComponent(delete,0,2);
-		actiongrid.addComponent(update,0,3);
 		
-		actiongrid.addComponent(lat,0,4);
-		actiongrid.addComponent(lng,0,5);
-		actiongrid.addComponent(typeForSearch,0,7);
-		actiongrid.addComponent(jsPanel,0,6);
-		typeForSearch.setValue("adress");
-		typeForSearch.setId("typeForSearch");
-		actiongrid.addComponent(message,0,8);
-		actiongrid.addComponent(setAdmin,0,9);
-	
-		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
-		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
-		actiongrid.setComponentAlignment(update, Alignment.MIDDLE_CENTER);		
-		actiongrid.setRowExpandRatio(4, 2);
-		actiongrid.setMargin(true);
-		update.setId("update");
-		
-		//Label map = new Label("a map itt lesz");
-		
-		mapLayout.setSizeFull();
-		mapPanel.setId("map");
-		mapPanel.setStyleName("mapPanel");
-		mapPanel.setSizeFull();							
-		mapLayout.addComponent(mapPanel);	
-		this.addComponent(new Label("ChainGuide"));
-		this.addComponent(topgrid);
-		this.addComponent(maingrid);		
-		maingrid.addComponent(actiongrid,1,0);
-		maingrid.addComponent(mapLayout, 0, 0);
-		maingrid.setColumnExpandRatio(0, 4);
-		maingrid.setColumnExpandRatio(1, 1);
-		
-		//PointLocalizer alert = new PointLocalizer();
-		//mapLayout.addComponent(alert);
-		
-		createLogout(logout);	
-		createSave(save);
-		createUpdate(update);
-		createDelete(delete);
-		createRoleManagerButton();
 		message.addClickListener(new Button.ClickListener() {			
 			public void buttonClick(ClickEvent event) {
 				createMessage();
@@ -276,6 +284,7 @@ public class Admin extends VerticalLayout implements View{
 	private void createRoleManagerButton(){
 		final Window subWindow = new Window("Manage roles: ");
 		FormLayout flayout = new FormLayout();
+		flayout.setStyleName("mainColor");
 		subWindow.setContent(flayout);
 		subWindow.center();
 		subWindow.setResizable(false);
@@ -458,8 +467,9 @@ public class Admin extends VerticalLayout implements View{
 		            openhour.addClickListener(new Button.ClickListener() {
 		    			private static final long serialVersionUID = 1L;
 		    			public void buttonClick(ClickEvent event) {
-		    				final Window openhourWindow = new Window("Save service-type as: ");
+		    				final Window openhourWindow = new Window("Set Time-Table: ");
 				            FormLayout openhourlayout = new FormLayout();
+				            openhourlayout.setStyleName("mainColor");
 				            //flayout.setMargin(true);
 				            openhourWindow.setContent(openhourlayout);
 				            openhourlayout.setWidth("35em");
@@ -482,10 +492,12 @@ public class Admin extends VerticalLayout implements View{
 				            
 				            final TextField open  = new TextField("Opens:");
 				            openhourlayout.addComponent(open);
+				            open.setStyleName("textFieldColor");
 				            open.setInputPrompt("09");
 				            final TextField close  = new TextField("Closes:");
 				            close.setInputPrompt("12");
 				            openhourlayout.addComponent(close);
+				            close.setStyleName("textFieldColor");
 				            Button add = new Button("add");
 				            openhourlayout.addComponent(add);
 				            Button remove = new Button("remove");

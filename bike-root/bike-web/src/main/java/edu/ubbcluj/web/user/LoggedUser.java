@@ -178,8 +178,8 @@ public class LoggedUser extends VerticalLayout implements View {
 		bPoint.setRows(2);
 		startPointForNearest.setRows(2);
 		bPoint.setWidth("90%");
-		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
-		bPoint.setDescription("Type or choose from the map an End point for your trip .");
+		aPoint.setDescription("Choose from the map a Start point for your trip .");
+		bPoint.setDescription("Choose from the map an End point for your trip .");
 		startPointForNearest.setId("nearestStart");
 		
 		// Create the Accordion.
@@ -792,33 +792,39 @@ public class LoggedUser extends VerticalLayout implements View {
 			if(rowIndex>1){
 				for(int i=2;i<=rowIndex;i++){
 					ComboBox cb = (ComboBox) table.getItem(i).getItemProperty("Rate 	").getValue();
-					String value = cb.getValue().toString();
-					if (value!="-"){
-						Services serv = servdao.getServiceById(ids.get(i-2 ));
-						//ids.remove(0);
-						Rating r = new Rating(serv, thisUser, Integer.parseInt(value));
-					
-						List<Rating> rates = rdao.getAllRatingByService(serv);
-						boolean alredyRated = false;
-						if(rates!=null){
-							for(int j=0;j<rates.size();j++){
-								int id = rates.get(j).getUsers().getId();
-								if(id==thisUser.getId()){
-									alredyRated=true;
+					if(cb.getValue()!=null){
+						
+						
+						String value = cb.getValue().toString();
+						if ((value!="-")&&(value!="")){
+							Services serv = servdao.getServiceById(ids.get(i-2 ));
+							//ids.remove(0);
+							Rating r = new Rating(serv, thisUser, Integer.parseInt(value));
+						
+							List<Rating> rates = rdao.getAllRatingByService(serv);
+							boolean alredyRated = false;
+							if(rates!=null){
+								for(int j=0;j<rates.size();j++){
+									int id = rates.get(j).getUsers().getId();
+									if(id==thisUser.getId()){
+										alredyRated=true;
+									}
 								}
 							}
+							if(alredyRated==false){
+								rdao.insertRating(r);
+								System.out.println("insert: "+r);
+							}
+							else{
+								System.out.println("service: "+serv);
+								Rating oldrate = rdao.getRatingByUserAndService(thisUser, serv);
+								oldrate.setRate(Integer.parseInt(value));
+								rdao.updateRating(oldrate);
+								System.out.println("update: "+oldrate);
+							}
 						}
-						if(alredyRated==false){
-							rdao.insertRating(r);
-							System.out.println("insert: "+r);
-						}
-						else{
-							System.out.println("service: "+serv);
-							Rating oldrate = rdao.getRatingByUserAndService(thisUser, serv);
-							oldrate.setRate(Integer.parseInt(value));
-							rdao.updateRating(oldrate);
-							System.out.println("update: "+oldrate);
-						}
+						
+					
 					}
 					
 				}

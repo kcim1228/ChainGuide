@@ -115,7 +115,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		bPoint.setStyleName("textFieldColor");
 		jsPanel.setStyleName("notVisible");
 		startPointForNearest.setStyleName("textFieldColor");
-		login.setStyleName("logButton");
+
 		routeType.setRequired(true);
 		routeType.setDescription("Choose a travel-mode");		
 		nearestSelect.setDescription("What are you looking for?");
@@ -169,8 +169,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		bPoint.setRows(2);
 		startPointForNearest.setRows(2);
 		bPoint.setWidth("90%");
-		aPoint.setDescription("Type or choose from the map a Start point for your trip .");
-		bPoint.setDescription("Type or choose from the map an End point for your trip .");
+		aPoint.setDescription("Choose from the map a Start point for your trip .");
+		bPoint.setDescription("Choose from the map an End point for your trip .");
 		startPointForNearest.setId("nearestStart");
 		
 		// Create the Accordion.
@@ -620,7 +620,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					pass2.setComponentError(new UserError("The passwords are not the same!"));
 					okay=false;
 				}
-				if((email!=null)||(!email.equals(""))){
+				if((email.getValue()!=null)&&(!email.getValue().equals(""))){
+					System.out.println("email: "+email.getValue());
 					if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 							+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
 						okay=false;
