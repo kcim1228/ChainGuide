@@ -19,7 +19,7 @@ window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 	
 	var options = {
             elt: document.getElementById('map'),             // ID of map element on page
-            zoom: 12,                                        // initial zoom level of the map
+            zoom: 14,                                        // initial zoom level of the map
             latLng: { lat:46.766667, lng:23.583333 }     // center of map in latitude/longitude
         };
 
@@ -28,15 +28,17 @@ window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 
         window.map = new MQA.TileMap(options);
         //MQA.TileMap.setSize(MQA.setSize(200,200));
+        navigator.geolocation.getCurrentPosition(function(position) {
+            map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+          });
         
-        MQA.withModule('largezoom','traffictoggle','viewoptions','geolocationcontrol','insetmapcontrol','mousewheel', function() {
+        MQA.withModule('largezoom','viewoptions','geolocationcontrol','mousewheel', function() {
 
             map.addControl(
               new MQA.LargeZoom(),
               new MQA.MapCornerPlacement(MQA.MapCorner.TOP_LEFT, new MQA.Size(5,5))
             );
 
-            map.addControl(new MQA.TrafficToggle());
 
             map.addControl(new MQA.ViewOptions());
 
@@ -45,18 +47,6 @@ window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
               new MQA.MapCornerPlacement(MQA.MapCorner.TOP_RIGHT, new MQA.Size(10,50))
             );
 
-            /*Inset Map Control options */
-            var options={
-              size:{width:150, height:125},
-              zoom:3,
-              mapType:'map',
-              minimized:true
-            };
-
-            map.addControl(
-              new MQA.InsetMapControl(options),
-              new MQA.MapCornerPlacement(MQA.MapCorner.BOTTOM_RIGHT)
-            );
 
             map.enableMouseWheelZoom();                     
           });

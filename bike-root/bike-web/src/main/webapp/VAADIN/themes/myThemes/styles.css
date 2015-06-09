@@ -7065,7 +7065,6 @@ body .myThemes.v-app .v-app-loading {
 }
 
 .myThemes .mapPanel {
-	width: 90%;
 	height: 48em;
 }
 
@@ -7087,6 +7086,10 @@ body .myThemes.v-app .v-app-loading {
 }
 
 .myThemes .mainColor {
+	background-color: #F5E0CB;
+}
+
+.myThemes .v-scrollable {
 	background-color: #F5E0CB;
 }
 

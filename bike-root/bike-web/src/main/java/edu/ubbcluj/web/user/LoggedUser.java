@@ -146,6 +146,11 @@ public class LoggedUser extends VerticalLayout implements View {
 		maingrid.setWidth("100%");
 		maingrid.setHeight("85%");
 		
+		startPointForNearest.setDescription("Select a Start point from the map");
+		showAll.setDescription("Choose a type, and list that type of services or places");
+		topRated.setDescription("Choose a service type, and you get the top rated service of that type");
+		searchType.setDescription("What do you want to search for?");
+		
 		logingrid.addComponent(logout,0,0);
 		topgrid.addComponent(search,0,0);
 		topgrid.addComponent(topsearchButton,2,0);
@@ -706,7 +711,7 @@ public class LoggedUser extends VerticalLayout implements View {
         subWindow.center();
         subWindow.setResizable(false);
         subWindow.setWidth("30em");
-        subWindow.setHeight("28em");
+        subWindow.setHeight("32em");
        FormLayout grid = new FormLayout();
        grid.setStyleName("subWindow");
        subWindow.setContent(grid);

@@ -4,9 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Messages;
 import edu.ubbcluj.backend.model.Users;
@@ -15,6 +18,7 @@ import edu.ubbcluj.backend.repository.MessagesDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 
+	Logger LOG = LoggerFactory.getLogger(HibernateMessagesDAO.class);
 	@Override
 	public Messages insertMessage(Messages m) {
 		Session session = null;
@@ -24,12 +28,13 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			session.beginTransaction();
 			session.persist(m);
 			session.getTransaction().commit();
-			
+			LOG.debug("Message succefully inserted! ");
 			return m;
 			
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Message insertation failed!");
 			}
 			
 			throw new RuntimeException("Message insertation failed! ",ex);	

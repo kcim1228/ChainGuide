@@ -115,7 +115,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		bPoint.setStyleName("textFieldColor");
 		jsPanel.setStyleName("notVisible");
 		startPointForNearest.setStyleName("textFieldColor");
-
+		startPointForNearest.setDescription("Select a Start point from the map");
+		showAll.setDescription("Choose a type, and list that type of services or places");
+		topRated.setDescription("Choose a service type, and you get the top rated service of that type");
+		searchType.setDescription("What do you want to search for?");
 		routeType.setRequired(true);
 		routeType.setDescription("Choose a travel-mode");		
 		nearestSelect.setDescription("What are you looking for?");
@@ -481,10 +484,11 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
-				DAOFactory daoFactory = DAOFactory.getInstance();
 				UsersDAO usersDao = daoFactory.getUsersDAO();
 				try{
 					Users user = usersDao.getUserByName(username.getValue());
+					username.setComponentError(null);
+					
 					String hashed = passwordHasher(pass.getValue());
 					if(hashed.equals(user.getPassword())){
 						subWindow.close();
@@ -494,10 +498,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							getUI().getNavigator().removeView("");
 							getUI().getNavigator().addView("", new LoggedUser(user));
 							getUI().getNavigator().navigateTo("");
-
-							//admin is if-be es exaption
-
-
 						}
 						else{
 							if(user.getUsertype().equals("admin")){
@@ -512,10 +512,17 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 					}else{
 						pass.setComponentError(new UserError("Wrong password!"));
+						Notification.show("Wrong password!",
+								"",
+								Notification.Type.ERROR_MESSAGE);
 					}
 
 				}catch(RuntimeException ex){
 					username.setComponentError( new UserError("No such user with this username!"));
+					pass.setComponentError(null);
+					Notification.show("Wrong username!",
+							"No such user found with this username",
+							Notification.Type.ERROR_MESSAGE);
 				}
 
 
@@ -618,6 +625,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				if(!pass1.getValue().equals(pass2.getValue())){
 
 					pass2.setComponentError(new UserError("The passwords are not the same!"));
+					Notification.show("Passwords do not match", "", Notification.Type.WARNING_MESSAGE);
 					okay=false;
 				}
 				if((email.getValue()!=null)&&(!email.getValue().equals(""))){
@@ -625,7 +633,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 							+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
 						okay=false;
-						email.setComponentError(new UserError("This is not a valid email adress!"));
+						email.setComponentError(new UserError("This is an incorrect email adress!"));
+						Notification.show("Incorrect email format", "", Notification.Type.WARNING_MESSAGE);
 					}
 				}
 				if(okay){
@@ -640,7 +649,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					}
 
 					if(exist){
-						Notification.show("Username alredy i use", "Pick up another", com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
+						Notification.show("Username alredy in use", "Pick up another", com.vaadin.ui.Notification.Type.ERROR_MESSAGE);
 					}
 					else{
 
@@ -650,6 +659,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						String hashed = passwordHasher(pass1.getValue());
 						Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
 						usersDao.insertUser(user);
+						Notification.show("Your registration went successfully", "", Notification.Type.HUMANIZED_MESSAGE);
 						myUIClass.getSession().setAttribute("userName", user.getUsername());
 						getUI().getNavigator().removeView("");
 						getUI().getNavigator().addView("", new LoggedUser(user));

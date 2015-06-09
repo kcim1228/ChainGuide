@@ -16,6 +16,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.UserError;
+import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -79,8 +80,8 @@ public class Admin extends VerticalLayout implements View{
 	private Button save = new Button("SAVE / NEW");
 	private Button delete = new Button("DELETE");
 	private Button update = new Button("UPDATE");
-	private TextField lat = new TextField("lat");
-	private TextField lng = new TextField("lng");
+	private TextField lat = new TextField();
+	private TextField lng = new TextField();
 	private TextField typeForSearch = new TextField();
 	private Float actualLat;
 	private Float actualLng;
@@ -149,9 +150,9 @@ public class Admin extends VerticalLayout implements View{
 		topgrid.setColumnExpandRatio(3, 5);
 		actiongrid.setWidth("100%");
 		actiongrid.setHeight("100%");
-		actiongrid.addComponent(save,0,1);
-		actiongrid.addComponent(delete,0,2);
-		actiongrid.addComponent(update,0,3);
+		//actiongrid.addComponent(save,0,1);
+		//actiongrid.addComponent(delete,0,2);
+		//actiongrid.addComponent(update,0,3);
 		
 		actiongrid.addComponent(lat,0,4);
 		actiongrid.addComponent(lng,0,5);
@@ -161,16 +162,47 @@ public class Admin extends VerticalLayout implements View{
 		//typeForSearch.setId("typeForSearch");
 		lat.setStyleName("notVisible");
 		lng.setStyleName("notVisible");
-		actiongrid.addComponent(message,0,8);
-		actiongrid.addComponent(setAdmin,0,9);
+		//actiongrid.addComponent(message,0,8);
+		//actiongrid.addComponent(setAdmin,0,9);
 	
-		actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
+		/*actiongrid.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);
 		actiongrid.setComponentAlignment(update, Alignment.MIDDLE_CENTER);		
-		actiongrid.setRowExpandRatio(4, 2);
-		actiongrid.setMargin(true);
+		actiongrid.setRowExpandRatio(4, 2);*/
+		//actiongrid.setMargin(true);
 		update.setId("update");
 		
+		
+		Accordion accordion = new Accordion();
+		accordion.setHeight("100%");
+		accordion.setWidth("100%");
+		final VerticalLayout actionslayout = new VerticalLayout();
+		actionslayout.setStyleName("accTab");
+		actionslayout.addComponent(save);
+		actionslayout.addComponent(update);
+		actionslayout.addComponent(delete);
+		actionslayout.setComponentAlignment(save, Alignment.MIDDLE_CENTER);
+		actionslayout.setComponentAlignment(update, Alignment.MIDDLE_CENTER);
+		actionslayout.setComponentAlignment(delete, Alignment.MIDDLE_CENTER);	
+		actionslayout.setMargin(true);
+		accordion.addTab(actionslayout,"Basic actions");
+		
+		final VerticalLayout messlayout = new VerticalLayout();
+		messlayout.setStyleName("accTab");
+		messlayout.addComponent(message);
+		messlayout.setComponentAlignment(message, Alignment.MIDDLE_CENTER);	
+		messlayout.setMargin(true);
+		accordion.addTab(messlayout, "Messages");
+		
+		final VerticalLayout rolelayout = new VerticalLayout();
+		rolelayout.setStyleName("accTab");
+		rolelayout.addComponent(setAdmin);
+		rolelayout.setComponentAlignment(setAdmin, Alignment.MIDDLE_CENTER);	
+		rolelayout.setMargin(true);
+		accordion.addTab(rolelayout, "Manage user-roles");
+		
+		
+		actiongrid.addComponent(accordion,0,1);
 		//Label map = new Label("a map itt lesz");
 		
 		mapLayout.setSizeFull();
@@ -185,7 +217,7 @@ public class Admin extends VerticalLayout implements View{
 		this.addComponent(maingrid);		
 		maingrid.addComponent(actiongrid,1,0);
 		maingrid.addComponent(mapLayout, 0, 0);
-		maingrid.setColumnExpandRatio(0, 4);
+		maingrid.setColumnExpandRatio(0, 5);
 		maingrid.setColumnExpandRatio(1, 1);
 		this.setStyleName("mainColor");
 		//PointLocalizer alert = new PointLocalizer();

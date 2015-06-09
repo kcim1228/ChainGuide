@@ -4,7 +4,6 @@
 	@include reindeer;
 
 	.mapPanel{
-		width: 90%;
 		height: 48em;
 	}
 	
@@ -27,6 +26,10 @@
 	.mainColor{
 		background-color: #F5E0CB;
 	}
+	.v-scrollable{
+		background-color: #F5E0CB;
+	}
+	
 	.textFieldColor{
 		background-color:#FFFFDB;
 	}
