@@ -8,15 +8,16 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Places;
-import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.repository.PlacesDAO;
 
 @SuppressWarnings("rawtypes")
 public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 	
-	
+	private static final Logger LOG = LoggerFactory.getLogger(HibernatePlacesDAO.class);
 	public Places insertPlace(Places place) {
 		Session session = null;
 		
@@ -31,6 +32,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Place insertation failed! ");
 			}
 			
 			throw new RuntimeException("Place insertation failed! ",ex);	
@@ -52,6 +54,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Place delete failed! ");
 			}
 			
 			throw new RuntimeException("Place delete failed!",ex);	
@@ -73,6 +76,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Place update failed! ");
 			}
 			
 			throw new RuntimeException("Place update failed!",ex);	
@@ -98,6 +102,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetPlacesByName failed! ");
 			}
 			
 			throw new RuntimeException("Places selection by name failed!",ex);			
@@ -125,6 +130,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllPlaces failed! ");
 			}
 			
 			throw new RuntimeException("Places selection failed!",ex);			
@@ -151,6 +157,7 @@ public class HibernatePlacesDAO extends HibernateDAO implements PlacesDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Place by Id selection failed! ");
 			}
 			
 			throw new RuntimeException("Place by ID selection failed!",ex);			

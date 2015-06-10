@@ -7,6 +7,8 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Type;
 import edu.ubbcluj.backend.repository.TypeDAO;
@@ -14,6 +16,7 @@ import edu.ubbcluj.backend.repository.TypeDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateTypeDAO.class);
 	@Override
 	public Type insertType(Type type) {
 		Session session = null;
@@ -29,6 +32,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Type insertation failed!");
 			}
 			
 			throw new RuntimeException("Type insertation failed!",ex);	
@@ -49,6 +53,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Type update failed!");
 			}
 			
 			throw new RuntimeException("Type update failed!",ex);	
@@ -70,6 +75,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Type delete failed!");
 			}
 			
 			throw new RuntimeException("Type delete failed!",ex);	
@@ -95,6 +101,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllTypeFailed failed!");
 			}
 			
 			throw new RuntimeException("Types selection failed!",ex);			
@@ -121,6 +128,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetType by ID failed!");
 			}
 			
 			throw new RuntimeException("Type by ID selection failed!",ex);			
@@ -147,6 +155,7 @@ public class HibernateTypeDAO extends HibernateDAO implements TypeDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetType by name failed!");
 			}
 			
 			throw new RuntimeException("Type by Name selection failed!",ex);			

@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -18,7 +17,7 @@ import edu.ubbcluj.backend.repository.MessagesDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 
-	Logger LOG = LoggerFactory.getLogger(HibernateMessagesDAO.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateMessagesDAO.class);
 	@Override
 	public Messages insertMessage(Messages m) {
 		Session session = null;
@@ -50,11 +49,12 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			session.beginTransaction();
 			session.delete(m);
 			session.getTransaction().commit();
-			
+			LOG.debug("Message succefully deleted! ");
 			
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Message delete failed!");
 			}
 			
 			throw new RuntimeException("Message delete failed!",ex);	
@@ -72,11 +72,12 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			session.beginTransaction();
 			session.update(m);
 			session.getTransaction().commit();
-			
+			LOG.debug("Message succefully updated! ");
 			
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Message update failed! ");
 			}
 			
 			throw new RuntimeException("Message update failed!",ex);	
@@ -103,6 +104,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllMessageByReceiver failed! ");
 			}
 			
 			throw new RuntimeException(ex.getMessage(),ex);			
@@ -130,6 +132,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllMessageBySenderFailed ! ");
 			}
 			
 			throw new RuntimeException("Messages selection by senderId failed!",ex);			
@@ -139,6 +142,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 		return messageList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Messages> getAllUnreadMessagesBySender(Users u) {
 		List<Messages> messageList = Collections.emptyList();
@@ -156,6 +160,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get all unread messages failed! ");
 			}
 			
 			throw new RuntimeException("Unread-Messages selection by senderId failed!",ex);			
@@ -165,6 +170,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 		return messageList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Messages> getAllReadMessagesBySender(Users u) {
 		List<Messages> messageList = Collections.emptyList();
@@ -182,6 +188,7 @@ public class HibernateMessagesDAO extends HibernateDAO implements MessagesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get all read messages failed! ");
 			}
 			
 			throw new RuntimeException("Read- Messages selection by senderId failed!",ex);			

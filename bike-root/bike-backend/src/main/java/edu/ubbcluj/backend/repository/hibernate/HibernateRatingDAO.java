@@ -7,6 +7,8 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Rating;
 import edu.ubbcluj.backend.model.Services;
@@ -16,6 +18,7 @@ import edu.ubbcluj.backend.repository.RatingDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateRatingDAO.class);
 	@Override
 	public Rating insertRating(Rating r) {
 		Session session = null;
@@ -31,6 +34,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Rating insertation failed!");
 			}
 			
 			throw new RuntimeException("Rating insertation failed! ",ex);	
@@ -51,6 +55,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Rating delete failed!");
 			}
 			
 			throw new RuntimeException("Rating delete failed!",ex);	
@@ -74,6 +79,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Rating update  failed!");
 			}
 			
 			throw new RuntimeException("Rating update failed!",ex);	
@@ -101,6 +107,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllRatingByService failed!");
 			}
 			
 			throw new RuntimeException(ex.getMessage(),ex);			
@@ -110,6 +117,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 		return ratingList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Rating> getAllRating() {
 		List<Rating> ratingList = Collections.emptyList();
@@ -127,6 +135,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllRating failed!");
 			}
 			
 			throw new RuntimeException(ex.getMessage(),ex);			
@@ -153,6 +162,7 @@ public class HibernateRatingDAO extends HibernateDAO implements RatingDAO {
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetRatingByUserAndService failed!");
 			}
 			
 			throw new RuntimeException("Rating by service and user selection failed!",ex);			

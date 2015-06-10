@@ -7,6 +7,8 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Servicetype;
@@ -16,6 +18,7 @@ import edu.ubbcluj.backend.repository.ServicetypeDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateServicetypeDAO extends HibernateDAO implements ServicetypeDAO{
 
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateServicetypeDAO.class);
 	@Override
 	public Servicetype insertServicetype(Servicetype servicetype) {
 		Session session = null;
@@ -32,6 +35,7 @@ public class HibernateServicetypeDAO extends HibernateDAO implements Servicetype
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("ServiceType insertation failed! ");
 			}
 			
 			throw new RuntimeException("Service-Type insertation failed! ",ex);	
@@ -53,6 +57,7 @@ public class HibernateServicetypeDAO extends HibernateDAO implements Servicetype
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("ServiceType delete failed! ");
 			}
 			
 			throw new RuntimeException("Service-type delete failed!",ex);	
@@ -75,6 +80,7 @@ Session session = null;
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("ServiceType update failed! ");
 			}
 			
 			throw new RuntimeException("Service-type update failed!",ex);	
@@ -101,6 +107,7 @@ Session session = null;
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("getAllServiceTypesByType failed! ");
 			}
 			
 			throw new RuntimeException("Servicetypes by type selection failed!",ex);			
@@ -128,6 +135,7 @@ Session session = null;
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("getAllServiceTypesByService failed! ");
 			}
 			
 			throw new RuntimeException("Servicetypes by service selection failed!",ex);			

@@ -8,6 +8,8 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Openhours;
 import edu.ubbcluj.backend.model.Services;
@@ -16,6 +18,7 @@ import edu.ubbcluj.backend.repository.OpenhoursDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateOpenhoursDAO.class);
 	@Override
 	public Openhours insertOpehour(Openhours openh) {
 		Session session = null;
@@ -31,6 +34,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Openhour insertation failed!");
 			}
 			
 			throw new RuntimeException("Openhour insertation failed! ",ex);	
@@ -55,6 +59,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllOpenhours failed!");
 			}
 			
 			throw new RuntimeException("Openhours selection failed!",ex);			
@@ -78,6 +83,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Openhour delete failed!");
 			}
 			
 			throw new RuntimeException("Openhour delete failed!",ex);	
@@ -99,6 +105,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Openhour update failed!");
 			}
 			
 			throw new RuntimeException("Openhour update failed!",ex);	
@@ -109,6 +116,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 
 	
 	
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
 	public List<Openhours> getAllOpenNow() {
 		Date date = new Date();
@@ -131,6 +139,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllOpenNow failed!");
 			}
 			
 			throw new RuntimeException("Openhours selection failed!",ex);			
@@ -139,6 +148,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 		
 		return openhList;
 	}
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Openhours> getAllOpenhoursByService(Services serv) {	
 		List<Openhours> openhList = Collections.emptyList();
@@ -156,6 +166,7 @@ public class HibernateOpenhoursDAO extends HibernateDAO implements OpenhoursDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllOpenhoursByService failed!");
 			}
 			
 			throw new RuntimeException("Openhours selection by service failed!",ex);			

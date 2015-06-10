@@ -11,6 +11,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Services;
 import edu.ubbcluj.backend.model.Servicetype;
@@ -22,6 +24,7 @@ import edu.ubbcluj.backend.repository.ServicetypeDAO;
 @SuppressWarnings("rawtypes")
 public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 	
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateServicesDAO.class);
 	DAOFactory daoFactory = DAOFactory.getInstance();
 	ServicetypeDAO servicetypeDAO = daoFactory.getServicetypeDAO();
 	List<Servicetype> servicetypes = null;
@@ -41,6 +44,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Service insert failed!");
 			}
 			
 			throw new RuntimeException("Service insertation failed! ",ex);	
@@ -62,6 +66,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Service delete failed!");
 			}
 			
 			throw new RuntimeException("Service delete failed!",ex);	
@@ -83,6 +88,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Service update failed!");
 			}
 			
 			throw new RuntimeException("Service update failed!",ex);	
@@ -109,6 +115,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllServices failed!");
 			}
 			
 			throw new RuntimeException("Services selection failed!",ex);			
@@ -136,6 +143,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetAllServicesByName failed!");
 			}
 			
 			throw new RuntimeException("Services selection by name failed!",ex);			
@@ -162,6 +170,7 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("GetServiceById  failed!");
 			}
 			
 			throw new RuntimeException("Service by ID selection failed!",ex);			
@@ -182,12 +191,11 @@ public class HibernateServicesDAO extends HibernateDAO implements ServicesDAO{
 		
 		for(int i=0;i<serviceSize;i++){
 			Servicetype st = servicetypes.get(i);
-			//System.out.println(st.toString());
 			Services s = this.getServiceById(st.getServices().getId());
-			//System.out.println(s.toString());
 			services.add(i, s);
+			
 		}
-		
+		LOG.debug("getAllServicesByType went successfully ");
 		
 		return services;
 	}

@@ -8,12 +8,15 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.ubbcluj.backend.model.Users;
 import edu.ubbcluj.backend.repository.UsersDAO;
 
 @SuppressWarnings("rawtypes")
 public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
+	private static final Logger LOG = LoggerFactory.getLogger(HibernateUsersDAO.class);
 
 	@Override
 	public Users insertUser(Users user) {
@@ -30,6 +33,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("User insertation failed!");
 			}
 			
 			throw new RuntimeException("User insertation failed! ",ex);	
@@ -50,6 +54,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("User delete failed!");
 			}
 			
 			throw new RuntimeException("User delete failed!",ex);	
@@ -71,6 +76,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("User update failed!");
 			}
 			
 			throw new RuntimeException("User update failed!",ex);	
@@ -96,6 +102,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get all users failed!");
 			}
 			
 			throw new RuntimeException("Users selection failed!",ex);			
@@ -128,6 +135,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		} catch (final HibernateException ex) {
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get UserByName failed!");
 			}
 			
 			throw new RuntimeException("User selection failed!",ex);			
@@ -154,6 +162,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get UsersByName failed!");
 			}
 			
 			throw new RuntimeException("Users selection by name failed!",ex);			
@@ -163,6 +172,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 		return userList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Users> getUsersByType(String type) {
 		List<Users> userList = Collections.emptyList();
@@ -180,6 +190,7 @@ public class HibernateUsersDAO extends HibernateDAO implements UsersDAO{
 			
 			if (session != null && session.getTransaction() != null) {
 				session.getTransaction().rollback();
+				LOG.error("Get UserByType failed!");
 			}
 			
 			throw new RuntimeException("Users selection by type failed!",ex);			
