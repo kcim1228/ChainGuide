@@ -29,12 +29,13 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 	var endLat;
 	//leellenorizni, amikor rateszem a contentet h mi a key
 	
-	
+	var beginLat  = this.getState().latCoord;
+	var beginLng  = this.getState().lngCoord;
 	
 	var options = {
             elt: document.getElementById('map'),             // ID of map element on page
             zoom: 14,                                        // initial zoom level of the map
-            latLng: { lat:46.766667, lng:23.583333 }     // center of map in latitude/longitude
+            latLng: { lat:beginLat, lng:beginLng }     // center of map in latitude/longitude
         };
 
         // construct an instance of MQA.TileMap with the options object
@@ -44,7 +45,6 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
         navigator.geolocation.getCurrentPosition(function(position) {
             map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
           });
-        //MQA.TileMap.setSize(MQA.setSize(200,200));
         
         MQA.withModule('largezoom','viewoptions','geolocationcontrol','mousewheel', function() {
 
@@ -61,12 +61,8 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
               new MQA.MapCornerPlacement(MQA.MapCorner.TOP_RIGHT, new MQA.Size(10,50))
             );
 
-
             map.enableMouseWheelZoom();
           });
-  
-
-       
 }
 
 
@@ -127,10 +123,8 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		caption = "endPoint"+lastEndIndex;
 		map.removeShape(map.getByKey(caption)); 
 		lastEndIndex = lastEndIndex + 1;
-		//map.removeShape(map.getByKey("endPoint"+lastEndIndex)); 
 		MQA.withModule('geocoder', function() {
-			
-			//felulirom az alapertelmezett pontot
+			//overwrite POI-s attributes
 			 MQA.Geocoder.constructPOI = function(location) {
 				 	 lat = location.latLng.lat,
 	                lng = location.latLng.lng,
@@ -156,8 +150,7 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		      var response = data.results[0].locations[0];
 		      adress = response.street + ', ';
 		      adress += response.adminArea5 + ', ' + response.adminArea3 + ' ' + response.postalCode;
-		      document.getElementById('bPoint').value = adress;
-		      
+		      document.getElementById('bPoint').value = adress;    
 		      var evt = document.createEvent('HTMLEvents');
 		      evt.initEvent('change', true, false);
 		      endp = document.getElementById('bPoint');
@@ -180,7 +173,6 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		       p.setRolloverContent(name);
 		       p.setInfoTitleHTML(p.getRolloverContent());
 		       p.setIcon(new MQA.Icon('http://www.wsdot.wa.gov/NR/rdonlyres/91C3220B-A412-4821-9901-B002AD261CF7/28730/i405_TDM_icon_bike8.gif', 30, 30)); 
-		      // map.bestFit();
 		       return p;
 			 };			 
 		    // executes a geocode with an object containing lat/lng properties,
@@ -196,15 +188,13 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
             if(response && response.info && response.info.statuscode == 0 && response.results) {
                 var locations = response.results[0].locations;
                     var location = locations[0];
-                    if (location) {
-                   	 
+                    if (location) {    	 
                     	map.removeShape(map.getByKey(id));
                     	map.addShape(this.constructPOI(location));
                     }                         
               }
               map.bestFit();
-          };
-		
+          };	
 	}
 	
 	function createService(X,Y,name,id){
@@ -218,7 +208,6 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		       p.setRolloverContent(name);
 		       p.setInfoTitleHTML(p.getRolloverContent());
 		       p.setIcon(new MQA.Icon('http://zizaza.com/cache/icon_256/iconset/581024/581034/PNG/512/map_marker/home_home_icon_map_marker_flat_icon_home_png_map_marker_icon_png.png', 30, 30)); 
-		      // map.bestFit();
 		       return p;
 			 };			 
 		    // executes a geocode with an object containing lat/lng properties,
@@ -234,19 +223,16 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
              if(response && response.info && response.info.statuscode == 0 && response.results) {
                  var locations = response.results[0].locations;
                      var location = locations[0];
-                     if (location) {
-                    	 
+                     if (location) {                   	 
                      	map.removeShape(map.getByKey(id));
                      	map.addShape(this.constructPOI(location));
                      }                         
                }
                map.bestFit();
-           };
-		
+           };		
 	}
 	
 	function createService2(X,Y,name,id){
-		//alert("lat:"+X+" lng:"+Y+" name:"+name);
 		MQA.withModule('geocoder', function() {
 			 MQA.Geocoder.constructPOI = function(location) {
 			 	 lat = location.latLng.lat,
@@ -257,7 +243,6 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		       p.setRolloverContent(name);
 		       p.setInfoTitleHTML(p.getRolloverContent());
 		       p.setIcon(new MQA.Icon('http://zizaza.com/cache/icon_256/iconset/581024/581034/PNG/512/map_marker/home_home_icon_map_marker_flat_icon_home_png_map_marker_icon_png.png', 30, 30)); 
-		      // map.bestFit();
 		       return p;
 			 };			 
 		    // executes a geocode with an object containing lat/lng properties,
@@ -273,29 +258,25 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 	
 	
 	window.edu_ubbcluj_web_user_JsConnecter = function() {
-		//alert('route: ' + this.getState().routeType+' serach: '+ this.getState().searchType);
-		
 		
 		routeTypeForPath=this.getState().routeType;
 		mainSerachType=this.getState().searchType;
 		serviceName = this.getState().serviceName;
 		serviceLat = this.getState().serviceLat;
-		serviceLng = this.getState().serviceLng;
-		
+		serviceLng = this.getState().serviceLng;	
 		allNames = this.getState().allNames;
 		allLat = this.getState().allLat;
 		allLng = this.getState().allLng;
 		allSize = this.getState().allSize;
 		actionState = this.getState().action;
-		
-		//alert(actionState);
-		//ha search keres volt
+
+		//search action
 		if(actionState=="searchAction"){
 			if(mainSerachType=='adress'){
-	    		//ha cimre keresunk ra
+	    		//search type was adress
 	    		var text = document.getElementById('searchTextField').value;           	
 	        	MQA.withModule('geocoder', function() {
-	        		//felulirom az alapertelmezett pontot
+	        		//overwrite POI's attributes
 	        		 MQA.Geocoder.constructPOI = function(location) {
 	        			 	 lat = location.latLng.lat,
 	                         lng = location.latLng.lng,
@@ -304,21 +285,12 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 	                         p = new MQA.Poi({ lat: lat, lng: lng });
 	        			 	 p.draggable = true;
 	        			 	 p.key="kezdeti";
-	        			 	
-	        			 	 
-	                    // p.setRolloverContent('lat: '+p.latLng.lat+' lng: '+p.latLng.lng);
-	                    // p.setInfoTitleHTML(p.getRolloverContent());
-	                   //  p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>'+
-	                    		// '<button type="button" onclick="setEndPoint('+p.latLng.lat+','+p.latLng.lng+')">END</button> ');
 
-	                    // map.addShape(p);
 	                    MQA.EventManager.addListener(p, 'mouseover', function(evt){
 	                    	startPkey = "startPoint"+lastStartIndex;
 	                    	endPkey = "endPoint"+ lastEndIndex;
 	                    	
 	                    	if((p.key!=startPkey)&&(p.key!=endPkey)){
-	                    		//p.setRolloverContent('lat: '+p.latLng.lat+' lng: '+p.latLng.lng);
-	                            //p.setInfoTitleHTML(p.getRolloverContent());
 	                            p.setInfoContentHTML('Set as: <button type="button" onclick="setStartPoint('+p.latLng.lat+','+p.latLng.lng+')">START</button>'+
 	                           		 '<button type="button" onclick="setEndPoint('+p.latLng.lat+','+p.latLng.lng+')">END</button> ');    
 	                    	}   
@@ -337,7 +309,7 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 	                    		}
 	                    }
 	                   
-	                //felulirjuk, hogy csak a legelso talalatot mutassa
+	                //first result
 	                MQA.Geocoder.processResults = function(response, map) { 
 	                    if(response && response.info && response.info.statuscode == 0 && response.results) {
 	                        var locations = response.results[0].locations;
@@ -352,17 +324,14 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 	              });
 	    	}
 			if(mainSerachType=='service'){
-	    		//ha intezmenyre.re keresunk ra
+	    		//seach type was service
 	    		createService(serviceLat,serviceLng,serviceName,"actualservice");
 	    		
 	    	}
 			if(mainSerachType=='place'){
-	    		//ha parkokra stb.re keresunk ra
-	    		createPlace(serviceLat,serviceLng,serviceName,"actualplace");
-	    		
-	    	}
-			
-			
+				//seach type was place
+	    		createPlace(serviceLat,serviceLng,serviceName,"actualplace");	
+	    	}		
 		}
 		if(actionState=="routeAction"){	           
 	        	startPoint = map.getByKey("startPoint"+lastStartIndex);
@@ -373,10 +342,6 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 		}
 		if(actionState=="serviceListAction"){
 			if(allSize>-1){
-
-				/*if (oldSize>0){
-					map.removeAllShapes();
-				}*/
 				map.removeAllShapes();
 				for(i=0;i<allSize;i++){
 					caption = "allServices";
@@ -403,17 +368,14 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 			}
 		}
 		if(actionState=="nearestAction"){
-			//alert("nearestAction");
 			Nearestindex = 0;
 				startPoint = map.getByKey("startPoint"+lastStartIndex);
 				nearestLoc[0]=""+startPoint.latLng.lat+","+startPoint.latLng.lng;
 				for(j=0;j<allSize;j++){
-					//alert(allNames[j]+"; "+allLat[j]+"; "+allLng[j]);
 					nearestLoc[j+1]=""+allLat[j]+","+allLng[j];			
 				}
 				
 			    MQA.withModule('directions', 'longurl', function() {
-			    	// alert("belepett");
 			        /*Executes callback to the Directions Service for a route matrix with 3 parameters.*/
 			        MQA.Directions.routeMatrix(			   
 			          /*The first parameter is an array of location objects.*/
@@ -424,14 +386,10 @@ window.edu_ubbcluj_web_user_MapLoader = function() {
 			          /*The final parameter is a callback method to execute after completion.*/			          
 			          renderMatrixResults
 			        );
-			      });
-			
-		}
-		
-	
+			      });	
+		}	
 	}
 function renderMatrixResults(response) {
-		//alert("feldolgozas");
 		var minDistance=10000;
 		var minIndex = 0;
 	    var allToAll = response.allToAll;
@@ -442,10 +400,9 @@ function renderMatrixResults(response) {
 	    for (i = 0; i < numRows; i++) {
 	      var location = locations[i];	 
 	      var distanceList = allToAll ? distances[i] : distances;
-	     // alert("timelist-leght: "+timeList.length);
-	     // alert("allSize: "+allSize);
 	      for (j = 0; j < allSize+1; j++) {
 	    	  if(distanceList[j]>0){
+	    		  
 	    		  if(distanceList[j]<minDistance){
 	    			  minDistance = distanceList[j];
 	    			  minIndex = j-1;
@@ -453,15 +410,9 @@ function renderMatrixResults(response) {
 	    	  }
 	      }
 	    }
-	    //alert("min: "+minDistance);
-	    //alert("minindex"+minIndex);
-	    //alert("all "+ allLat[minIndex]+" es "+allLng[minIndex ]);
 	    startPoint = map.getByKey("startPoint"+lastStartIndex);
-	    //endPoint = { latLng: { lat: allLat[minIndex], lng: allLng[minIndex] }};
-	   endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
+	    endPoint  = new MQA.Poi({ lat:allLat[minIndex], lng:allLng[minIndex] });
 	    endPoint.setIcon(new MQA.Icon('http://open.mapquestapi.com/staticmap/geticon?uri=poi-green_1.png', 20, 30));
-	    
-	
 	    routeType = 'shortest';
 	    drawRoute(startPoint, endPoint, routeType);
 	    var evt = document.createEvent('HTMLEvents');
@@ -472,12 +423,6 @@ function renderMatrixResults(response) {
 	  }
 
 function drawRoute(startPoint,endPoint, routeType){ 
-	//alert("rajzol");
-	alert("startLat:"+startPoint.latLng.lat+"  startLng: "+startPoint.latLng.lng);
-	alert("endLat:"+endPoint.latLng.lat+"  endLng: "+endPoint.latLng.lng);
-	alert("type= "+routeType);
-	//map.removeAllShapes();
-	//alert("minden leszedve");
 	MQA.withModule('new-route', function() {
 		
 		 var opt = {
@@ -504,13 +449,10 @@ function drawRoute(startPoint,endPoint, routeType){
                     draggablepoi: true
                 },
                 success: function displayNarrative(data) {
-                	alert("success");
                	 map.bestFit();
                 }
 		 }
 		 map.addRoute(opt);
 		 map.bestFit();
-		 //alert("ut hozzadava");
 	  });
 }
-	

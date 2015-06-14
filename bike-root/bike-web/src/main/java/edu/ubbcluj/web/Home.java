@@ -24,10 +24,8 @@ public class Home extends UI {
 	@Override
 	protected void init(VaadinRequest request) {
 		 daoFactory = DAOFactory.getInstance();
-		System.out.println("regi ertek: "+ this.getSession().getAttribute("userName"));
 		VerticalLayout view = new VerticalLayout();
-		setContent(view);
-		
+		setContent(view);	
 		Navigator navigator = new Navigator(this, view);
 		String oldSessionValue = (String) this.getSession().getAttribute("userName");
 		if(oldSessionValue == null){
@@ -49,14 +47,6 @@ public class Home extends UI {
 					navigator.addView("", new Admin(user));
 				}
 			}
-		}
-		
-		
-		
-		
-		
+		}		
 	}
-		
-	
-
 }

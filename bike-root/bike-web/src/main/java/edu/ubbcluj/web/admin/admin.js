@@ -3,9 +3,8 @@ var serviceName = "none";
 var serviceLat;
 var serviceLng;
 var actionType;
-window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 
-	
+window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 
 	var lat,lng;
 	var actualPOIkey;
@@ -13,21 +12,20 @@ window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
 	var startLat;
 	var endLng;
 	var endLat;
-	//leellenorizni, amikor rateszem a contentet h mi a key
 	
-	
-	
+	var beginLat  = this.getState().latCoord;
+	var beginLng  = this.getState().lngCoord;
+
 	var options = {
             elt: document.getElementById('map'),             // ID of map element on page
             zoom: 14,                                        // initial zoom level of the map
-            latLng: { lat:46.766667, lng:23.583333 }     // center of map in latitude/longitude
+            latLng: { lat:beginLat, lng:beginLng }     // center of map in latitude/longitude
         };
 
         // construct an instance of MQA.TileMap with the options object
-
-
         window.map = new MQA.TileMap(options);
-        //MQA.TileMap.setSize(MQA.setSize(200,200));
+
+        //dinamic ceter of the map
         navigator.geolocation.getCurrentPosition(function(position) {
             map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
           });
@@ -39,14 +37,11 @@ window.edu_ubbcluj_web_admin_AdminMapLoader = function() {
               new MQA.MapCornerPlacement(MQA.MapCorner.TOP_LEFT, new MQA.Size(5,5))
             );
 
-
             map.addControl(new MQA.ViewOptions());
-
             map.addControl(
               new MQA.GeolocationControl(),
               new MQA.MapCornerPlacement(MQA.MapCorner.TOP_RIGHT, new MQA.Size(10,50))
             );
-
 
             map.enableMouseWheelZoom();                     
           });
@@ -135,24 +130,20 @@ function createPlace(X,Y,name){
 	
 
 window.edu_ubbcluj_web_admin_AdminJsConnecter = function() {
-	mainSerachType=this.getState().searchType;
-	//this.getState().actualLat = "alma";
-	//this.getState().actualLng = "korte";
 	
-	//alert("a service: "+this.getState().serviceName);
+	mainSerachType=this.getState().searchType;
 	serviceName = this.getState().serviceName;
 	serviceLat = this.getState().serviceLat;
 	serviceLng = this.getState().serviceLng;
 	actionType = this.getState().actionType;
 
-	alert(actionType);
 	
 	if(actionType=="searchAction"){
 		if (mainSerachType=="adress"){
-			//ha cimre kerestun k ra
+			//if the search type was adress
 			var text = document.getElementById('searchTextField').value;
 	    	MQA.withModule('geocoder', function() {
-	    		//felulirom az alapertelmezett pontot
+	    		//redifine the POI's attributes
 	    		 MQA.Geocoder.constructPOI = function(location) {
 	    			 	 lat = location.latLng.lat,
 	                     lng = location.latLng.lng,
@@ -161,23 +152,17 @@ window.edu_ubbcluj_web_admin_AdminJsConnecter = function() {
 	                     p = new MQA.Poi({ lat: lat, lng: lng });
 	    			 	 p.draggable = true;
 	    			 	 p.key="kezdeti";
-	    			 	 //alert(document.getElementById('lat').value)
 	    			 	var evt = document.createEvent('HTMLEvents');
-	    			    evt.initEvent('change', true, false);
-	    			 	
+	    			    evt.initEvent('change', true, false);			 	
 	    			 	var x = document.getElementById('lat');
 	    			 	x.value = lat;
 	    			 	var y = document.getElementById('lng');
 	    			 	y.value = lng;
 	    			 	x.dispatchEvent(evt);
 	    			 	y.dispatchEvent(evt);
-	    			 	 
-	               
-	                // map.addShape(p);
 	                MQA.EventManager.addListener(p, 'mouseout', function(evt){
 	                	var evt = document.createEvent('HTMLEvents');
-	                    evt.initEvent('change', true, false);
-	                	
+	                    evt.initEvent('change', true, false);                	
 	    			 	var x = document.getElementById('lat');
 	    			 	x.value = p.latLng.lat;
 	    			 	var y = document.getElementById('lng');
@@ -199,7 +184,7 @@ window.edu_ubbcluj_web_admin_AdminJsConnecter = function() {
 	                		}
 	                }
 	               
-	            //felulirjuk, hogy csak a legelso talalatot mutassa
+	            //over write to show only the first result
 	            MQA.Geocoder.processResults = function(response, map) { 
 	                if(response && response.info && response.info.statuscode == 0 && response.results) {
 	                    var locations = response.results[0].locations;
@@ -216,7 +201,6 @@ window.edu_ubbcluj_web_admin_AdminJsConnecter = function() {
 		}
 		if (mainSerachType=="service"){
 			createService(serviceLat,serviceLng,serviceName);
-           //	map.removeShape(map.getByKey("kezdeti"));
 		}
 		if (mainSerachType=="place"){
 			createPlace(serviceLat,serviceLng,serviceName);

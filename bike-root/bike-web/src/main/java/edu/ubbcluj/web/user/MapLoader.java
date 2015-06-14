@@ -6,13 +6,21 @@ import com.vaadin.ui.AbstractJavaScriptComponent;
 
 public class MapLoader extends AbstractJavaScriptComponent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-	
-	public MapLoader(){
-	
+	public MapLoader(Float x, Float y){
+		
+		getState().latCoord = x;
+		getState().lngCoord = y;
 	}
 	
-
+	@Override
+	protected MapState getState() {		
+		return (MapState) super.getState();
+	}
 	
 	
 }

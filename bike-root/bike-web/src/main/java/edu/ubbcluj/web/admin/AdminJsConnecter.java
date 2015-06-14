@@ -2,12 +2,7 @@ package edu.ubbcluj.web.admin;
 
 
 import com.vaadin.annotations.JavaScript;
-import com.vaadin.cdi.UIScoped;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.JavaScriptComponentState;
 import com.vaadin.ui.AbstractJavaScriptComponent;
-
-import edu.ubbcluj.backend.model.Services;
 
 @JavaScript({"admin.js"})
 

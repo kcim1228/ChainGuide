@@ -5,6 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.navigator.View;
@@ -42,6 +45,7 @@ import edu.ubbcluj.backend.repository.RatingDAO;
 import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
+import edu.ubbcluj.backend.util.PropertyProvider;
 import edu.ubbcluj.web.admin.Admin;
 
 public class UnLoggedUser extends VerticalLayout implements View {
@@ -90,7 +94,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	private DAOFactory daoFactory;
 	private Button showAllButton = new Button("GO");
 	private ComboBox topRated = new ComboBox("Get top rated: ");
-
+	private static final Logger LOG = LoggerFactory.getLogger(UnLoggedUser.class);
 
 	public UnLoggedUser(UI UIClass){
 		myUIClass = UI.getCurrent();
@@ -100,6 +104,9 @@ public class UnLoggedUser extends VerticalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		
 		daoFactory = DAOFactory.getInstance();
+		Float latCoord = Float.parseFloat( PropertyProvider.getProperty("lat"));
+		Float lngCoord = Float.parseFloat(PropertyProvider.getProperty("lng"));
+		
 		
 		//Appearance of View
 		search.setValue("strada horea, cluj napoca");	
@@ -240,7 +247,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		fillSelectAreas(nearestSelect,showAll,topRated);
 		createLogin(login);	
 		createRegister(register);	
-		MapLoader mp = new MapLoader();
+		MapLoader mp = new MapLoader(latCoord,lngCoord);
 		mapPanel.setContent(mp);
 		
 		
@@ -254,7 +261,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				actionState = "routeAction";
-				System.out.println("a: "+aPoint.getValue()+" b: "+bPoint.getValue() );
 				if((aPoint.getValue().equals(""))||(aPoint.getValue()==null)||
 					(bPoint.getValue().equals(""))||(bPoint.getValue()==null)){
 					Notification.show("Please select a START and an END point for your route!",
@@ -265,8 +271,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 							allLat,allLng,allSize,actionState);
 					jsPanel.setContent(js);
-					//aPoint.setValue("");
-					//bPoint.setValue("");
 				}
 			}
 		});
@@ -279,9 +283,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
-
-				System.out.println("nearestselect value: "+nearestSelect.getValue());
-				System.out.println("text= "+startPointForNearest.getValue());
 				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue()==null)){
 					Notification.show("Please select a START point and a Service-type!",
 							"",
@@ -291,7 +292,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					allLat.clear();
 					allLng.clear();   	
 					setAllParams(nearestCb.getValue());
-					
 				}
 			}
 		});
@@ -305,7 +305,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				showAll();
-
 			}
 		});
 
@@ -364,8 +363,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						actualSelectedName = actualSelectedService.getName();
 						actualLat = actualSelectedService.getCoordX();
 						actualLng = actualSelectedService.getCoordY();
-
-						System.out.println(actualSelectedService.toString());
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
 								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 								allNames,allLat,allLng,allSize,actionState);
@@ -416,7 +413,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			types = typeDAO.getAllType();
 			places = placesDAO.getAllPlaces();
 		} catch(RuntimeException ex) {
-			System.out.println(ex.getMessage());
+			LOG.error("no place, no type found");
 		}
 		for (Type p:types) {
 			a.addItem(p.getName());
@@ -427,9 +424,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			a.addItem(p.getType());
 			b.addItem(p.getType());
 		}
-
-
-
 	}
 
 	private void createLogin(Button login){
@@ -460,10 +454,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
 				if(loginAdded==false){
-					//addWindow(subWindow);
 					loginAdded=true;
 					myUIClass.addWindow(subWindow);
-
 				}
 			}
 		});
@@ -487,8 +479,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				UsersDAO usersDao = daoFactory.getUsersDAO();
 				try{
 					Users user = usersDao.getUserByName(username.getValue());
-					username.setComponentError(null);
-					
+					username.setComponentError(null);	
 					String hashed = passwordHasher(pass.getValue());
 					if(hashed.equals(user.getPassword())){
 						subWindow.close();
@@ -505,9 +496,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 								getUI().getNavigator().addView("", new Admin(user));
 								getUI().getNavigator().navigateTo("");
 							}else{
-								//ha egyik tipus sem....
+								Notification.show("Unknown type of user!",
+										"",
+										Notification.Type.ERROR_MESSAGE);
 							}
-
 						}
 
 					}else{
@@ -524,8 +516,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							"No such user found with this username",
 							Notification.Type.ERROR_MESSAGE);
 				}
-
-
 			}
 		});
 	}
@@ -569,8 +559,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		flayout.setWidth("25em"); 
 		subWindow.center();
 		subWindow.setResizable(false);
-
-
 		register.addClickListener(new Button.ClickListener() {
 			/**
 			 * 
@@ -595,13 +583,12 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				registerAdded=false;
 			}
 		});
-
 		reg.addClickListener(new Button.ClickListener() {
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-
+			
 			public void buttonClick(ClickEvent event) {
 				boolean okay=true;
 				DAOFactory daoFactory = DAOFactory.getInstance();
@@ -629,7 +616,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					okay=false;
 				}
 				if((email.getValue()!=null)&&(!email.getValue().equals(""))){
-					System.out.println("email: "+email.getValue());
 					if(!email.getValue().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 							+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")){
 						okay=false;
@@ -639,11 +625,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				}
 				if(okay){
 					boolean exist = false;
-
 					for(Users u:existingUser){
-						System.out.println(u.getUsername());
 						if(u.getUsername().equals(username.getValue())){
-
 							exist = true;
 						}
 					}
@@ -654,8 +637,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					else{
 
 						subWindow.close();
-						//System.out.println(fname.getValue()+","+lname.getValue()+","+username.getValue()+","+pass1.getValue()+","+email.getValue());
-
 						String hashed = passwordHasher(pass1.getValue());
 						Users user = new Users("user",username.getValue(),hashed,fname.getValue(),lname.getValue(),email.getValue());
 						usersDao.insertUser(user);
@@ -665,12 +646,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						getUI().getNavigator().addView("", new LoggedUser(user));
 						getUI().getNavigator().navigateTo("");
 					}
-
-
-
 				}
-
-
 			}
 		});
 
@@ -717,7 +693,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				list.add(t);
 			}
 		}
-		System.out.println("lista:"+list);
 		return list;
 	}
 
@@ -738,12 +713,10 @@ public class UnLoggedUser extends VerticalLayout implements View {
 
 			if(value==false){
 				allSize = slist.size();
-				System.out.println("itt: "+slist.toString());
 				for(int i=0;i<slist.size();i++){
 					allNames.add(slist.get(i).getName().toString());
 					allLat.add(slist.get(i).getCoordX());
 					allLng.add(slist.get(i).getCoordY());
-					System.out.println(slist.get(i));
 				}
 
 			}else{
@@ -753,10 +726,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				for(int i=0;i<ohs.size();i++){
 					openServ.add(ohs.get(i).getServices());
 				}
-				//slist.retainAll(openServ);//intersection(slist, openServ);
-
-				System.out.println("slist: "+slist.toString());
-				System.out.println("openserv"+openServ.toString());
 				List<Integer> openlist = new ArrayList<Integer>();
 				List<Integer> alllist = new ArrayList<Integer>();	
 				for(Services s:openServ){
@@ -765,18 +734,13 @@ public class UnLoggedUser extends VerticalLayout implements View {
 				for(Services s:slist){
 					alllist.add(s.getId());
 				}
-				System.out.println("open: "+ openlist.toString());
-				System.out.println("all: "+ alllist.toString());
-
 				openlist.retainAll(alllist);
-				System.out.println("utana: "+openlist);
 				allSize = openlist.size();
 				for(int i=0;i<allSize;i++){
 					allNames.add(sdao.getServiceById(openlist.get(i)).getName());
 					allLat.add(sdao.getServiceById(openlist.get(i)).getCoordX());
 					allLng.add(sdao.getServiceById(openlist.get(i)).getCoordY());
 				}
-
 			}
 		}else{
 			PlacesDAO pdao = daoFactory.getPlacesDAO();
@@ -794,14 +758,20 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					allLat.add(p.getCoordX());
 					allLng.add(p.getCoordY());
 				}
-
 			}
 		}
 
-		JsConnecter js = new JsConnecter((String) routeType.getValue(),
-				(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-				allLat,allLng,allSize,actionState);
-		jsPanel.setContent(js);
+		
+		if (allSize>0){
+			JsConnecter js = new JsConnecter((String) routeType.getValue(),
+					(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+					allLat,allLng,allSize,actionState);
+			jsPanel.setContent(js);
+		}else{
+			Notification.show("There is no one of that type. ",
+					"",
+					Notification.Type.WARNING_MESSAGE);
+		}
 		allSize = -1;
 	}
 
@@ -825,21 +795,17 @@ public class UnLoggedUser extends VerticalLayout implements View {
 					actionState = "serviceListAction";
 				}
 			}
-
-
 			if(allType.equals("service")){
 				Type tp = tdao.getTypeByName(showAll.getValue().toString());
 				ServicesDAO sdao = daoFactory.getServicesDAO();
 				List<Services> slist = sdao.getAllServicesByType(tp);
 				if(slist.size()>0){
 					if(showAllCb.getValue()==false){
-						System.out.println(showAll.getValue());
 						allSize = slist.size();
 						for(int i=0;i<slist.size();i++){
 							allNames.add(slist.get(i).getName().toString());
 							allLat.add(slist.get(i).getCoordX());
 							allLng.add(slist.get(i).getCoordY());
-							System.out.println(slist.get(i));
 						}
 						show = true;
 					}else{
@@ -850,10 +816,6 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							for(int i=0;i<ohs.size();i++){
 								openServ.add(ohs.get(i).getServices());
 							}
-							//slist.retainAll(openServ);//intersection(slist, openServ);
-
-							System.out.println("slist: "+slist.toString());
-							System.out.println("openserv"+openServ.toString());
 							List<Integer> openlist = new ArrayList<Integer>();
 							List<Integer> alllist = new ArrayList<Integer>();	
 							for(Services s:openServ){
@@ -862,12 +824,7 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							for(Services s:slist){
 								alllist.add(s.getId());
 							}
-							System.out.println("open: "+ openlist.toString());
-							System.out.println("all: "+ alllist.toString());
-
 							openlist.retainAll(alllist);
-							System.out.println("utana: "+openlist);
-
 							allSize = openlist.size();
 							for(int i=0;i<allSize;i++){
 								allNames.add(sdao.getServiceById(openlist.get(i)).getName());
@@ -876,17 +833,21 @@ public class UnLoggedUser extends VerticalLayout implements View {
 							}
 							show = true;
 						}
-
-
 					}
 					if(show){
-						JsConnecter js = new JsConnecter((String) routeType.getValue(),
-								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-								allLat,allLng,allSize,actionState);
-						jsPanel.setContent(js);
+				
+						if (allSize>0){
+							JsConnecter js = new JsConnecter((String) routeType.getValue(),
+									(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+									allLat,allLng,allSize,actionState);
+							jsPanel.setContent(js);
+						}else{
+							Notification.show("There is no one of that type. ",
+									"",
+									Notification.Type.WARNING_MESSAGE);
+						}
 						allSize = -1;
 					}
-
 				}
 			}else{
 				PlacesDAO pdao = daoFactory.getPlacesDAO();
@@ -904,10 +865,17 @@ public class UnLoggedUser extends VerticalLayout implements View {
 						allLat.add(p.getCoordX());
 						allLng.add(p.getCoordY());
 					}
-					JsConnecter js = new JsConnecter((String) routeType.getValue(),
-							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-							allLat,allLng,allSize,actionState);
-					jsPanel.setContent(js);
+					if (allSize>0){
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),
+								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+								allLat,allLng,allSize,actionState);
+						jsPanel.setContent(js);
+					}else{
+						Notification.show("There is no one of that type. ",
+								"",
+								Notification.Type.WARNING_MESSAGE);
+					}
+					
 					allSize = -1;
 
 				}

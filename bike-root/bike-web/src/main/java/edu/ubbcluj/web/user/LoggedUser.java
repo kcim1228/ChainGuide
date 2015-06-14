@@ -5,6 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 
+
+
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.navigator.View;
@@ -43,20 +50,18 @@ import edu.ubbcluj.backend.repository.RatingDAO;
 import edu.ubbcluj.backend.repository.ServicesDAO;
 import edu.ubbcluj.backend.repository.TypeDAO;
 import edu.ubbcluj.backend.repository.UsersDAO;
+import edu.ubbcluj.backend.util.PropertyProvider;
 
 
 public class LoggedUser extends VerticalLayout implements View {
-	
-	
-	 /**
+
+
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	boolean rateAdded;
-	 boolean registerAdded;
-	 UI myUIClass;
-	 
-	// public static final String NAME = "unloggedUser";
+	private boolean rateAdded;
+	private UI myUIClass;
 	private GridLayout topgrid = new GridLayout(4, 1);
 	private GridLayout logingrid = new GridLayout(2,1);
 	private GridLayout maingrid = new GridLayout(2,1);
@@ -97,21 +102,21 @@ public class LoggedUser extends VerticalLayout implements View {
 	private DAOFactory daoFactory;
 	private Button showAllButton = new Button("GO");
 	private ComboBox topRated = new ComboBox("Get top rated: ");
-	
-	
+	private static final Logger LOG = LoggerFactory.getLogger(LoggedUser.class);
+
 	public LoggedUser(Users us){
-		//myUIClass = UIClass;
 		myUIClass = UI.getCurrent();
 		thisUser = us;
-		
-		//this.setCaption("alma");
 	}
 
 	@SuppressWarnings("deprecation")
 	public void enter(ViewChangeEvent event) {
-		
+
 		daoFactory = DAOFactory.getInstance();
+		Float latCoord = Float.parseFloat( PropertyProvider.getProperty("lat"));
+		Float lngCoord = Float.parseFloat(PropertyProvider.getProperty("lng"));
 		
+
 		//Appearance of View
 		search.setValue("strada horea, cluj napoca");	
 		routeType.addItem("bicycle");
@@ -145,12 +150,12 @@ public class LoggedUser extends VerticalLayout implements View {
 		search.setId("searchTextField");
 		maingrid.setWidth("100%");
 		maingrid.setHeight("85%");
-		
+
 		startPointForNearest.setDescription("Select a Start point from the map");
 		showAll.setDescription("Choose a type, and list that type of services or places");
 		topRated.setDescription("Choose a service type, and you get the top rated service of that type");
 		searchType.setDescription("What do you want to search for?");
-		
+
 		logingrid.addComponent(logout,0,0);
 		topgrid.addComponent(search,0,0);
 		topgrid.addComponent(topsearchButton,2,0);
@@ -186,7 +191,7 @@ public class LoggedUser extends VerticalLayout implements View {
 		aPoint.setDescription("Choose from the map a Start point for your trip .");
 		bPoint.setDescription("Choose from the map an End point for your trip .");
 		startPointForNearest.setId("nearestStart");
-		
+
 		// Create the Accordion.
 		Accordion accordion = new Accordion();
 		accordion.setHeight("100%");
@@ -224,21 +229,21 @@ public class LoggedUser extends VerticalLayout implements View {
 		ratelayout.addComponent(topRated);
 		ratelayout.setMargin(true);
 		accordion.addTab(ratelayout, "Get top rated");
-		
+
 		final VerticalLayout messlayout = new VerticalLayout();
 		messlayout.setStyleName("accTab");
 		messlayout.addComponent(message);
 		messlayout.setMargin(true);
 		messlayout.setComponentAlignment(message, Alignment.BOTTOM_CENTER);
 		accordion.addTab(messlayout,"Contact");
-		
+
 		final VerticalLayout rlayout = new VerticalLayout();
 		rlayout.setStyleName("accTab");
 		rlayout.addComponent(rate);
 		rlayout.setMargin(true);
 		rlayout.setComponentAlignment(rate, Alignment.BOTTOM_CENTER);
 		accordion.addTab(rlayout,"Rating");
-		
+
 
 		actiongrid.addComponent(accordion,0,13);
 		actiongrid.addComponent(jsPanel,0,14);
@@ -264,10 +269,10 @@ public class LoggedUser extends VerticalLayout implements View {
 		maingrid.setColumnExpandRatio(0, 5);
 		maingrid.setColumnExpandRatio(1, 1);
 		fillSelectAreas(nearestSelect,showAll,topRated);
-		MapLoader mp = new MapLoader();
+		MapLoader mp = new MapLoader(latCoord,lngCoord);
 		mapPanel.setContent(mp);
-		
-		
+
+
 		//action-listeners:
 		getDirection.addClickListener(new Button.ClickListener() {
 
@@ -278,9 +283,8 @@ public class LoggedUser extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				actionState = "routeAction";
-				System.out.println("a: "+aPoint.getValue()+" b: "+bPoint.getValue() );
 				if((aPoint.getValue().equals(""))||(aPoint.getValue()==null)||
-					(bPoint.getValue().equals(""))||(bPoint.getValue()==null)){
+						(bPoint.getValue().equals(""))||(bPoint.getValue()==null)){
 					Notification.show("Please select a START and an END point for your route!",
 							"",
 							Notification.Type.WARNING_MESSAGE);
@@ -289,8 +293,6 @@ public class LoggedUser extends VerticalLayout implements View {
 							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
 							allLat,allLng,allSize,actionState);
 					jsPanel.setContent(js);
-					//aPoint.setValue("");
-					//bPoint.setValue("");
 				}
 			}
 		});
@@ -304,8 +306,6 @@ public class LoggedUser extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 
-				System.out.println("nearestselect value: "+nearestSelect.getValue());
-				System.out.println("text= "+startPointForNearest.getValue());
 				if((startPointForNearest.getValue().equals(""))||(nearestSelect.getValue()==null)){
 					Notification.show("Please select a START point and a Service-type!",
 							"",
@@ -315,11 +315,9 @@ public class LoggedUser extends VerticalLayout implements View {
 					allLat.clear();
 					allLng.clear();   	
 					setAllParams(nearestCb.getValue());
-					
 				}
 			}
 		});
-
 
 		showAllButton.addListener(new Button.ClickListener() {		
 			/**
@@ -388,8 +386,6 @@ public class LoggedUser extends VerticalLayout implements View {
 						actualSelectedName = actualSelectedService.getName();
 						actualLat = actualSelectedService.getCoordX();
 						actualLng = actualSelectedService.getCoordY();
-
-						System.out.println(actualSelectedService.toString());
 						JsConnecter js = new JsConnecter((String) routeType.getValue(),
 								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,
 								allNames,allLat,allLng,allSize,actionState);
@@ -427,7 +423,7 @@ public class LoggedUser extends VerticalLayout implements View {
 				}
 			}
 		});
-		
+
 		rate.addClickListener(new Button.ClickListener() {			
 			/**
 			 * 
@@ -438,7 +434,7 @@ public class LoggedUser extends VerticalLayout implements View {
 				createRate();
 			}
 		});
-	
+
 		message.addClickListener(new Button.ClickListener() {			
 			/**
 			 * 
@@ -447,10 +443,10 @@ public class LoggedUser extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				createMessage();
-				
+
 			}
 		});
-		
+
 		logout.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
@@ -458,13 +454,13 @@ public class LoggedUser extends VerticalLayout implements View {
 				myUIClass.getNavigator().removeView("");
 				getUI().getNavigator().addView("", new UnLoggedUser(myUIClass));
 				getUI().getNavigator().navigateTo("");
-				 
-		    }
+
+			}
 		});
 
-		
+
 	}
-	
+
 	private void fillSelectAreas(final ComboBox a, ComboBox b, ComboBox c){
 		final DAOFactory daoFactory = DAOFactory.getInstance();
 		PlacesDAO placesDAO = daoFactory.getPlacesDAO();
@@ -475,7 +471,7 @@ public class LoggedUser extends VerticalLayout implements View {
 			types = typeDAO.getAllType();
 			places = placesDAO.getAllPlaces();
 		} catch(RuntimeException ex) {
-			System.out.println(ex.getMessage());
+			LOG.error("no place, no type was found");
 		}
 		for (Type p:types) {
 			a.addItem(p.getName());
@@ -486,16 +482,13 @@ public class LoggedUser extends VerticalLayout implements View {
 			a.addItem(p.getType());
 			b.addItem(p.getType());
 		}
-
-
-
 	}
-	
+
 	protected void addWindow(Window subWindow) {
 		this.addComponent(subWindow);
 
 	}
-	
+
 	public  List<Services> intersection(List<Services> list1, List<Services> list2) {
 		List<Services> list = new ArrayList<Services>();
 
@@ -504,7 +497,6 @@ public class LoggedUser extends VerticalLayout implements View {
 				list.add(t);
 			}
 		}
-		System.out.println("lista:"+list);
 		return list;
 	}
 
@@ -525,12 +517,10 @@ public class LoggedUser extends VerticalLayout implements View {
 
 			if(value==false){
 				allSize = slist.size();
-				System.out.println("itt: "+slist.toString());
 				for(int i=0;i<slist.size();i++){
 					allNames.add(slist.get(i).getName().toString());
 					allLat.add(slist.get(i).getCoordX());
 					allLng.add(slist.get(i).getCoordY());
-					System.out.println(slist.get(i));
 				}
 
 			}else{
@@ -540,10 +530,6 @@ public class LoggedUser extends VerticalLayout implements View {
 				for(int i=0;i<ohs.size();i++){
 					openServ.add(ohs.get(i).getServices());
 				}
-				//slist.retainAll(openServ);//intersection(slist, openServ);
-
-				System.out.println("slist: "+slist.toString());
-				System.out.println("openserv"+openServ.toString());
 				List<Integer> openlist = new ArrayList<Integer>();
 				List<Integer> alllist = new ArrayList<Integer>();	
 				for(Services s:openServ){
@@ -552,11 +538,7 @@ public class LoggedUser extends VerticalLayout implements View {
 				for(Services s:slist){
 					alllist.add(s.getId());
 				}
-				System.out.println("open: "+ openlist.toString());
-				System.out.println("all: "+ alllist.toString());
-
 				openlist.retainAll(alllist);
-				System.out.println("utana: "+openlist);
 				allSize = openlist.size();
 				for(int i=0;i<allSize;i++){
 					allNames.add(sdao.getServiceById(openlist.get(i)).getName());
@@ -585,10 +567,17 @@ public class LoggedUser extends VerticalLayout implements View {
 			}
 		}
 
-		JsConnecter js = new JsConnecter((String) routeType.getValue(),
-				(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-				allLat,allLng,allSize,actionState);
-		jsPanel.setContent(js);
+		
+		if (allSize>0){
+			JsConnecter js = new JsConnecter((String) routeType.getValue(),
+					(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+					allLat,allLng,allSize,actionState);
+			jsPanel.setContent(js);
+		}else{
+			Notification.show("There is no one of that type. ",
+					"",
+					Notification.Type.WARNING_MESSAGE);
+		}
 		allSize = -1;
 	}
 
@@ -620,13 +609,11 @@ public class LoggedUser extends VerticalLayout implements View {
 				List<Services> slist = sdao.getAllServicesByType(tp);
 				if(slist.size()>0){
 					if(showAllCb.getValue()==false){
-						System.out.println(showAll.getValue());
 						allSize = slist.size();
 						for(int i=0;i<slist.size();i++){
 							allNames.add(slist.get(i).getName().toString());
 							allLat.add(slist.get(i).getCoordX());
 							allLng.add(slist.get(i).getCoordY());
-							System.out.println(slist.get(i));
 						}
 						show = true;
 					}else{
@@ -637,10 +624,6 @@ public class LoggedUser extends VerticalLayout implements View {
 							for(int i=0;i<ohs.size();i++){
 								openServ.add(ohs.get(i).getServices());
 							}
-							//slist.retainAll(openServ);//intersection(slist, openServ);
-
-							System.out.println("slist: "+slist.toString());
-							System.out.println("openserv"+openServ.toString());
 							List<Integer> openlist = new ArrayList<Integer>();
 							List<Integer> alllist = new ArrayList<Integer>();	
 							for(Services s:openServ){
@@ -649,12 +632,7 @@ public class LoggedUser extends VerticalLayout implements View {
 							for(Services s:slist){
 								alllist.add(s.getId());
 							}
-							System.out.println("open: "+ openlist.toString());
-							System.out.println("all: "+ alllist.toString());
-
 							openlist.retainAll(alllist);
-							System.out.println("utana: "+openlist);
-
 							allSize = openlist.size();
 							for(int i=0;i<allSize;i++){
 								allNames.add(sdao.getServiceById(openlist.get(i)).getName());
@@ -663,14 +641,18 @@ public class LoggedUser extends VerticalLayout implements View {
 							}
 							show = true;
 						}
-
-
 					}
 					if(show){
-						JsConnecter js = new JsConnecter((String) routeType.getValue(),
-								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-								allLat,allLng,allSize,actionState);
-						jsPanel.setContent(js);
+						if (allSize>0){
+							JsConnecter js = new JsConnecter((String) routeType.getValue(),
+									(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+									allLat,allLng,allSize,actionState);
+							jsPanel.setContent(js);
+						}else{
+							Notification.show("There is no one of that type. ",
+									"",
+									Notification.Type.WARNING_MESSAGE);
+						}
 						allSize = -1;
 					}
 
@@ -691,12 +673,17 @@ public class LoggedUser extends VerticalLayout implements View {
 						allLat.add(p.getCoordX());
 						allLng.add(p.getCoordY());
 					}
-					JsConnecter js = new JsConnecter((String) routeType.getValue(),
-							(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
-							allLat,allLng,allSize,actionState);
-					jsPanel.setContent(js);
+					if (allSize>0){
+						JsConnecter js = new JsConnecter((String) routeType.getValue(),
+								(String)searchType.getValue(),actualSelectedName,actualLat,actualLng,allNames,
+								allLat,allLng,allSize,actionState);
+						jsPanel.setContent(js);
+					}else{
+						Notification.show("There is no one of that type. ",
+								"",
+								Notification.Type.WARNING_MESSAGE);
+					}
 					allSize = -1;
-
 				}
 			}
 		}
@@ -708,140 +695,126 @@ public class LoggedUser extends VerticalLayout implements View {
 		final List<Integer> ids = new ArrayList<Integer>();
 		final Window subWindow = new Window("Ratings");
 		subWindow.setStyleName("subWindow");
-        subWindow.center();
-        subWindow.setResizable(false);
-        subWindow.setWidth("30em");
-        subWindow.setHeight("32em");
-       FormLayout grid = new FormLayout();
-       grid.setStyleName("subWindow");
-       subWindow.setContent(grid);
-       final TextField searching = new TextField();
-       searching.setStyleName("textFieldColor");
-       searching.setInputPrompt("Search by service name");
-       grid.addComponent(searching);
-       Button listButton = new Button("list");
-       grid.addComponent(listButton);
-       
-       final Table table = new Table();
-      // table.setSelectable(true);
-       table.setStyleName("textFieldColor");
-       table.setWidth("95%");
-       table.setPageLength(7);
-       table.setColumnWidth("Average", 20);
-       
-       table.addContainerProperty("Service", String.class, null);
-       table.addContainerProperty("Average",  String.class, null);
-       table.addContainerProperty("Rate 	",  ComboBox.class, null);
-       final DAOFactory daoFactory = DAOFactory.getInstance();
-       
-       grid.addComponent(table);
-       listButton.addClickListener(new Button.ClickListener() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		subWindow.center();
+		subWindow.setResizable(false);
+		subWindow.setWidth("30em");
+		subWindow.setHeight("32em");
+		FormLayout grid = new FormLayout();
+		grid.setStyleName("subWindow");
+		subWindow.setContent(grid);
+		final TextField searching = new TextField();
+		searching.setStyleName("textFieldColor");
+		searching.setInputPrompt("Search by service name");
+		grid.addComponent(searching);
+		Button listButton = new Button("list");
+		grid.addComponent(listButton);
 
-		public void buttonClick(ClickEvent event) {
-			ServicesDAO sdao = daoFactory.getServicesDAO();
-			RatingDAO rdao = daoFactory.getRatingDAO();
-			List<Services> servlist = sdao.getAllServicesByName(searching.getValue());
-			rowIndex = 1;
-			
-			for(Services s:servlist){
-				List<Rating> ratings = rdao.getAllRatingByService(s);
-				System.out.println(ratings.toString());
-				Float avg = (float) 0.0;
-				int count=0;
-				int sum =0;
-				for(Rating r:ratings){
-					sum = sum+ r.getRate();
-					count++;
+		final Table table = new Table();
+		table.setStyleName("textFieldColor");
+		table.setWidth("95%");
+		table.setPageLength(7);
+		table.setColumnWidth("Average", 20);
+		table.addContainerProperty("Service", String.class, null);
+		table.addContainerProperty("Average",  String.class, null);
+		table.addContainerProperty("Rate 	",  ComboBox.class, null);
+		final DAOFactory daoFactory = DAOFactory.getInstance();
+		grid.addComponent(table);
+		listButton.addClickListener(new Button.ClickListener() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				ServicesDAO sdao = daoFactory.getServicesDAO();
+				RatingDAO rdao = daoFactory.getRatingDAO();
+				List<Services> servlist = sdao.getAllServicesByName(searching.getValue());
+				rowIndex = 1;
+
+				for(Services s:servlist){
+					List<Rating> ratings = rdao.getAllRatingByService(s);
+					Float avg = (float) 0.0;
+					int count=0;
+					int sum =0;
+					for(Rating r:ratings){
+						sum = sum+ r.getRate();
+						count++;
+					}
+					if(count>0){
+						avg = (float) ((float)sum/(float)count);
+					}
+
+					ComboBox cb = new ComboBox();
+					rowIndex++;
+					cb.addItem("-");
+					cb.addItem("1");
+					cb.addItem("2");
+					cb.addItem("3");
+					cb.addItem("4");
+					cb.addItem("5");
+
+					cb.setValue("-");
+					cb.setWidth("5em");
+					String average = Float.toString(avg);
+					table.addItem(new Object[]{s.getName(),average,cb},rowIndex);
+					ids.add(s.getId());
 				}
-				if(count>0){
-					System.out.println("sum "+sum+" c: "+count);
-					avg = (float) ((float)sum/(float)count);
-					System.out.println("avg: "+avg);
-				}
-				
-				ComboBox cb = new ComboBox();
-				rowIndex++;
-				cb.addItem("-");
-				cb.addItem("1");
-				cb.addItem("2");
-				cb.addItem("3");
-				cb.addItem("4");
-				cb.addItem("5");
-				
-				cb.setValue("-");
-				cb.setWidth("5em");
-				String average = Float.toString(avg);
-				table.addItem(new Object[]{s.getName(),average,cb},rowIndex);
-				ids.add(s.getId());
+
 			}
-			
-		}
-	});
-       
-       
-       Button rateButton = new Button("Done");
-       grid.addComponent(rateButton);
-       final ServicesDAO servdao = daoFactory.getServicesDAO();
-       final RatingDAO rdao = daoFactory.getRatingDAO();
-       rateButton.addClickListener(new Button.ClickListener() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		});
 
-		public void buttonClick(ClickEvent event) {
-			if(rowIndex>1){
-				for(int i=2;i<=rowIndex;i++){
-					ComboBox cb = (ComboBox) table.getItem(i).getItemProperty("Rate 	").getValue();
-					if(cb.getValue()!=null){
-						
-						
-						String value = cb.getValue().toString();
-						if ((value!="-")&&(value!="")){
-							Services serv = servdao.getServiceById(ids.get(i-2 ));
-							//ids.remove(0);
-							Rating r = new Rating(serv, thisUser, Integer.parseInt(value));
-						
-							List<Rating> rates = rdao.getAllRatingByService(serv);
-							boolean alredyRated = false;
-							if(rates!=null){
-								for(int j=0;j<rates.size();j++){
-									int id = rates.get(j).getUsers().getId();
-									if(id==thisUser.getId()){
-										alredyRated=true;
+
+		Button rateButton = new Button("Done");
+		grid.addComponent(rateButton);
+		final ServicesDAO servdao = daoFactory.getServicesDAO();
+		final RatingDAO rdao = daoFactory.getRatingDAO();
+		rateButton.addClickListener(new Button.ClickListener() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				if(rowIndex>1){
+					for(int i=2;i<=rowIndex;i++){
+						ComboBox cb = (ComboBox) table.getItem(i).getItemProperty("Rate 	").getValue();
+						if(cb.getValue()!=null){
+
+
+							String value = cb.getValue().toString();
+							if ((value!="-")&&(value!="")){
+								Services serv = servdao.getServiceById(ids.get(i-2 ));
+								Rating r = new Rating(serv, thisUser, Integer.parseInt(value));
+								List<Rating> rates = rdao.getAllRatingByService(serv);
+								boolean alredyRated = false;
+								if(rates!=null){
+									for(int j=0;j<rates.size();j++){
+										int id = rates.get(j).getUsers().getId();
+										if(id==thisUser.getId()){
+											alredyRated=true;
+										}
 									}
 								}
-							}
-							if(alredyRated==false){
-								rdao.insertRating(r);
-								System.out.println("insert: "+r);
-							}
-							else{
-								System.out.println("service: "+serv);
-								Rating oldrate = rdao.getRatingByUserAndService(thisUser, serv);
-								oldrate.setRate(Integer.parseInt(value));
-								rdao.updateRating(oldrate);
-								System.out.println("update: "+oldrate);
+								if(alredyRated==false){
+									rdao.insertRating(r);
+								}
+								else{
+									Rating oldrate = rdao.getRatingByUserAndService(thisUser, serv);
+									oldrate.setRate(Integer.parseInt(value));
+									rdao.updateRating(oldrate);
+								}
 							}
 						}
-						
-					
-					}
-					
-				}
-			}
-			subWindow.close();
-			rateAdded=false;
-			
-		}
-	});
 
-        
-        subWindow.addCloseListener(new Window.CloseListener() {
+					}
+				}
+				subWindow.close();
+				rateAdded=false;
+			}
+		});
+
+
+		subWindow.addCloseListener(new Window.CloseListener() {
 			private static final long serialVersionUID = 1L;
 
 			public void windowClose(CloseEvent e) {					
@@ -849,102 +822,91 @@ public class LoggedUser extends VerticalLayout implements View {
 				rateAdded=false;
 			}
 		});
-        
-    	if(rateAdded==false){
-    		//addWindow(subWindow);
-    		rateAdded=true;
-    		myUIClass.addWindow(subWindow);
-    		
-    	}
-		
+
+		if(rateAdded==false){
+			rateAdded=true;
+			myUIClass.addWindow(subWindow);
+
+		}
+
 	}
-	
-	
+
+
 	private void createMessage(){
 		final Window subWindow = new Window("Contact");
 		subWindow.setStyleName("subWindow");
-        subWindow.center();
-        subWindow.setResizable(false);
-        subWindow.setWidth("30em");
-        subWindow.setHeight("8em");
-       FormLayout form = new FormLayout();
-       form.setStyleName("subWindow");
-       subWindow.setContent(form);
-       
-       if(messageAdded==false){
-   		//addWindow(subWindow);
-	   		messageAdded=true;
-	   		myUIClass.addWindow(subWindow);  		
-   		}
-       subWindow.addCloseListener(new Window.CloseListener() {
+		subWindow.center();
+		subWindow.setResizable(false);
+		subWindow.setWidth("30em");
+		subWindow.setHeight("8em");
+		FormLayout form = new FormLayout();
+		form.setStyleName("subWindow");
+		subWindow.setContent(form);
+		if(messageAdded==false){
+			messageAdded=true;
+			myUIClass.addWindow(subWindow);  		
+		}
+		subWindow.addCloseListener(new Window.CloseListener() {
 			private static final long serialVersionUID = 1L;
 			public void windowClose(CloseEvent e) {					
 				subWindow.close();
 				messageAdded=false;
 			}
 		});
-       Button newMessage = new Button("Create new message");
-       form.addComponent(newMessage);
-       newMessage.addClickListener(new Button.ClickListener() {		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		Button newMessage = new Button("Create new message");
+		form.addComponent(newMessage);
+		newMessage.addClickListener(new Button.ClickListener() {		
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 
-		public void buttonClick(ClickEvent event) {
-			final Window newMessWindow = new Window("New message");
-			newMessWindow.setResizable(false);
-			newMessWindow.setStyleName("subWindow");
-			newMessWindow.center();
-			newMessWindow.setWidth("35em");
-			newMessWindow.setHeight("20.8em");
-			myUIClass.addWindow(newMessWindow);
-			newMessWindow.addCloseListener(new Window.CloseListener() {
-				private static final long serialVersionUID = 1L;
-				public void windowClose(CloseEvent e) {					
-					newMessWindow.close();
-				}
-			});
-			FormLayout newMessForm = new FormLayout();
-			newMessForm.setStyleName("subWindow");
-			newMessWindow.setContent(newMessForm);
-			Label to = new Label("To: Admins");
-			newMessForm.addComponent(to);
-			final TextField body = new TextField("Body: ");
-			body.setStyleName("textFieldColor");
-			newMessForm.addComponent(body);
-			body.setHeight("10em");
-			body.setWidth("90%");
-			Button send = new Button("SEND");
-			newMessForm.addComponent(send);
-			send.addClickListener(new Button.ClickListener() {				
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void buttonClick(ClickEvent event) {
-					newMessWindow.close();
-					Date date = new Date();
-					DAOFactory daoFactory = DAOFactory.getInstance();
-					UsersDAO udao = daoFactory.getUsersDAO();
-					MessagesDAO mdao = daoFactory.getMessagesDAO();
-					List<Users> adminList = udao.getUsersByType("admin");
-					for(Users u:adminList){
-						Messages mess = new Messages(u,thisUser,body.getValue(),date,0);
-						System.out.println(mess);
-						mdao.insertMessage(mess);
+			public void buttonClick(ClickEvent event) {
+				final Window newMessWindow = new Window("New message");
+				newMessWindow.setResizable(false);
+				newMessWindow.setStyleName("subWindow");
+				newMessWindow.center();
+				newMessWindow.setWidth("35em");
+				newMessWindow.setHeight("20.8em");
+				myUIClass.addWindow(newMessWindow);
+				newMessWindow.addCloseListener(new Window.CloseListener() {
+					private static final long serialVersionUID = 1L;
+					public void windowClose(CloseEvent e) {					
+						newMessWindow.close();
 					}
-				}
-			});
-		}
-	});
-       
-       
+				});
+				FormLayout newMessForm = new FormLayout();
+				newMessForm.setStyleName("subWindow");
+				newMessWindow.setContent(newMessForm);
+				Label to = new Label("To: Admins");
+				newMessForm.addComponent(to);
+				final TextField body = new TextField("Body: ");
+				body.setStyleName("textFieldColor");
+				newMessForm.addComponent(body);
+				body.setHeight("10em");
+				body.setWidth("90%");
+				Button send = new Button("SEND");
+				newMessForm.addComponent(send);
+				send.addClickListener(new Button.ClickListener() {				
+					/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+					public void buttonClick(ClickEvent event) {
+						newMessWindow.close();
+						Date date = new Date();
+						DAOFactory daoFactory = DAOFactory.getInstance();
+						UsersDAO udao = daoFactory.getUsersDAO();
+						MessagesDAO mdao = daoFactory.getMessagesDAO();
+						List<Users> adminList = udao.getUsersByType("admin");
+						for(Users u:adminList){
+							Messages mess = new Messages(u,thisUser,body.getValue(),date,0);
+							mdao.insertMessage(mess);
+						}
+					}
+				});
+			}
+		});
 	}	
-
-	
-	
-	
-
 }
