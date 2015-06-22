@@ -230,7 +230,8 @@ public class UnLoggedUser extends VerticalLayout implements View {
 		mapPanel.setSizeFull();	
 		mapLayout.addComponent(mapPanel);
 
-		Label top = new Label("ChainGuide");
+		Label top = new Label("");
+		top.setStyleName("logo");
 		top.setWidth("100%");
 		top.setHeight("4%");
 		this.addComponent(top);

@@ -7065,7 +7065,7 @@ body .myThemes.v-app .v-app-loading {
 }
 
 .myThemes .mapPanel {
-	height: 48em;
+	height: 47em;
 }
 
 .myThemes .alma {
@@ -7077,9 +7077,16 @@ body .myThemes.v-app .v-app-loading {
 	display: none;
 }
 
+.myThemes .logo {
+	text-align: center;
+	height: 3em;
+	background: url("logo.jpg") no-repeat;
+	background-size: 25em 3em;
+}
+
 .myThemes .topGrid {
 	background-color: #5CAD85;
-	height: 1em;
+	height: 0.8em;
 	-webkit-box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
 	-moz-box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
 	box-shadow: 1px 8px 23px 6px rgba(0, 0, 0, 0.31);
